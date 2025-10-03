@@ -1,0 +1,75 @@
+---
+name: version
+description: Version workflow
+on:
+  workflow_call:
+jobs:
+  context:
+    runs-on: ubuntu-latest
+    outputs:
+      is_pr: ${{ steps.check.outputs.is_pr }}
+    steps:
+      - name: Check action is running in PR context
+        id: check
+        run: |
+          if [ -n "${{ github.event.pull_request.number }}" ]; then
+            echo "is_pr=true" >> $GITHUB_OUTPUT
+            echo "Running in PR #${{ github.event.pull_request.number }}"
+          else
+            echo "is_pr=false" >> $GITHUB_OUTPUT
+            echo "Not running in a PR context. Skipping version check."
+          fi
+
+  version:
+    runs-on: ubuntu-latest
+    needs: context
+    if: needs.context.outputs.is_pr == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@v0.13.0
+        with:
+          enable-cache: true
+
+      - name: Check version bump
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          echo "Comparing versions between base ($BASE_SHA) and head ($HEAD_SHA)"
+
+          # Get base version from the target branch
+          BASE_VERSION=$(git show "$BASE_SHA:galaxy.yml" | jq -r .version)
+          echo "Base version (target branch): $BASE_VERSION"
+
+          # Get head version from the source branch (current checkout)
+          HEAD_VERSION=$(jq -r .version < galaxy.yml)
+          echo "Head version (source branch): $HEAD_VERSION"
+
+          # Validate semver format
+          if ! echo "$HEAD_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$'; then
+            echo "$HEAD_VERSION does not follow standard semver format (X.Y.Z)"
+            exit 1
+          fi
+
+          # Check whether versions are different
+          if [ "$BASE_VERSION" = "$HEAD_VERSION" ]; then
+            echo "::error title=Version Not Updated::Version has not been updated in galaxy.yml (still $BASE_VERSION)"
+            exit 1
+          fi
+
+          # Verify version update using lexicographical sort with version sorting
+          LOWER_VERSION=$(printf '%s\n' "$BASE_VERSION" "$HEAD_VERSION" | sort -V | head -n1)
+
+          if [ "$LOWER_VERSION" = "$HEAD_VERSION" ]; then
+            echo "New version ($HEAD_VERSION) must be greater than base version ($BASE_VERSION)"
+            exit 1
+          fi
+
+          echo "Version updated from $BASE_VERSION to $HEAD_VERSION"

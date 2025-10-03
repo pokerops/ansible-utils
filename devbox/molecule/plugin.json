@@ -1,0 +1,34 @@
+{
+  "name": "molecule",
+  "packages": [
+    "python@3.13",
+    "uv@latest",
+    "gnumake@latest",
+    "yq@latest",
+    "git@latest",
+    "expect@latest",
+    "libisoburn@latest",
+    "gnupg@latest",
+    "xfsprogs@latest",
+    "virt-viewer@latest"
+  ],
+  "env": {
+    "PYPROJECT": "{{.Virtenv}}",
+    "MAKEFILE": "{{.Virtenv}}/Makefile"
+  },
+  "create_files": {
+    "{{.Virtenv}}/Makefile": "config/Makefile",
+    "{{.Virtenv}}/pyproject.toml": "config/pyproject.toml"
+  },
+  "shell": {
+    "init_hook": [
+      "devbox install",
+      "uv sync --directory ${PYPROJECT}",
+      ". .venv/bin/activate"
+    ],
+    "scripts": {
+      "make": "[ -f Makefile ] && make $@ || make -f ${MAKEFILE} $@",
+      "uv": "[ -f pyproject.toml ] && uv $@ || uv --directory ${PYPROJECT} $@"
+    }
+  }
+}

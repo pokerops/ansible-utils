@@ -1,0 +1,22 @@
+---
+name: release
+description: Release workflow
+on:
+  workflow_call:
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v4
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@v0.12.0
+        with:
+          enable-cache: true
+
+      - name: Release collection
+        run: devbox run -- just publish
+        env:
+          GALAXY_API_KEY: "${{ secrets.GALAXY_API_KEY }}"

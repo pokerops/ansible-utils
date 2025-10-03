@@ -1,0 +1,20 @@
+---
+name: lint
+description: Lint workflow
+on:
+  workflow_call:
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v4
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@v0.13.0
+        with:
+          enable-cache: true
+
+      - name: Lint code
+        run: devbox run lint
