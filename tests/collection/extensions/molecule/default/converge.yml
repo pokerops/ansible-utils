@@ -1,0 +1,3 @@
+---
+- name: Import test playbook
+  import_playbook: pokerops.test.test

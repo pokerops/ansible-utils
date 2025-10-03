@@ -1,43 +1,61 @@
 .PHONY: all ${MAKECMDGOALS}
 
+VIRTENV ?=
 MOLECULE_SCENARIO ?= default
 MOLECULE_REVISION ?= $$(git rev-parse --abbrev-ref HEAD)
 UBUNTU_RELEASE ?= noble
 UBUNTU_KVM_IMAGE = https://cloud-images.ubuntu.com/${UBUNTU_RELEASE}/current/${UBUNTU_RELEASE}-server-cloudimg-amd64.img
-MOLECULE_KVM_IMAGE := $(UBUNTU_KVM_IMAGE)
+MOLECULE_KVM_IMAGE ?= $(UBUNTU_KVM_IMAGE)
 GALAXY_API_KEY ?=
 GALAXY_FILE = galaxy.yml
+META_FILE = meta/main.yml
 REQUIREMENTS = requirements.yml
 ROLE_DIR = roles
 ROLE_FILE = roles.yml
 
 LOGIN_ARGS ?=
 
-sync install:
-	devbox run uv sync
+init:
+	@mkdir -p .github/workflows
+	@cp -a {{.Virtenv}}/.yamllint .yamllint
+	@for action in {{.Virtenv}}/action_*.yml; do \
+		ACTION_NAME=$$(basename $${action}); \
+		ACTION_PATH=".github/workflows/$${ACTION_NAME#action_}"; \
+		[ ! -f "$${ACTION_PATH}" ] && cp -a $${action} $${ACTION_PATH} || true; \
+	done;
 
-lint: install
-	devbox run uv run yamllint . -c .yamllint
-	devbox run uv run ansible-lint -p playbooks/ --exclude ".ansible/*"
+sync install: init
+	@devbox run --quiet -- uv sync --no-managed-python
 
-requirements: install
-	@python --version
-	devbox run uv run ansible-galaxy role install \
-		--force --no-deps \
-		--roles-path ${ROLE_DIR} \
-		--role-file ${ROLE_FILE}
-	devbox run uv run ansible-galaxy collection install \
-		--force-with-deps .
+lint: sync
+	@devbox run --quiet -- yamllint . -c .yamllint
+	@if [[ -f "${GALAXY_FILE}" || -f "${META_FILE}" ]]; then \
+		devbox run --quiet -- ansible-lint -p ${GALAXY_FILE} --exclude ".ansible/*"; \
+	fi
+
+requirements: sync
+	@mkdir -p ${ROLE_DIR}
+	@if [ -f "${ROLE_FILE}" ]; then \
+		@ansible-galaxy role install \
+			--force --no-deps \
+			--roles-path ${ROLE_DIR} \
+			--role-file ${ROLE_FILE}; \
+	fi
+	@if [ -f "${GALAXY_FILE}" ]; then \
+		devbox run --quiet -- ansible-galaxy collection install \
+			--force-with-deps \
+			.; \
+	fi
 	@find ./ -name "*.ymle*" -delete
 
 build: requirements
-	if [ -f "${GALAXY_FILE}" ]; \
-		@uv run build; \
+	if [ -f "${GALAXY_FILE}" ]; then \
+		devbox run --quiet -- uv build; \
 		@git status --porcelain | wc -l | grep -q '^0$$' || (echo "Uncommitted build detected, please run build stage and commit changes" && exit 1); \
 	fi
 
 update:
-	devbox run uv run update
+	devbox run --quiet -- uv update
 
 ifeq (login,$(firstword $(MAKECMDGOALS)))
     LOGIN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -50,13 +68,12 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 	MOLECULE_HOME=$$(mktemp -d); \
 	if [ -n "$${CI:-}" ]; then \
 		export MOLECULE_EPHEMERAL_DIR=.molecule/${MOLECULE_SCENARIO}; \
-	else \
 	fi; \
 	HOME=$${MOLECULE_HOME} \
 	MOLECULE_REVISION=${MOLECULE_REVISION} \
 	MOLECULE_KVM_IMAGE=${MOLECULE_KVM_IMAGE} \
 	MOLECULE_LOGDIR=${MOLECULE_LOGDIR} \
-	devbox run uv run dotenv molecule $@ -s ${MOLECULE_SCENARIO} ${LOGIN_ARGS}; \
+	devbox run --quiet -- molecule $@ -s ${MOLECULE_SCENARIO} ${LOGIN_ARGS}; \
 	if [ -n "$${CI:-}" ]; then \
 		rm -r $${MOLECULE_EPHEMERAL_DIR}; \
 	fi; \
@@ -71,6 +88,6 @@ publish: build
 		COLLECTION_NAMESPACE=$$(yq -r '.namespace' ${GALAXY_FILE}) \
 		COLLECTION_NAME=$$(yq -r '.name' ${GALAXY_FILE}) \
 		COLLECTION_VERSION=$$(yq -r '.version' ${GALAXY_FILE}) \
-			devbox run uv run ansible-galaxy collection publish --api-key ${GALAXY_API_KEY} \
+			devbox run --quiet -- ansible-galaxy collection publish --api-key ${GALAXY_API_KEY} \
 				"$${COLLECTION_NAMESPACE}-$${COLLECTION_NAME}-$${COLLECTION_VERSION}.tar.gz"
 	fi

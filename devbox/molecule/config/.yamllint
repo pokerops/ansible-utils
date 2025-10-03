@@ -2,6 +2,7 @@
 extends: default
 
 ignore: |
+  .yamllint
   .devbox/
   .venv/
   .ansible/
@@ -25,4 +26,3 @@ rules:
   octal-values:
     forbid-implicit-octal: true
     forbid-explicit-octal: true
-

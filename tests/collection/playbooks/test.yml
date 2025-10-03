@@ -1,0 +1,10 @@
+---
+- name: Test playbook
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Create test file
+      file:
+        path: /tmp/test-collection-file
+        state: touch
+        mode: "0644"

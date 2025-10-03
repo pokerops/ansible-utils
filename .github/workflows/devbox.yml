@@ -1,0 +1,36 @@
+---
+name: Test Devbox Molecule Plugin
+
+on:
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  devbox:
+    name: Test devbox molecule plugin
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - lint
+          - requirements
+          - build
+          - test
+    defaults:
+      run:
+        working-directory: tests/collection
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@v0.13.0
+        with:
+          enable-cache: true
+          project-path: tests/collection
+
+      - name: Run target tests
+        working-directory: tests/collection
+        run: |
+          devbox run make install
+          devbox run make {{matrix.target}}

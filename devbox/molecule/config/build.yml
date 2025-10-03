@@ -1,0 +1,10 @@
+---
+name: build
+on:
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  build:
+    needs: lint
+    uses: tcook/ansible-utils/.github/workflows/build.yml@master

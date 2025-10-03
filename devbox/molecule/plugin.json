@@ -13,22 +13,30 @@
     "virt-viewer@latest"
   ],
   "env": {
+    "VIRTENV": "{{.DevboxRoot}}/molecule",
     "PYPROJECT": "{{.Virtenv}}",
     "MAKEFILE": "{{.Virtenv}}/Makefile"
   },
   "create_files": {
     "{{.Virtenv}}/Makefile": "config/Makefile",
-    "{{.Virtenv}}/pyproject.toml": "config/pyproject.toml"
+    "{{.Virtenv}}/pyproject.toml": "config/pyproject.toml",
+    "{{.Virtenv}}/.yamllint": "config/.yamllint",
+    "{{.Virtenv}}/action_version.yml": "config/version.yml",
+    "{{.Virtenv}}/action_lint.yml": "config/lint.yml",
+    "{{.Virtenv}}/action_build.yml": "config/build.yml",
+    "{{.Virtenv}}/action_release.yml": "config/release.yml"
   },
   "shell": {
     "init_hook": [
-      "devbox install",
-      "uv sync --directory ${PYPROJECT}",
-      ". .venv/bin/activate"
+      ". .venv/bin/activate",
+      "alias make='devbox run --quiet make --'",
+      "alias uv='devbox run --quiet uv' --",
+      "devbox run --quiet init"
     ],
     "scripts": {
-      "make": "[ -f Makefile ] && make $@ || make -f ${MAKEFILE} $@",
-      "uv": "[ -f pyproject.toml ] && uv $@ || uv --directory ${PYPROJECT} $@"
+      "init": "make -f ${MAKEFILE} init",
+      "make": "[ -f Makefile ] && \\make $@ || make -f ${MAKEFILE} $@",
+      "uv": "[ -f pyproject.toml ] && \\uv $@ || uv --directory ${PYPROJECT} $@"
     }
   }
 }
