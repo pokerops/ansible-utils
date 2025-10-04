@@ -6,4 +6,4 @@ on:
 
 jobs:
   lint:
-    uses: pokerops/ansible-utils/.github/workflows/lint.yml@master
+    uses: pokerops/ansible-utils/actions/lint.yml@master
