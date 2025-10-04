@@ -30,7 +30,7 @@
     "init_hook": [
       ". .venv/bin/activate",
       "alias make='devbox run --quiet make --'",
-      "alias uv='devbox run --quiet uv' --",
+      "alias uv='devbox run --quiet uv --'",
       "devbox run --quiet init"
     ],
     "scripts": {
