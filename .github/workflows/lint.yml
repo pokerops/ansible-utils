@@ -1,9 +1,24 @@
 ---
-name: version
+name: lint
+
 on:
   pull_request:
     branches: ["main", "master"]
 
 jobs:
   lint:
-    uses: pokerops/ansible-utils/actions/lint.yml@master
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@v0.13.0
+        with:
+          enable-cache: true
+
+      - name: Run target tests
+        working-directory: tests/collection
+        run: |
+          devbox run make install
+          devbox run make lint
