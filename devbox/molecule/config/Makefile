@@ -1,6 +1,7 @@
 .PHONY: all ${MAKECMDGOALS}
 
 VIRTENV ?=
+CI ?= false
 MOLECULE_SCENARIO ?= default
 MOLECULE_REVISION ?= $$(git rev-parse --abbrev-ref HEAD)
 UBUNTU_RELEASE ?= noble
@@ -66,18 +67,12 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 	rm -rf ansible_collections/
 	find .venv -type d -name ansible_collections | xargs -r -- rm -r
 	MOLECULE_HOME=$$(mktemp -d); \
-	if [ ! -z "$${CI:-}" ]; then \
-		export MOLECULE_EPHEMERAL_DIR=.molecule/${MOLECULE_SCENARIO}; \
-		echo "Using MOLECULE_EPHEMERAL_DIR=$${MOLECULE_EPHEMERAL_DIR}"; \
-	fi; \
 	HOME=$${MOLECULE_HOME} \
+	MOLECULE_EPHEMERAL_DIR=.molecule/${MOLECULE_SCENARIO}; \
 	MOLECULE_REVISION=${MOLECULE_REVISION} \
 	MOLECULE_KVM_IMAGE=${MOLECULE_KVM_IMAGE} \
 	MOLECULE_LOGDIR=${MOLECULE_LOGDIR} \
 	devbox run --quiet -- molecule $@ -s ${MOLECULE_SCENARIO} ${LOGIN_ARGS}; \
-	if [ ! -z "$${CI:-}" ]; then \
-		rm -r $${MOLECULE_EPHEMERAL_DIR}; \
-	fi; \
 	rm -r $${MOLECULE_HOME};
 
 publish: build
