@@ -1,8 +1,11 @@
 .PHONY: all ${MAKECMDGOALS}
 
 VIRTENV ?=
+CI ?= false
 MOLECULE_SCENARIO ?= default
 MOLECULE_REVISION ?= $$(git rev-parse --abbrev-ref HEAD)
+MOLECULE_EPHEMERAL_DIR ?= .molecule/${MOLECULE_SCENARIO}
+MOLECULE_LOGDIR ?= /tmp/logs
 UBUNTU_RELEASE ?= noble
 UBUNTU_KVM_IMAGE = https://cloud-images.ubuntu.com/${UBUNTU_RELEASE}/current/${UBUNTU_RELEASE}-server-cloudimg-amd64.img
 MOLECULE_KVM_IMAGE ?= $(UBUNTU_KVM_IMAGE)
@@ -65,18 +68,14 @@ endif
 test dependency create prepare converge idempotence side-effect verify destroy cleanup reset list login:
 	rm -rf ansible_collections/
 	find .venv -type d -name ansible_collections | xargs -r -- rm -r
-	MOLECULE_HOME=$$(mktemp -d); \
-	if [ -n "$${CI:-}" ]; then \
-		export MOLECULE_EPHEMERAL_DIR=.molecule/${MOLECULE_SCENARIO}; \
-	fi; \
+	export MOLECULE_HOME=$$(mktemp -d); \
+	mkdir -p$ ${MOLECULE_EPHEMERAL_DIR}; \
 	HOME=$${MOLECULE_HOME} \
+	MOLECULE_EPHEMERAL_DIR=${MOLECULE_EPHEMERAL_DIR} \
 	MOLECULE_REVISION=${MOLECULE_REVISION} \
 	MOLECULE_KVM_IMAGE=${MOLECULE_KVM_IMAGE} \
 	MOLECULE_LOGDIR=${MOLECULE_LOGDIR} \
 	devbox run --quiet -- molecule $@ -s ${MOLECULE_SCENARIO} ${LOGIN_ARGS}; \
-	if [ -n "$${CI:-}" ]; then \
-		rm -r $${MOLECULE_EPHEMERAL_DIR}; \
-	fi; \
 	rm -r $${MOLECULE_HOME};
 
 publish: build

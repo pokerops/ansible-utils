@@ -9,8 +9,7 @@
     "expect@latest",
     "libisoburn@latest",
     "gnupg@latest",
-    "xfsprogs@latest",
-    "virt-viewer@latest"
+    "xfsprogs@latest"
   ],
   "env": {
     "VIRTENV": "{{.DevboxRoot}}/molecule",
