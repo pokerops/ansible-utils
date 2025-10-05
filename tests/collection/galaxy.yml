@@ -1,14 +1,17 @@
 ---
 namespace: pokerops
 name: test
-version: 1.0.0
+version: 0.0.1
 readme: README.md
 authors: []
 description: Test collection for devbox molecule plugin verification
 license:
   - GPL-2.0-or-later
 license_file: ""
-tags: []
+tags:
+  - linux
+  - infrastructure
+  - tools
 dependencies: {}
 repository: https://github.com/pokerops/ansible-utils
 documentation: https://github.com/pokerops/ansible-utils

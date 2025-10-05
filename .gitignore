@@ -7,3 +7,4 @@
 
 tests/**/.venv/
 tests/collection/.github/
+tests/collection/.ansible/
