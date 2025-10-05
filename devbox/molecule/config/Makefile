@@ -66,15 +66,16 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 	rm -rf ansible_collections/
 	find .venv -type d -name ansible_collections | xargs -r -- rm -r
 	MOLECULE_HOME=$$(mktemp -d); \
-	if [ -n "$${CI:-}" ]; then \
+	if [ ! -z "$${CI:-}" ]; then \
 		export MOLECULE_EPHEMERAL_DIR=.molecule/${MOLECULE_SCENARIO}; \
+		echo "Using MOLECULE_EPHEMERAL_DIR=$${MOLECULE_EPHEMERAL_DIR}"; \
 	fi; \
 	HOME=$${MOLECULE_HOME} \
 	MOLECULE_REVISION=${MOLECULE_REVISION} \
 	MOLECULE_KVM_IMAGE=${MOLECULE_KVM_IMAGE} \
 	MOLECULE_LOGDIR=${MOLECULE_LOGDIR} \
 	devbox run --quiet -- molecule $@ -s ${MOLECULE_SCENARIO} ${LOGIN_ARGS}; \
-	if [ -n "$${CI:-}" ]; then \
+	if [ ! -z "$${CI:-}" ]; then \
 		rm -r $${MOLECULE_EPHEMERAL_DIR}; \
 	fi; \
 	rm -r $${MOLECULE_HOME};
