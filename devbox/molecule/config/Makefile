@@ -68,7 +68,7 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 	find .venv -type d -name ansible_collections | xargs -r -- rm -r
 	MOLECULE_HOME=$$(mktemp -d); \
 	HOME=$${MOLECULE_HOME} \
-	MOLECULE_EPHEMERAL_DIR=.molecule/${MOLECULE_SCENARIO}; \
+	MOLECULE_EPHEMERAL_DIR=.molecule/${MOLECULE_SCENARIO} \
 	MOLECULE_REVISION=${MOLECULE_REVISION} \
 	MOLECULE_KVM_IMAGE=${MOLECULE_KVM_IMAGE} \
 	MOLECULE_LOGDIR=${MOLECULE_LOGDIR} \
