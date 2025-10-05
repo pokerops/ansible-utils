@@ -30,7 +30,7 @@ sync install: init
 lint: sync
 	@devbox run --quiet -- yamllint . -c .yamllint
 	@if [[ -f "${GALAXY_FILE}" || -f "${META_FILE}" ]]; then \
-		devbox run --quiet -- ansible-lint -p ${GALAXY_FILE} --exclude ".ansible/*"; \
+		devbox run --quiet -- ansible-lint -p . --exclude ".ansible/*"; \
 	fi
 
 requirements: sync
