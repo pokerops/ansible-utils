@@ -33,4 +33,4 @@ jobs:
         working-directory: tests/collection
         run: |
           devbox run make install
-          devbox run make {{matrix.target}}
+          devbox run make ${{matrix.target}}

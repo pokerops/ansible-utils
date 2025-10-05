@@ -36,7 +36,7 @@ lint: sync
 requirements: sync
 	@mkdir -p ${ROLE_DIR}
 	@if [ -f "${ROLE_FILE}" ]; then \
-		@ansible-galaxy role install \
+		devbox run --quiet -- ansible-galaxy role install \
 			--force --no-deps \
 			--roles-path ${ROLE_DIR} \
 			--role-file ${ROLE_FILE}; \
