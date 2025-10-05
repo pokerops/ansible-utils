@@ -5,6 +5,7 @@ CI ?= false
 MOLECULE_SCENARIO ?= default
 MOLECULE_REVISION ?= $$(git rev-parse --abbrev-ref HEAD)
 MOLECULE_EPHEMERAL_DIR ?= .molecule/${MOLECULE_SCENARIO}
+MOLECULE_INSTANCE_CONFIG ?= $(MOLECULE_EPHEMERAL_DIR)/instance_config.yml
 MOLECULE_LOGDIR ?= /tmp/logs
 UBUNTU_RELEASE ?= noble
 UBUNTU_KVM_IMAGE = https://cloud-images.ubuntu.com/${UBUNTU_RELEASE}/current/${UBUNTU_RELEASE}-server-cloudimg-amd64.img
@@ -72,6 +73,7 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 	mkdir -p$ ${MOLECULE_EPHEMERAL_DIR}; \
 	HOME=$${MOLECULE_HOME} \
 	MOLECULE_EPHEMERAL_DIR=${MOLECULE_EPHEMERAL_DIR} \
+	MOLECULE_INSTANCE_CONFIG=${MOLECULE_INSTANCE_CONFIG} \
 	MOLECULE_REVISION=${MOLECULE_REVISION} \
 	MOLECULE_KVM_IMAGE=${MOLECULE_KVM_IMAGE} \
 	MOLECULE_LOGDIR=${MOLECULE_LOGDIR} \
