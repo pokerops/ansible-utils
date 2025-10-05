@@ -3,6 +3,9 @@ name: lint
 description: Lint workflow
 on:
   workflow_call:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   lint:
     name: lint
@@ -17,4 +20,4 @@ jobs:
           enable-cache: true
 
       - name: Lint code
-        run: devbox run lint
+        run: devbox run make lint

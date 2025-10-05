@@ -1,0 +1,10 @@
+.github/workflows/*.yml
+!.github/workflows/lint.yml
+!.github/workflows/devbox.yml
+
+.yamllint
+.venv/
+
+tests/**/.venv/
+tests/collection/.github/
+tests/collection/.ansible/

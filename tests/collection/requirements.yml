@@ -1,0 +1,5 @@
+---
+collections:
+  - name: pokerops.test
+    source: .
+    type: dir

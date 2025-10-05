@@ -1,0 +1,9 @@
+---
+name: version
+on:
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  version:
+    uses: pokerops/ansible-utils/.github/workflows/version.yml@master

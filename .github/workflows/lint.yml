@@ -1,17 +1,16 @@
 ---
-name: release
-description: Release workflow
+name: lint
 on:
-  workflow_call:
+  pull_request:
+    branches: ["main", "master"]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  release:
-    name: release
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the codebase.
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install devbox
@@ -19,7 +18,8 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Release collection
-        run: devbox run make publish
-        env:
-          GALAXY_API_KEY: "${{ secrets.GALAXY_API_KEY }}"
+      - name: Run target tests
+        working-directory: tests/collection
+        run: |
+          devbox run make install
+          devbox run make lint
