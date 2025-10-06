@@ -17,6 +17,7 @@ jobs:
         uses: jetify-com/devbox-install-action@v0.13.0
         with:
           enable-cache: true
+          project-path: tests/collection
 
       - name: Run target tests
         working-directory: tests/collection
