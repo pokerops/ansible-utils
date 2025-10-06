@@ -1,11 +1,11 @@
 ---
 name: release
-
+permissions:
+  contents: read
 on:
   push:
     tags:
       - "*"
-
 jobs:
   release:
     uses: tcook/pokerops.actions/.github/workflows/release.yml@master
