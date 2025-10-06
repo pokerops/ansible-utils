@@ -33,9 +33,9 @@
       "devbox run --quiet init"
     ],
     "scripts": {
-      "init": "make -f ${MAKEFILE} init",
-      "make": "[ -f Makefile ] && \\make $@ || make -f ${MAKEFILE} $@",
-      "uv": "[ -f pyproject.toml ] && \\uv $@ || uv --directory ${PYPROJECT} $@"
+      "init": "\\make -f ${MAKEFILE} init",
+      "make": "[ -f Makefile ] && \\make $@ || \\make -f ${MAKEFILE} $@",
+      "uv": "[ -f pyproject.toml ] && \\uv $@ || \\uv --directory ${PYPROJECT} $@"
     }
   }
 }
