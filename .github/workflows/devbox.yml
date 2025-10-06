@@ -30,7 +30,6 @@ jobs:
           project-path: tests/collection
 
       - name: Run target tests
-        working-directory: tests/collection
         run: |
           devbox run make install
           devbox run make ${{matrix.target}}
