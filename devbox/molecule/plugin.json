@@ -26,12 +26,7 @@
     "{{.Virtenv}}/action_release.yml": "config/release.yml"
   },
   "shell": {
-    "init_hook": [
-      ". .venv/bin/activate",
-      "alias make='devbox run --quiet make --'",
-      "alias uv='devbox run --quiet uv --'",
-      "devbox run --quiet init"
-    ],
+    "init_hook": [". .venv/bin/activate", "devbox run --quiet init"],
     "scripts": {
       "init": "\\make -f ${MAKEFILE} init",
       "make": "[ -f Makefile ] && \\make $@ || \\make -f ${MAKEFILE} $@",

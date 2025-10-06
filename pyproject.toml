@@ -1,13 +1,13 @@
 [build-system]
-requires = ["setuptools>=45", "wheel"]
-build-backend = "setuptools.build_meta"
+build-backend = 'setuptools.build_meta'
+requires = ['setuptools>=45', 'wheel']
 
 [project]
 dependencies = [
-  'ansible==11.5.0',
-  'ansible-lint==25.9.0',
-  'boto3==1.40.45',
-  'botocore==1.40.45',
+  'ansible==11.10.0',
+  'ansible-lint==25.9.1',
+  'boto3==1.40.46',
+  'botocore==1.40.46',
   'deepmerge==2.0',
   'dotenv-cli==3.4.1',
   'github3-py==4.0.1',
@@ -27,11 +27,8 @@ dependencies = [
 ]
 description = 'Dependency management for PokerOps Ansible Actions devbox plugin'
 name = 'pokerops-ansible-utils'
-requires-python = '>=3.13'
+requires-python = '>=3.11,<3.14'
 version = '0.0.0'
-
-[tool.setuptools]
-packages = []
 
 [tool]
 [tool.pyright]
@@ -41,3 +38,6 @@ venvPath = '.'
 
 [tool.ruff]
 line-length = 160
+
+[tool.setuptools]
+packages = []
