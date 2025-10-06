@@ -13,19 +13,46 @@ devbox install           # Install all required packages and dependencies
 devbox run uv sync       # Sync Python dependencies
 ```
 
+### Dependency Management
+
+**Initial Setup:**
+
+```bash
+uv lock                  # Create uv.lock with pinned versions
+```
+
+**Updating Dependencies:**
+
+```bash
+uv sync --upgrade        # Update to latest compatible versions
+uv lock --upgrade        # Update lock file with new versions
+```
+
+**Adding New Dependencies:**
+
+```bash
+uv add --group dev package@latest  # Add to dev dependency group
+```
+
+**Updating All Dependencies to Latest Versions:**
+
+```bash
+make update              # Updates to latest versions and shows formatted output for pyproject.toml
+make sync                # Sync dependencies after manual pyproject.toml update
+make clean               # Clean up generated files
+```
+
 ### Core Development Commands
 
 **Linting and Code Quality:**
 
 ```bash
-devbox run lint          # Run yamllint and ansible-lint on codebase
 make lint                # Alternative via Makefile (uses devbox internally)
 ```
 
 **Building:**
 
 ```bash
-devbox run build         # Build Ansible collection (if galaxy.yml exists)
 make build               # Alternative via Makefile
 ```
 
@@ -92,4 +119,3 @@ molecule test            # Run full test suite
 - **uv** - Fast Python package manager
 
 The workflows expect consuming repositories to have a `galaxy.yml` file for collection metadata and building.
-
