@@ -70,7 +70,7 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 	rm -rf ansible_collections/
 	find .venv -type d -name ansible_collections | xargs -r -- rm -r
 	export MOLECULE_HOME=$$(mktemp -d); \
-	mkdir -p$ ${MOLECULE_EPHEMERAL_DIR}; \
+	mkdir -p ${MOLECULE_EPHEMERAL_DIR}; \
 	HOME=$${MOLECULE_HOME} \
 	MOLECULE_EPHEMERAL_DIR=${MOLECULE_EPHEMERAL_DIR} \
 	MOLECULE_INSTANCE_CONFIG=${MOLECULE_INSTANCE_CONFIG} \
