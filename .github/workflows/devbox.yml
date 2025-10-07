@@ -28,11 +28,10 @@ jobs:
           # Get current branch name
           CURRENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           echo "Using branch: $CURRENT_BRANCH"
-
           # Update all workflow config files to use current branch instead of @master
-          find devbox/molecule/config -name "*.yml" -type f -exec sed -i "s/@master/@$CURRENT_BRANCH/g" {} \;
-
+          sed -i "s/@master/@$CURRENT_BRANCH/g" devbox/molecule/config/pyproject.toml
           echo "Updated plugin configuration files to use branch: $CURRENT_BRANCH"
+          cat devbox/virtenv/pokerops.ansible-utils.molecule/Makefile
 
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.13.0
