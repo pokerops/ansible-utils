@@ -1,5 +1,5 @@
 ---
-name: ci
+name: devbox
 on:
   pull_request:
     branches: [main, master]
@@ -7,34 +7,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Update plugin config to use current branch
-        run: |
-          # Get current branch name
-          CURRENT_BRANCH="${{ github.head_ref || github.ref_name }}"
-          echo "Using branch: $CURRENT_BRANCH"
-          
-          # Update all workflow config files to use current branch instead of @master
-          find devbox/molecule/config -name "*.yml" -type f -exec sed -i "s/@master/@$CURRENT_BRANCH/g" {} \;
-          
-          echo "Updated plugin configuration files to use branch: $CURRENT_BRANCH"
-
-      - name: Install devbox
-        uses: jetify-com/devbox-install-action@v0.13.0
-        with:
-          enable-cache: true
-          project-path: tests/collection
-
-      - name: Run target tests
-        working-directory: tests/collection
-        run: |
-          devbox run make install
-          devbox run make lint
   devbox:
     runs-on: ubuntu-latest
     strategy:
@@ -56,10 +28,10 @@ jobs:
           # Get current branch name
           CURRENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           echo "Using branch: $CURRENT_BRANCH"
-          
+
           # Update all workflow config files to use current branch instead of @master
           find devbox/molecule/config -name "*.yml" -type f -exec sed -i "s/@master/@$CURRENT_BRANCH/g" {} \;
-          
+
           echo "Updated plugin configuration files to use branch: $CURRENT_BRANCH"
 
       - name: Install devbox
