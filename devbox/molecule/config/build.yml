@@ -7,4 +7,4 @@ on:
     branches: ["main", "master"]
 jobs:
   build:
-    uses: tcook/ansible-utils/.github/workflows/build.yml@master
+    uses: pokerops/ansible-utils/.github/workflows/build.yml@master
