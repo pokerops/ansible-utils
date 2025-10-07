@@ -28,7 +28,7 @@ PINNED_DEPS = $(shell dasel -f pyproject.toml -r toml 'project.dependencies.all(
 upgrade_deps: ## Update all dependencies to latest versions
 	@echo "Updating dependencies to latest versions..."
 	@\uv sync --upgrade
-	@if uv sync --upgrade; then \
+	@if \uv sync --upgrade; then \
 		echo "Dependencies updated successfully"; \
 	else \
 		exit 1 ; \
