@@ -24,7 +24,6 @@ jobs:
           enable-cache: true
 
       - name: Run target tests
-        working-directory: tests/collection
         run: |
           devbox run make ${{matrix.target}}
 
