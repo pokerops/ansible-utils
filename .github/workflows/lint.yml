@@ -1,6 +1,5 @@
 ---
 name: lint
-description: Lint workflow
 on:
   workflow_call:
 concurrency:
