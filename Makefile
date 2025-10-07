@@ -1,6 +1,6 @@
 .PHONY: all ${MAKECMDGOALS}
 
-# Extract dependency names from pyproject.toml dynamically
+GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MAIN_DEPS = $(shell dasel -f pyproject.toml -r toml 'project.dependencies.all()' | \
 	sed "s/'//g" | \
 	grep -v '^git+' | \
@@ -15,7 +15,6 @@ MAIN_DEPS = $(shell dasel -f pyproject.toml -r toml 'project.dependencies.all()'
 	cut -d' ' -f1 | \
 	tr '\n' ' ' | \
 	uniq)
-
 PINNED_DEPS = $(shell dasel -f pyproject.toml -r toml 'project.dependencies.all()' | \
 	sed "s/'//g" | \
 	grep -v '^git+' | \
@@ -70,3 +69,12 @@ lock: ## Regenerate the lock file
 
 update: update_deps lock
 upgrade: upgrade_deps lock
+
+test:
+	# Update all workflow config files to use current branch instead of @master
+	sed -i "s/@master/@${GIT_BRANCH}/g" devbox/molecule/config/pyproject.toml
+	echo "Updated plugin configuration files to use branch: ${GIT_BRANCH}"
+	cat devbox/molecule/config/pyproject.toml
+
+reset:
+	git checkout -- devbox/molecule/config/pyproject.toml

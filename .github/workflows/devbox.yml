@@ -16,12 +16,14 @@ jobs:
           - requirements
           - build
           - test
-    defaults:
-      run:
-        working-directory: tests/collection
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Update plugin config to use current branch
+        run: make test
+        env:
+          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.13.0
@@ -30,6 +32,7 @@ jobs:
           project-path: tests/collection
 
       - name: Run target tests
+        working-directory: tests/collection
         run: |
           devbox run make install
           devbox run make ${{matrix.target}}

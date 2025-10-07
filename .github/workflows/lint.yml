@@ -1,26 +1,22 @@
 ---
 name: lint
 on:
-  pull_request:
-    branches: ["main", "master"]
+  workflow_call:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   lint:
+    name: lint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Check out the codebase
         uses: actions/checkout@v4
 
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.13.0
         with:
           enable-cache: true
-          project-path: tests/collection
 
-      - name: Run target tests
-        working-directory: tests/collection
-        run: |
-          devbox run make install
-          devbox run make lint
+      - name: Lint code
+        run: devbox run make lint
