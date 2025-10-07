@@ -1,6 +1,5 @@
 ---
 name: release
-description: Release workflow
 on:
   workflow_call:
 concurrency:
