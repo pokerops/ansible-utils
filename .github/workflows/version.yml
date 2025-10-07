@@ -1,5 +1,6 @@
 ---
 name: version
+description: Version validation and comparison workflow
 on:
   workflow_call:
 concurrency:
