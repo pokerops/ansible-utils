@@ -5,30 +5,51 @@ MAIN_DEPS = $(shell dasel -f pyproject.toml -r toml 'project.dependencies.all()'
 	sed "s/'//g" | \
 	grep -v '^git+' | \
 	sed 's/@latest$$//' | \
+	sed 's/>=/>/' | \
+	sed 's/<=/</' | \
+	cut -d'~' -f1 | \
+	cut -d'>' -f1 | \
+	cut -d'<' -f1 | \
 	cut -d'=' -f1 | \
 	cut -d'@' -f1 | \
+	cut -d' ' -f1 | \
+	tr '\n' ' ' | \
+	uniq)
+
+PINNED_DEPS = $(shell dasel -f pyproject.toml -r toml 'project.dependencies.all()' | \
+	sed "s/'//g" | \
+	grep -v '^git+' | \
+	cut -d' ' -f1 | \
+	cut -d'@' -f1 | \
+	cut -d'.' -f 1-2 | \
+	sed 's/[><=]=/~=/' | \
 	tr '\n' ' ')
 
-help: ## Show dependency management help
-	@echo "Dependency Management:"
-	@echo "  make sync          Sync dependencies from pyproject.toml"
-	@echo "  make update        Update all dependencies to latest versions and update pyproject.toml"
-
-sync: ## Sync dependencies from pyproject.toml
-	uv sync
-
-update: ## Update all dependencies to latest versions and update pyproject.toml
+upgrade_deps: ## Update all dependencies to latest versions
 	@echo "Updating dependencies to latest versions..."
-	uv sync --upgrade
-	@if uv sync --upgrade; then \
+	@\uv sync --upgrade
+	@if \uv sync --upgrade; then \
 		echo "Dependencies updated successfully"; \
 	else \
 		exit 1 ; \
 	fi
-	uv lock --upgrade || true
-	DEPS_REGEX=$$(echo "$(MAIN_DEPS)" | tr ' ' '|'); \
+	@\uv lock --upgrade || true
+	@echo ${MAIN_DEPS} | xargs -r \uv remove || true
+	@echo ${MAIN_DEPS} | xargs -r \uv add
+
+update_deps:
+	echo ${PINNED_DEPS}
+	@echo "Updating dependencies to latest versions..."
+	@echo ${MAIN_DEPS} | xargs -r \uv remove || true
+	@echo ${PINNED_DEPS} | xargs -r \uv add
+	@\uv lock --upgrade || true
+
+lock: ## Regenerate the lock file
+	@echo "Updating dependencies to latest versions...";
 	TEMPFILE=$$(mktemp); \
-	VERSIONS=$$(uv export --format requirements-txt --no-hashes | grep -E "^($$DEPS_REGEX)==" | sort); \
+	DEPS_REGEX=$$(echo "$(MAIN_DEPS)" | tr ' ' '|' | sort -r); \
+	echo $$DEPS_REGEX; \
+	VERSIONS=$$(\uv export --format requirements-txt --no-hashes | grep -E "^($$DEPS_REGEX)==" | sort); \
 	if [ -n "$$VERSIONS" ]; then \
 		echo "Found versions:"; \
 		echo "$$VERSIONS"; \
@@ -45,5 +66,7 @@ update: ## Update all dependencies to latest versions and update pyproject.toml
 		mv $$TEMPFILE pyproject.toml; \
 	else \
 		echo "No versions found to update"; \
-	fi; \
+	fi;
 
+update: update_deps lock
+upgrade: upgrade_deps lock
