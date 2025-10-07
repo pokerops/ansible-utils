@@ -23,7 +23,7 @@ init overwrite:
 	@for action in {{.Virtenv}}/action_*.yml; do \
 		ACTION_NAME=$$(basename $${action}); \
 		ACTION_PATH=".github/workflows/$${ACTION_NAME#action_}"; \
-		if [ "$@" = "overwrite" ] || [ ! -f "$${ACTION_PATH}" ]; then \
+		if [[ "$@" == "overwrite" ]] || [ ! -f "$${ACTION_PATH}" ]; then \
 			echo "Installing $${ACTION_NAME} to $${ACTION_PATH}"; \
 			cp -a $${action} $${ACTION_PATH} || true; \
 		fi \
