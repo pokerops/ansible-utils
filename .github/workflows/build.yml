@@ -1,5 +1,6 @@
 ---
 name: build
+description: Collection build workflow
 on:
   workflow_call:
 concurrency:
