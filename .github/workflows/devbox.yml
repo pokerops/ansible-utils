@@ -16,22 +16,12 @@ jobs:
           - requirements
           - build
           - test
-    defaults:
-      run:
-        working-directory: tests/collection
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Update plugin config to use current branch
-        run: |
-          # Get current branch name
-          CURRENT_BRANCH="${{ github.head_ref || github.ref_name }}"
-          echo "Using branch: $CURRENT_BRANCH"
-          # Update all workflow config files to use current branch instead of @master
-          sed -i "s/@master/@$CURRENT_BRANCH/g" devbox/molecule/config/pyproject.toml
-          echo "Updated plugin configuration files to use branch: $CURRENT_BRANCH"
-          cat devbox/virtenv/pokerops.ansible-utils.molecule/Makefile
+        run: make test
 
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.13.0
@@ -40,6 +30,7 @@ jobs:
           project-path: tests/collection
 
       - name: Run target tests
+        working-directory: tests/collection
         run: |
           devbox run make install
           devbox run make ${{matrix.target}}
