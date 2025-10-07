@@ -17,13 +17,16 @@ ROLE_FILE = roles.yml
 
 LOGIN_ARGS ?=
 
-init:
+init overwrite:
 	@mkdir -p .github/workflows
 	@cp -a {{.Virtenv}}/.yamllint .yamllint
 	@for action in {{.Virtenv}}/action_*.yml; do \
 		ACTION_NAME=$$(basename $${action}); \
 		ACTION_PATH=".github/workflows/$${ACTION_NAME#action_}"; \
-		[ ! -f "$${ACTION_PATH}" ] && cp -a $${action} $${ACTION_PATH} || true; \
+		if [ "$@" == "overwrite" ] || [ ! -f "$${ACTION_PATH}" ]; then \
+		  echo "Installing $${ACTION_NAME} to $${ACTION_PATH}"; \
+			cp -a $${action} $${ACTION_PATH} || true; \
+		fi \
 	done;
 
 sync install: init
