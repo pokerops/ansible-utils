@@ -7,6 +7,26 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  make:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - update
+          - upgrade
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@v0.13.0
+        with:
+          enable-cache: true
+
+      - name: Run target tests
+        run: |
+          devbox run make ${{matrix.target}}
+
   devbox:
     runs-on: ubuntu-latest
     strategy:
@@ -16,6 +36,7 @@ jobs:
           - requirements
           - build
           - test
+          - init
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
