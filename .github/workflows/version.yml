@@ -42,7 +42,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           BASE_SHA="${{ github.event.pull_request.base.sha }}"
-          echo "Comparing versions between base ($BASE_SHA) and HEAD"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          echo "Comparing versions between base ($BASE_SHA) and head ($HEAD_SHA)"
 
           # Get base version from the target branch
           BASE_VERSION=$(git show "$BASE_SHA:galaxy.yml" | yq -r .version)
