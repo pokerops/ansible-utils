@@ -22,7 +22,7 @@ jobs:
       - name: Build collection
         run: |
           if [ -f galaxy.yml ]; then
-            devbox run build
+            devbox run make build
           else
             echo "galaxy.yml not found, skipping build."
             exit 0
