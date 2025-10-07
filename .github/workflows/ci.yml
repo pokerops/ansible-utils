@@ -13,6 +13,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Update plugin config to use current branch
+        run: |
+          # Get current branch name
+          CURRENT_BRANCH="${{ github.head_ref || github.ref_name }}"
+          echo "Using branch: $CURRENT_BRANCH"
+          
+          # Update all workflow config files to use current branch instead of @master
+          find devbox/molecule/config -name "*.yml" -type f -exec sed -i "s/@master/@$CURRENT_BRANCH/g" {} \;
+          
+          echo "Updated plugin configuration files to use branch: $CURRENT_BRANCH"
+
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.13.0
         with:
@@ -39,6 +50,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Update plugin config to use current branch
+        run: |
+          # Get current branch name
+          CURRENT_BRANCH="${{ github.head_ref || github.ref_name }}"
+          echo "Using branch: $CURRENT_BRANCH"
+          
+          # Update all workflow config files to use current branch instead of @master
+          find devbox/molecule/config -name "*.yml" -type f -exec sed -i "s/@master/@$CURRENT_BRANCH/g" {} \;
+          
+          echo "Updated plugin configuration files to use branch: $CURRENT_BRANCH"
 
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.13.0
