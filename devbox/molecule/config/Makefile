@@ -38,7 +38,7 @@ lint: sync
 		devbox run --quiet -- ansible-lint -p . --exclude ".ansible/*"; \
 	fi
 
-requirements: sync
+requirements: clean sync
 	@mkdir -p ${ROLE_DIR}
 	@if [ -f "${ROLE_FILE}" ]; then \
 		devbox run --quiet -- ansible-galaxy role install \
@@ -69,11 +69,15 @@ endif
 
 test dependency create prepare converge idempotence side-effect verify destroy cleanup reset list login:
 		find .venv -type d -name ansible_collections | xargs -r -- rm -r
-		rm -rf $${HOME}/.ansible/{collections,roles}
 		MOLECULE_REVISION=${MOLECULE_REVISION} \
 		MOLECULE_KVM_IMAGE=${MOLECULE_KVM_IMAGE} \
 		MOLECULE_LOGDIR=${MOLECULE_LOGDIR} \
 		devbox run --quiet -- molecule $@ -s ${MOLECULE_SCENARIO} ${LOGIN_ARGS};
+		if [ "$@" = "destroy" ] || [ "$@" = "cleanup" ] || [ "$@" = "reset" ]; then \
+			make clean; \
+		fi
+
+clean:
 		rm -rf $${HOME}/.ansible/{collections,roles}
 
 publish: build
