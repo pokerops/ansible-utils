@@ -1,6 +1,5 @@
 .PHONY: all ${MAKECMDGOALS}
 
-VIRTENV ?=
 CI ?= false
 MOLECULE_SCENARIO ?= default
 MOLECULE_REVISION ?= $$(git rev-parse --abbrev-ref HEAD)
@@ -19,7 +18,6 @@ LOGIN_ARGS ?=
 
 init overwrite:
 	@mkdir -p .github/workflows
-	@cp -a {{.Virtenv}}/.yamllint .yamllint
 	@for action in {{.Virtenv}}/action_*.yml; do \
 		ACTION_NAME=$$(basename $${action}); \
 		ACTION_PATH=".github/workflows/$${ACTION_NAME#action_}"; \
@@ -33,7 +31,7 @@ sync install: init
 	@devbox run --quiet -- uv sync --no-managed-python
 
 lint: sync
-	@devbox run --quiet -- yamllint . -c .yamllint
+	@devbox run --quiet -- yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
 	@if [[ -f "${GALAXY_FILE}" || -f "${META_FILE}" ]]; then \
 		devbox run --quiet -- ansible-lint -p . --exclude ".ansible/*"; \
 	fi
