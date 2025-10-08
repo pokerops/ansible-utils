@@ -74,7 +74,7 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 		MOLECULE_LOGDIR=${MOLECULE_LOGDIR} \
 		devbox run --quiet -- molecule $@ -s ${MOLECULE_SCENARIO} ${LOGIN_ARGS};
 		if [ "$@" = "destroy" ] || [ "$@" = "cleanup" ] || [ "$@" = "reset" ]; then \
-			make clean; \
+			$(MAKE) clean; \
 		fi
 
 clean:
