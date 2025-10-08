@@ -31,11 +31,7 @@ sync install: init
 	@devbox run --quiet -- uv sync --no-managed-python
 
 lint: sync
-	@YAMLLINT_CFG=".yamllint"; \
-	if [ ! -f $YAMLLINT_CFG ]; then \
-		YAMLLINT_CFG="{{.Virtenv}}/.yamllint"; \
-	fi; \
-	devbox run --quiet -- yamllint . -c $$YAMLLINT_CFG;
+	@devbox run --quiet -- yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
 	@if [[ -f "${GALAXY_FILE}" || -f "${META_FILE}" ]]; then \
 		devbox run --quiet -- ansible-lint -p . --exclude ".ansible/*"; \
 	fi
