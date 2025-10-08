@@ -73,7 +73,7 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 		MOLECULE_KVM_IMAGE=${MOLECULE_KVM_IMAGE} \
 		MOLECULE_LOGDIR=${MOLECULE_LOGDIR} \
 		devbox run --quiet -- molecule $@ -s ${MOLECULE_SCENARIO} ${LOGIN_ARGS};
-		if [ "$@" = "destroy" ] || [ "$@" = "cleanup" ] || [ "$@" = "reset" ]; then \
+		@if [ "$@" = "destroy" ] || [ "$@" = "cleanup" ] || [ "$@" = "reset" ]; then \
 			$(MAKE) clean; \
 		fi
 
