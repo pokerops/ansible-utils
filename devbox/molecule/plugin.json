@@ -34,7 +34,7 @@
     "scripts": {
       "init": "\\make -f ${MAKEFILE} init",
       "make": "\\make $( ([ -f Makefile ] || printf %s '-f {{.Virtenv}}/Makefile') )",
-      "uv": "\\uv $( ([ -f pyproject.toml ] || printf %s '--directory {{.Virtenv}}/pyproject.toml') )"
+      "uv": "\\uv $( ([ -f pyproject.toml ] || printf %s '--directory {{.Virtenv}}') )"
     }
   }
 }
