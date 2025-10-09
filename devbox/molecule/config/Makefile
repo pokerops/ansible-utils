@@ -28,24 +28,24 @@ init overwrite:
 	done;
 
 sync install: init
-	@devbox run --quiet -- uv sync --no-managed-python
+	@uv sync --no-managed-python
 
 lint: sync
-	@devbox run --quiet -- yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
+	@yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
 	@if [[ -f "${GALAXY_FILE}" || -f "${META_FILE}" ]]; then \
-		devbox run --quiet -- ansible-lint -p . --exclude ".ansible/*"; \
+		ansible-lint -p . --exclude ".ansible/*"; \
 	fi
 
 requirements: clean sync
 	@mkdir -p ${ROLE_DIR}
 	@if [ -f "${ROLE_FILE}" ]; then \
-		devbox run --quiet -- ansible-galaxy role install \
+		ansible-galaxy role install \
 			--force --no-deps \
 			--roles-path ${ROLE_DIR} \
 			--role-file ${ROLE_FILE}; \
 	fi
 	@if [ -f "${GALAXY_FILE}" ]; then \
-		devbox run --quiet -- ansible-galaxy collection install \
+		ansible-galaxy collection install \
 			--force-with-deps \
 			.; \
 	fi
@@ -53,12 +53,12 @@ requirements: clean sync
 
 build: requirements
 	if [ -f "${GALAXY_FILE}" ]; then \
-		devbox run --quiet -- uv build; \
+		uv build; \
 		@git status --porcelain | wc -l | grep -q '^0$$' || (echo "Uncommitted build detected, please run build stage and commit changes" && exit 1); \
 	fi
 
 update:
-	devbox run --quiet -- uv update
+	uv update
 
 ifeq (login,$(firstword $(MAKECMDGOALS)))
     LOGIN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -70,7 +70,7 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 		MOLECULE_REVISION=${MOLECULE_REVISION} \
 		MOLECULE_KVM_IMAGE=${MOLECULE_KVM_IMAGE} \
 		MOLECULE_LOGDIR=${MOLECULE_LOGDIR} \
-		devbox run --quiet -- molecule $@ -s ${MOLECULE_SCENARIO} ${LOGIN_ARGS};
+		molecule $@ -s ${MOLECULE_SCENARIO} ${LOGIN_ARGS};
 		@if [ "$@" = "destroy" ] || [ "$@" = "cleanup" ] || [ "$@" = "reset" ]; then \
 			$(MAKE) clean; \
 		fi
@@ -87,6 +87,6 @@ publish: build
 		COLLECTION_NAMESPACE=$$(yq -r '.namespace' ${GALAXY_FILE}) \
 		COLLECTION_NAME=$$(yq -r '.name' ${GALAXY_FILE}) \
 		COLLECTION_VERSION=$$(yq -r '.version' ${GALAXY_FILE}) \
-			devbox run --quiet -- ansible-galaxy collection publish --api-key ${GALAXY_API_KEY} \
+			ansible-galaxy collection publish --api-key ${GALAXY_API_KEY} \
 				"$${COLLECTION_NAMESPACE}-$${COLLECTION_NAME}-$${COLLECTION_VERSION}.tar.gz"
 	fi
