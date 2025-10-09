@@ -29,12 +29,13 @@
     "init_hook": [
       ". .venv/bin/activate",
       "echo Run 'make (init|overwrite)' to initialize or update the testing environment",
-      "alias make='[ -f Makefile ] && \\make $@ || \\make -f ${MAKEFILE} $@'"
+      "alias make='\\make $( ([ -f Makefile ] || printf %s '-f {{.Virtenv}}/Makefile') )",
+      "alias uv='\\uv $( ([ -f pyproject.toml ] || printf %s '-f {{.Virtenv}}') )"
     ],
     "scripts": {
       "init": "\\make -f ${MAKEFILE} init",
-      "make": "\\make $( ([ -f Makefile ] || printf %s '-f {{.Virtenv}}/Makefile') )",
-      "uv": "\\uv $( ([ -f pyproject.toml ] || printf %s '--directory {{.Virtenv}}') )"
+      "make": "\\make $( ([ -f Makefile ] || printf %s '-f {{.Virtenv}}/Makefile') ) $@",
+      "uv": "\\uv $( ([ -f pyproject.toml ] || printf %s '--directory {{.Virtenv}}') ) $@"
     }
   }
 }
