@@ -1,6 +1,6 @@
 .PHONY: all ${MAKECMDGOALS}
 
-UV = $$(if [ -f pyproject.toml ]; then echo uv; else echo uv --directory {{.Virtenv}}; fi)
+UV := $(shell if [ -f pyproject.toml ]; then echo uv; else echo "uv --directory {{.Virtenv}}"; fi)
 MOLECULE_SCENARIO ?= default
 MOLECULE_REVISION ?= $$(git rev-parse --abbrev-ref HEAD)
 MOLECULE_LOGDIR ?= /tmp/logs
