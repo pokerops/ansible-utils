@@ -1,6 +1,6 @@
 .PHONY: all ${MAKECMDGOALS}
 
-CI ?= false
+UV = $$(if [ -f pyproject.toml ]; then echo uv; else echo uv --directory {{.Virtenv}}; fi)
 MOLECULE_SCENARIO ?= default
 MOLECULE_REVISION ?= $$(git rev-parse --abbrev-ref HEAD)
 MOLECULE_LOGDIR ?= /tmp/logs
@@ -28,7 +28,7 @@ init overwrite:
 	done;
 
 sync install: init
-	@uv sync --no-managed-python
+	@${UV} sync --no-managed-python
 
 lint: sync
 	@yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
@@ -53,12 +53,12 @@ requirements: clean sync
 
 build: requirements
 	if [ -f "${GALAXY_FILE}" ]; then \
-		uv build; \
+		${UV} build; \
 		@git status --porcelain | wc -l | grep -q '^0$$' || (echo "Uncommitted build detected, please run build stage and commit changes" && exit 1); \
 	fi
 
 update:
-	uv update
+	${UV} update
 
 ifeq (login,$(firstword $(MAKECMDGOALS)))
     LOGIN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
