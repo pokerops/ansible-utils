@@ -8,6 +8,6 @@ on:
       - "*"
 jobs:
   release:
-    uses: tcook/pokerops.actions/.github/workflows/release.yml@master
+    uses: pokerops/ansible-utils/.github/workflows/release.yml@master
     secrets:
       GALAXY_API_KEY: ${{ "{{" }} secrets.GALAXY_API_KEY {{ "}}" }}
