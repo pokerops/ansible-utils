@@ -33,8 +33,8 @@
     ],
     "scripts": {
       "init": "\\make -f ${MAKEFILE} init",
-      "make": "if [ -f Makefile ]; then \\make $@; else \\make -f ${MAKEFILE} $@; fi",
-      "uv": "if [ -f pyproject.toml ]; then \\uv $@; else \\uv --directory ${PYPROJECT} $@; fi"
+      "make": "\\make $( ([ -f Makefile ] || printf '-f {{.Virtenv}}/Makefile') )",
+      "uv": "\\uv $( ([ -f pyproject.toml ] || printf '--directory {{.Virtenv}}/pyproject.toml') )"
     }
   }
 }
