@@ -8,6 +8,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   make:
+    needs: checkout
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -15,12 +16,16 @@ jobs:
           - update
           - upgrade
     steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v5
+
       - name: Run make ${{matrix.target}}
-        uses: .
+        uses: ./
         with:
           run: "make ${{matrix.target}}"
 
   devbox:
+    needs: checkout
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -33,18 +38,25 @@ jobs:
     env:
       GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v5
+
       - name: Run make ${{matrix.target}}
-        uses: .
+        uses: ./
         with:
           pre: "make test"
           run: "make install ${{matrix.target}}"
           path: tests/collection
 
   version:
+    needs: checkout
     runs-on: ubuntu-latest
     steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v5
+
       - name: Run make ${{matrix.target}}
-        uses: .
+        uses: ./
         with:
           run: "make install check_version BASE_SHA=${{ github.event.pull_request.base.sha }} HEAD_SHA=${{ github.event.pull_request.head.sha }}"
           path: tests/collection
