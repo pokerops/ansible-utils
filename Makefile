@@ -72,7 +72,7 @@ upgrade: upgrade_deps lock
 
 test:
 	# Update all workflow config files to use current branch instead of @master
-	sed -i "s/@master/@${GIT_BRANCH}/g" devbox/molecule/config/pyproject.toml
+	sed -i "s/\(pokerops\/ansible-utils\)@[^\"]*/\1@${GIT_BRANCH}/g" devbox/molecule/config/pyproject.toml
 	echo "Updated plugin configuration files to use branch: ${GIT_BRANCH}"
 	cat devbox/molecule/config/pyproject.toml
 
