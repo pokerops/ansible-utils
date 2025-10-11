@@ -21,7 +21,35 @@ jobs:
       - name: Run make ${{matrix.target}}
         uses: ./
         with:
+          checkout: false
           run: "make ${{matrix.target}}"
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v5
+
+      - name: Run make test
+        run: make test GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+
+      - name: Run make requirements
+        uses: ./
+        with:
+          checkout: false
+          run: "make requirements"
+          path: tests/collection
+
+      - name: Run make reset
+        run: make reset
+
+      - name: Run make build
+        uses: ./
+        with:
+          checkout: false
+          install: false
+          run: "make install build"
+          path: tests/collection
 
   devbox:
     runs-on: ubuntu-latest
@@ -30,19 +58,19 @@ jobs:
         target:
           - lint
           - requirements
-          - build
           - test
           - init
-    env:
-      GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
+      - name: Run make test
+        run: make test GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+
       - name: Run make ${{matrix.target}}
         uses: ./
         with:
-          pre: "make test"
+          checkout: false
           run: "make install ${{matrix.target}}"
           path: tests/collection
 
@@ -52,8 +80,12 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make ${{matrix.target}}
+      - name: Run make test
+        run: make test GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+
+      - name: Run make check_version
         uses: ./
         with:
+          checkout: false
           run: "make install check_version BASE_SHA=${{ github.event.pull_request.base.sha }} HEAD_SHA=${{ github.event.pull_request.head.sha }}"
           path: tests/collection
