@@ -43,7 +43,7 @@ jobs:
       - name: Run make reset
         run: make reset
 
-      - name: Run make ${{matrix.target}}
+      - name: Run make build
         uses: ./
         with:
           checkout: false
@@ -83,7 +83,7 @@ jobs:
       - name: Run make test
         run: make test GIT_BRANCH=${{ github.head_ref || github.ref_name }}
 
-      - name: Run make ${{matrix.target}}
+      - name: Run make check_version
         uses: ./
         with:
           checkout: false
