@@ -58,11 +58,11 @@ requirements: clean sync
 
 build: requirements
 	@if [ -f "${GALAXY_FILE}" ]; then \
-		${UV} build; \
-		git status --porcelain | wc -l | grep -q '^0$$' || (echo "Uncommitted build detected, please run build stage and commit changes" && exit 1); \
+		ansible-galaxy collection build --force .; \
 	else \
 		echo "No ${GALAXY_FILE} found, skipping build"; \
 	fi
+	${UV} build
 
 update:
 	${UV} update
