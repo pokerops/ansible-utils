@@ -57,9 +57,9 @@ requirements: clean sync
 	@find ./ -name "*.ymle*" -delete
 
 build: requirements
-	if [ -f "${GALAXY_FILE}" ]; then \
+	@if [ -f "${GALAXY_FILE}" ]; then \
 		${UV} build; \
-		@git status --porcelain | wc -l | grep -q '^0$$' || (echo "Uncommitted build detected, please run build stage and commit changes" && exit 1); \
+		git status --porcelain | wc -l | grep -q '^0$$' || (echo "Uncommitted build detected, please run build stage and commit changes" && exit 1); \
 	else \
 		echo "No ${GALAXY_FILE} found, skipping build"; \
 	fi
