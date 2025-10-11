@@ -39,3 +39,12 @@ jobs:
           pre: "make test"
           run: "make install ${{matrix.target}}"
           path: tests/collection
+
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run make ${{matrix.target}}
+        uses: pokerops/ansible-utils@master
+        with:
+          run: "make install check_version BASE_SHA=${{ github.event.pull_request.base.sha }} HEAD_SHA=${{ github.event.pull_request.head.sha }}"
+          path: tests/collection
