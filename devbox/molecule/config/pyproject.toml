@@ -7,7 +7,7 @@ dependencies = []
 
 [dependency-groups]
 dev = [
-  "pokerops-ansible-utils@git+https://github.com/pokerops/ansible-utils@master",
+  "pokerops-ansible-utils@git+https://github.com/pokerops/ansible-utils@action",
 ]
 
 [tool.pyright]

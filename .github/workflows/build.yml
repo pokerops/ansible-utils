@@ -11,7 +11,16 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     steps:
+      - name: Install requirements
+        uses: pokerops/ansible-utils@master
+        with:
+          pre: make test
+          run: make requirements
+
       - name: Build collection
         uses: pokerops/ansible-utils@master
         with:
+          pre: make reset
           run: make build
+          init: false
+          checkout: false
