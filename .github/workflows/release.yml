@@ -10,16 +10,10 @@ jobs:
   release:
     name: release
     runs-on: ubuntu-latest
+    env:
+      GALAXY_API_KEY: "${{ secrets.GALAXY_API_KEY }}"
     steps:
-      - name: Check out the codebase.
-        uses: actions/checkout@v4
-
-      - name: Install devbox
-        uses: jetify-com/devbox-install-action@v0.13.0
+      - name: Set up repository
+        uses: pokerops/ansible-utils@master
         with:
-          enable-cache: true
-
-      - name: Release collection
-        run: devbox run make publish
-        env:
-          GALAXY_API_KEY: "${{ secrets.GALAXY_API_KEY }}"
+          run: "make publish"

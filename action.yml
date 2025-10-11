@@ -1,0 +1,37 @@
+---
+name: devbox
+description: Execute a devbox command in the specified path
+inputs:
+  path:
+    description: "devbox path"
+    required: false
+    default: "./"
+  pre:
+    description: "prepare command to run"
+    required: false
+    default: "echo 'No prepare command specified'"
+  run:
+    description: "devbox command to run"
+    required: true
+    default: "make test"
+runs:
+  using: "composite"
+  steps:
+    - name: Check out the codebase
+      uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+
+    - name: Prepare environment
+      run: ${{ inputs.pre }}
+      shell: bash
+
+    - name: Install devbox
+      uses: jetify-com/devbox-install-action@v0.13.0
+      with:
+        enable-cache: true
+        project-path: ${{ inputs.path }}
+
+    - name: Run devbox command
+      run: devbox run -- ${{ inputs.run }}
+      shell: bash
