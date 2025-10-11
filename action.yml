@@ -9,11 +9,19 @@ inputs:
   pre:
     description: "prepare command to run"
     required: false
-    default: "echo 'No prepare command specified'"
+    default: ""
   run:
     description: "devbox command to run"
-    required: true
-    default: "make test"
+    required: false
+    default: "true"
+  checkout:
+    description: "Checkout the codebase"
+    required: false
+    default: "true"
+  install:
+    description: "initialize devbox if not already initialized"
+    required: false
+    default: "false"
 runs:
   using: "composite"
   steps:
@@ -21,16 +29,19 @@ runs:
       uses: actions/checkout@v5
       with:
         fetch-depth: 0
+      if: ${{ inputs.checkout == 'true' }}
 
     - name: Prepare environment
       run: ${{ inputs.pre }}
       shell: bash
+      if: ${{ inputs.pre != '' }}
 
     - name: Install devbox
       uses: jetify-com/devbox-install-action@v0.13.0
       with:
         enable-cache: true
         project-path: ${{ inputs.path }}
+      if: ${{ inputs.init == 'true' }}
 
     - name: Run devbox command
       run: devbox run -- ${{ inputs.run }}

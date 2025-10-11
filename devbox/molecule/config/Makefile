@@ -56,13 +56,15 @@ requirements: clean sync
 	fi
 	@find ./ -name "*.ymle*" -delete
 
-build: requirements
+build:
+	@git status --porcelain | wc -l | grep -q '^0$$' || (echo "Uncommitted build detected, please run build stage and commit changes" && exit 1); \
 	@if [ -f "${GALAXY_FILE}" ]; then \
 		ansible-galaxy collection build --force .; \
 	else \
-		echo "No ${GALAXY_FILE} found, skipping build"; \
+		echo "No ${GALAXY_FILE} found, skipping ansible build"; \
 	fi
 	${UV} build
+	fi
 
 update:
 	${UV} update
