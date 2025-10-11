@@ -2,19 +2,24 @@
 
 UV := $(shell if [ -f pyproject.toml ]; then echo uv; else echo "uv --directory {{.Virtenv}}"; fi)
 MOLECULE_SCENARIO ?= default
-MOLECULE_REVISION ?= $$(git rev-parse --abbrev-ref HEAD)
 MOLECULE_LOGDIR ?= /tmp/logs
 UBUNTU_RELEASE ?= noble
 UBUNTU_KVM_IMAGE = https://cloud-images.ubuntu.com/${UBUNTU_RELEASE}/current/${UBUNTU_RELEASE}-server-cloudimg-amd64.img
 MOLECULE_KVM_IMAGE ?= $(UBUNTU_KVM_IMAGE)
 GALAXY_API_KEY ?=
-GALAXY_FILE = galaxy.yml
+GALAXY_FILE = ./galaxy.yml
 META_FILE = meta/main.yml
 REQUIREMENTS = requirements.yml
 ROLE_DIR = roles
 ROLE_FILE = roles.yml
 
+BASE_SHA ?= $(shell git rev-parse master)
+HEAD_SHA ?= $(shell git rev-parse HEAD)
+BASE_VERSION = $(shell if [ -f ${GALAXY_FILE} ]; then git show $(BASE_SHA):${GALAXY_FILE} | yq -r '.version // ""'; else echo ""; fi)
+HEAD_VERSION = $(shell if [ -f ${GALAXY_FILE} ]; then git show $(HEAD_SHA):${GALAXY_FILE} | yq -r '.version // ""'; else echo ""; fi)
+
 LOGIN_ARGS ?=
+VERSION_CHECK_ARGS ?=
 
 init overwrite:
 	@mkdir -p .github/workflows
@@ -55,6 +60,8 @@ build: requirements
 	if [ -f "${GALAXY_FILE}" ]; then \
 		${UV} build; \
 		@git status --porcelain | wc -l | grep -q '^0$$' || (echo "Uncommitted build detected, please run build stage and commit changes" && exit 1); \
+	else
+		echo "No ${GALAXY_FILE} found, skipping build"; \
 	fi
 
 update:
@@ -67,7 +74,6 @@ endif
 
 test dependency create prepare converge idempotence side-effect verify destroy cleanup reset list login:
 		find .venv -type d -name ansible_collections | xargs -r -- rm -r
-		MOLECULE_REVISION=${MOLECULE_REVISION} \
 		MOLECULE_KVM_IMAGE=${MOLECULE_KVM_IMAGE} \
 		MOLECULE_LOGDIR=${MOLECULE_LOGDIR} \
 		molecule $@ -s ${MOLECULE_SCENARIO} ${LOGIN_ARGS};
@@ -90,3 +96,32 @@ publish: build
 			ansible-galaxy collection publish --api-key ${GALAXY_API_KEY} \
 				"$${COLLECTION_NAMESPACE}-$${COLLECTION_NAME}-$${COLLECTION_VERSION}.tar.gz"
 	fi
+
+version-check:
+	@echo "Running version check for ${GALAXY_FILE}..."
+	@echo "BASE SHA: ${BASE_SHA}"
+	@echo "HEAD SHA: ${HEAD_SHA}"
+	@echo "BASE VERSION: ${BASE_VERSION}"
+	@echo "HEAD VERSION: ${HEAD_VERSION}"
+	@# Validate galaxy versions
+	@if [[ -z "$(HEAD_VERSION)" || -z "$(BASE_VERSION)" ]]; then \
+		echo "Version is missing in galaxy.yml"; \
+		exit 1; \
+	fi
+	@# Validate semver format
+	@if ! echo "$(HEAD_VERSION)" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$$'; then \
+		echo "$(HEAD_VERSION) does not follow standard semver format (X.Y.Z)"; \
+		exit 1; \
+	fi
+	@# Check version is updated
+	@if [[ "$(BASE_VERSION)" = "$(HEAD_VERSION)" ]]; then \
+		echo "Version has not been updated in galaxy.yml (still $(BASE_VERSION))"; \
+		exit 1; \
+	fi
+	@# Verify version update sequence
+	@LOWER_VERSION=$(printf '%s\n' "$BASE_VERSION" "$HEAD_VERSION" | sort -V | head -n1); \
+	if [[ "$(LOWER_VERSION)" = "$(HEAD_VERSION)" ]]; then \
+		echo "New version ($(HEAD_VERSION)) must be greater than base version ($(BASE_VERSION))"; \
+		exit 1; \
+	fi
+	@echo "Version updated from $(BASE_VERSION) to $(HEAD_VERSION)"

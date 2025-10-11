@@ -1,6 +1,6 @@
 ---
 name: build
-description: Collection build workflow
+description: Build workflow
 on:
   workflow_call:
 concurrency:
@@ -11,19 +11,7 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the codebase.
-        uses: actions/checkout@v4
-
-      - name: Install devbox
-        uses: jetify-com/devbox-install-action@v0.13.0
-        with:
-          enable-cache: true
-
       - name: Build collection
-        run: |
-          if [ -f galaxy.yml ]; then
-            devbox run make build
-          else
-            echo "galaxy.yml not found, skipping build."
-            exit 0
-          fi
+        uses: pokerops/ansible-utils@master
+        with:
+          run: make build
