@@ -34,4 +34,5 @@ runs:
 
     - name: Run devbox command
       run: devbox run -- ${{ inputs.run }}
+      working-directory: ${{ inputs.path }}
       shell: bash
