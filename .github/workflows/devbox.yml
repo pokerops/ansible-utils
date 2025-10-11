@@ -16,7 +16,7 @@ jobs:
           - upgrade
     steps:
       - name: Run make ${{matrix.target}}
-        uses: ../../
+        uses: pokerops/ansible-utils@${{ github.sha }}
         with:
           run: "make ${{matrix.target}}"
 
@@ -34,7 +34,7 @@ jobs:
       GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
       - name: Run make ${{matrix.target}}
-        uses: ../../
+        uses: pokerops/ansible-utils@${{ github.sha }}
         with:
           pre: "make test"
           run: "make install ${{matrix.target}}"
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run make ${{matrix.target}}
-        uses: ../../
+        uses: pokerops/ansible-utils@${{ github.sha }}
         with:
           run: "make install check_version BASE_SHA=${{ github.event.pull_request.base.sha }} HEAD_SHA=${{ github.event.pull_request.head.sha }}"
           path: tests/collection
