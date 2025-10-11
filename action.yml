@@ -3,15 +3,15 @@ name: devbox
 description: Execute a devbox command in the specified path
 inputs:
   path:
-    description: "devbox path"
+    description: "Devbox path"
     required: false
     default: "./"
   pre:
-    description: "prepare command to run"
+    description: "Prepare command to run"
     required: false
     default: ""
   run:
-    description: "devbox command to run"
+    description: "Devbox command to run"
     required: false
     default: "true"
   checkout:
@@ -19,9 +19,9 @@ inputs:
     required: false
     default: "true"
   install:
-    description: "initialize devbox if not already initialized"
+    description: "Install Devbox"
     required: false
-    default: "false"
+    default: "true"
 runs:
   using: "composite"
   steps:
@@ -41,7 +41,7 @@ runs:
       with:
         enable-cache: true
         project-path: ${{ inputs.path }}
-      if: ${{ inputs.init == 'true' }}
+      if: ${{ inputs.install == 'true' }}
 
     - name: Run devbox command
       run: devbox run -- ${{ inputs.run }}
