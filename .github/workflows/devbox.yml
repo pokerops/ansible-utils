@@ -8,7 +8,6 @@ concurrency:
   cancel-in-progress: true
 jobs:
   make:
-    needs: checkout
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -25,7 +24,6 @@ jobs:
           run: "make ${{matrix.target}}"
 
   devbox:
-    needs: checkout
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -49,7 +47,6 @@ jobs:
           path: tests/collection
 
   version:
-    needs: checkout
     runs-on: ubuntu-latest
     steps:
       - name: Check out the codebase
