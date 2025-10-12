@@ -1,5 +1,6 @@
 .PHONY: all ${MAKECMDGOALS}
 
+PROJECT_ROOT := $(shell git rev-parse --show-toplevel)
 UV := $(shell if [ -f pyproject.toml ]; then echo uv; else echo "uv --directory {{.Virtenv}}"; fi)
 MOLECULE_SCENARIO ?= default
 MOLECULE_LOGDIR ?= /tmp/logs
@@ -7,7 +8,9 @@ UBUNTU_RELEASE ?= noble
 UBUNTU_KVM_IMAGE = https://cloud-images.ubuntu.com/${UBUNTU_RELEASE}/current/${UBUNTU_RELEASE}-server-cloudimg-amd64.img
 MOLECULE_KVM_IMAGE ?= $(UBUNTU_KVM_IMAGE)
 GALAXY_API_KEY ?=
-GALAXY_FILE = ./galaxy.yml
+GALAXY_FILE = galaxy.yml
+GALAXY_ROOT ?= $(shell pwd | sed "s|$(PROJECT_ROOT)/||")
+GALAXY_PATH = $(shell echo $(GALAXY_ROOT)/$(GALAXY_FILE) | sed 's|^\./||')
 META_FILE = meta/main.yml
 REQUIREMENTS = requirements.yml
 ROLE_DIR = roles
@@ -15,8 +18,8 @@ ROLE_FILE = roles.yml
 
 BASE_SHA ?= $(shell git rev-parse master)
 HEAD_SHA ?= $(shell git rev-parse HEAD)
-BASE_VERSION = $(shell if [ -f ${GALAXY_FILE} ]; then git show $(BASE_SHA):${GALAXY_FILE} | yq -r '.version // ""'; else echo ""; fi)
-HEAD_VERSION = $(shell if [ -f ${GALAXY_FILE} ]; then git show $(HEAD_SHA):${GALAXY_FILE} | yq -r '.version // ""'; else echo ""; fi)
+BASE_VERSION = $(shell if [ -f $(GALAXY_FILE) ]; then git show $(BASE_SHA):$(GALAXY_PATH) | yq -r '.version // ""'; else echo ""; fi)
+HEAD_VERSION = $(shell if [ -f $(GALAXY_FILE) ]; then git show $(HEAD_SHA):$(GALAXY_PATH) | yq -r '.version // ""'; else echo ""; fi)
 
 LOGIN_ARGS ?=
 VERSION_CHECK_ARGS ?=
@@ -100,6 +103,7 @@ publish: build
 
 version-check:
 	@echo "Running version check for ${GALAXY_FILE}..."
+	@echo "GALAXY_YML: $(GALAXY_ROOT)/${GALAXY_FILE}"
 	@echo "BASE SHA: ${BASE_SHA}"
 	@echo "HEAD SHA: ${HEAD_SHA}"
 	@echo "BASE VERSION: ${BASE_VERSION}"

@@ -138,7 +138,8 @@ jobs:
           path: tests/collection
           run: |
             make install version-check \
-              GALAXY_FILE=tests/collection/galaxy.yml GALAXY_HEAD=tests/collection/galaxy.yml \
+              GALAXY_ROOT=tests/collection/galaxy.yml \
+              GALAXY_HEAD=tests/collection/galaxy.yml \
               BASE_SHA=3609fc62d3af0c1ba8cbca940abf28e2e82a6f21 \
               HEAD_SHA=${{ github.event.pull_request.head.sha }}
         continue-on-error: true
