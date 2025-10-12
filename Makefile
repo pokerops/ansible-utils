@@ -74,9 +74,14 @@ configure: reset
 	# Update all workflow config files to use current branch instead of @master
 	@sed -i "s/\(pokerops\/ansible-utils\)@[^\"]*/\1@${GIT_BRANCH}/g" devbox/molecule/config/pyproject.toml
 	@TEMP=$$(mktemp); \
-		echo "include .devbox/virtenv/molecule/Makefile" >> $$TEMP; \
-		echo "" >> $$TEMP; \
-		grep -v '^include .devbox/virtenv/molecule/Makefile$$' Makefile >> $$TEMP || true; \
+		DEVBOX_MAKEFILE=".devbox/molecule/Makefile"; \
+		if [ -f $${DEVBOX_MAKEFILE} ]; then \
+			echo "include $${DEVBOK_MAKEFILE}" >> $$TEMP; \
+			echo "" >> $$TEMP; \
+		else \
+			echo "# No $$DEVBOX_MAKEFILE found" >> $$TEMP; \
+		fi; \
+		grep -v '^include $${DEVBOX_MAKEFILE}$$' Makefile >> $$TEMP || true; \
 		mv $$TEMP Makefile
 
 reset:
