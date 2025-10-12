@@ -91,7 +91,7 @@ jobs:
           checkout: false
           run: |
             make install version-check \
-              GALAXY_ROOT=tests/collection \
+              GALAXY_FILE=tests/collection/galaxy.yml \
               BASE_SHA=${{ github.event.pull_request.base.sha }} \
               HEAD_SHA=${{ github.event.pull_request.head.sha }}
 
@@ -112,7 +112,7 @@ jobs:
           checkout: false
           run: |
             make install version-check \
-              GALAXY_ROOT=tests/collection \
+              GALAXY_FILE=tests/collection/galaxy.yml \
               BASE_SHA=${{ github.event.pull_request.head.sha }} \
               HEAD_SHA=${{ github.event.pull_request.head.sha }}
         continue-on-error: true
@@ -141,7 +141,7 @@ jobs:
           checkout: false
           run: |
             make install version-check \
-              GALAXY_ROOT=tests/collection \
+              GALAXY_FILE=tests/collection/galaxy.yml \
               BASE_SHA=3609fc62d3af0c1ba8cbca940abf28e2e82a6f21 \
               HEAD_SHA=${{ github.event.pull_request.head.sha }}
         continue-on-error: true
