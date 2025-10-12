@@ -70,11 +70,16 @@ lock: ## Regenerate the lock file
 update: update_deps lock
 upgrade: upgrade_deps lock
 
-test:
+configure: reset
 	# Update all workflow config files to use current branch instead of @master
-	sed -i "s/\(pokerops\/ansible-utils\)@[^\"]*/\1@${GIT_BRANCH}/g" devbox/molecule/config/pyproject.toml
-	echo "Updated plugin configuration files to use branch: ${GIT_BRANCH}"
-	cat devbox/molecule/config/pyproject.toml
+	@sed -i "s/\(pokerops\/ansible-utils\)@[^\"]*/\1@${GIT_BRANCH}/g" devbox/molecule/config/pyproject.toml
+	@TEMP=$$(mktemp); \
+		echo "include .devbox/virtenv/molecule/Makefile" >> $$TEMP; \
+		echo "" > $$TEMP; \
+		grep -v '^include .devbox/virtenv/molecule/Makefile$$' Makefile > $$TEMP || true;
 
 reset:
-	git checkout -- devbox/molecule/config/pyproject.toml
+	# Revert changes to workflow config files and Makefile
+	@git checkout -- devbox/molecule/config/pyproject.toml
+	@git checkout -- .gitignore
+	@sed -i '/^include .devbox\/virtenv\/molecule\/Makefile$$/d' Makefile || true
