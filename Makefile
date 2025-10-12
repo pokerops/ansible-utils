@@ -84,7 +84,7 @@ configure: reset
 		grep -v '^include $${DEVBOX_MAKEFILE}$$' Makefile >> $$TEMP || true; \
 		mv $$TEMP Makefile
 
-reset:
+checkout:
 	@git checkout -- devbox/molecule/config/pyproject.toml
 	@git checkout -- .gitignore
 	@git checkout -- Makefile

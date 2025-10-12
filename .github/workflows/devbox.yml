@@ -40,8 +40,8 @@ jobs:
           run: "make requirements"
           path: tests/collection
 
-      - name: Run make reset
-        run: make reset
+      - name: Run make checkout
+        run: make checkout
 
       - name: Run make build
         uses: ./
