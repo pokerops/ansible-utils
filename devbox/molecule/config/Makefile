@@ -17,6 +17,7 @@ BASE_SHA ?= $(shell git rev-parse master)
 HEAD_SHA ?= $(shell git rev-parse HEAD)
 BASE_VERSION = $(shell if [ -f $(GALAXY_FILE) ]; then git show $(BASE_SHA):$(GALAXY_FILE) | yq -r '.version // ""'; else echo ""; fi)
 HEAD_VERSION = $(shell if [ -f $(GALAXY_FILE) ]; then git show $(HEAD_SHA):$(GALAXY_FILE) | yq -r '.version // ""'; else echo ""; fi)
+MIN_VERSION = $(shell printf '%s\n' "$(BASE_VERSION)" "$(HEAD_VERSION)" | sort -V | head -n1)
 
 LOGIN_ARGS ?=
 VERSION_CHECK_ARGS ?=
@@ -120,10 +121,8 @@ version-check:
 		exit 1; \
 	fi
 	@# Verify version update sequence
-	@LOWER_VERSION=$$((echo "$(BASE_VERSION)"; echo "$(HEAD_VERSION)") | sort -V | head -n1); \
-	echo "Lower version is $${LOWER_VERSION}"; \
-	echo "Head version is $(HEAD_VERSION)"; \
-	if [ "$${LOWER_VERSION}" = "$(HEAD_VERSION)" ]; then \
+	@echo "Min version is $(MIN_VERSION)";
+	@if [ "$(MIN_VERSION)" = "$(HEAD_VERSION)" ]; then \
 		echo "New version ($(HEAD_VERSION)) must be greater than base version ($(BASE_VERSION))"; \
 		exit 1; \
 	fi
