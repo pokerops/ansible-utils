@@ -7,8 +7,7 @@ UBUNTU_RELEASE ?= noble
 UBUNTU_KVM_IMAGE = https://cloud-images.ubuntu.com/${UBUNTU_RELEASE}/current/${UBUNTU_RELEASE}-server-cloudimg-amd64.img
 MOLECULE_KVM_IMAGE ?= $(UBUNTU_KVM_IMAGE)
 GALAXY_API_KEY ?=
-GALAXY_BASE = galaxy.yml
-GALAXY_FILE = ./$(GALAXY_BASE)
+GALAXY_FILE = ./galaxy.yml
 META_FILE = meta/main.yml
 REQUIREMENTS = requirements.yml
 ROLE_DIR = roles
@@ -16,8 +15,8 @@ ROLE_FILE = roles.yml
 
 BASE_SHA ?= $(shell git rev-parse master)
 HEAD_SHA ?= $(shell git rev-parse HEAD)
-BASE_VERSION = $(shell if [ -f ${GALAXY_FILE} ]; then git show $(BASE_SHA):${GALAXY_BASE} | yq -r '.version // ""'; else echo ""; fi)
-HEAD_VERSION = $(shell if [ -f ${GALAXY_FILE} ]; then git show $(HEAD_SHA):${GALAXY_BASE} | yq -r '.version // ""'; else echo ""; fi)
+BASE_VERSION = $(shell if [ -f ${GALAXY_FILE} ]; then git show $(BASE_SHA):${GALAXY_FILE} | yq -r '.version // ""'; else echo ""; fi)
+HEAD_VERSION = $(shell if [ -f ${GALAXY_FILE} ]; then git show $(HEAD_SHA):${GALAXY_FILE} | yq -r '.version // ""'; else echo ""; fi)
 
 LOGIN_ARGS ?=
 VERSION_CHECK_ARGS ?=
