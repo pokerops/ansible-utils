@@ -120,8 +120,10 @@ version-check:
 		exit 1; \
 	fi
 	@# Verify version update sequence
-	@LOWER_VERSION=$(printf '%s\n' "$BASE_VERSION" "$HEAD_VERSION" | sort -V | head -n1); \
-	if [ "$(LOWER_VERSION)" = "$(HEAD_VERSION)" ]; then \
+	@LOWER_VERSION=$$((echo "$(BASE_VERSION)"; echo "$(HEAD_VERSION)") | sort -V | head -n1); \
+	echo "Lower version is $${LOWER_VERSION}"; \
+	echo "Head version is $(HEAD_VERSION)"; \
+	if [ "$${LOWER_VERSION}" = "$(HEAD_VERSION)" ]; then \
 		echo "New version ($(HEAD_VERSION)) must be greater than base version ($(BASE_VERSION))"; \
 		exit 1; \
 	fi
