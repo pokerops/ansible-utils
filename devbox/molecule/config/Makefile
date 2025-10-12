@@ -17,6 +17,7 @@ BASE_SHA ?= $(shell git rev-parse master)
 HEAD_SHA ?= $(shell git rev-parse HEAD)
 BASE_VERSION = $(shell if [ -f $(GALAXY_FILE) ]; then git show $(BASE_SHA):$(GALAXY_FILE) | yq -r '.version // ""'; else echo ""; fi)
 HEAD_VERSION = $(shell if [ -f $(GALAXY_FILE) ]; then git show $(HEAD_SHA):$(GALAXY_FILE) | yq -r '.version // ""'; else echo ""; fi)
+MIN_VERSION = $(shell printf '%s\n' "$(BASE_VERSION)" "$(HEAD_VERSION)" | sort -V | head -n1)
 
 LOGIN_ARGS ?=
 VERSION_CHECK_ARGS ?=
@@ -105,7 +106,7 @@ version-check:
 	@echo "BASE VERSION: ${BASE_VERSION}"
 	@echo "HEAD VERSION: ${HEAD_VERSION}"
 	@# Validate galaxy versions
-	@if [[ -z "$(HEAD_VERSION)" || -z "$(BASE_VERSION)" ]]; then \
+	@if [ -z "$(HEAD_VERSION)" ] || [ -z "$(BASE_VERSION)" ]; then \
 		echo "Version is missing in ${GALAXY_FILE}"; \
 		exit 1; \
 	fi
@@ -115,13 +116,13 @@ version-check:
 		exit 1; \
 	fi
 	@# Check version is updated
-	@if [[ "$(BASE_VERSION)" = "$(HEAD_VERSION)" ]]; then \
+	@if [ "$(BASE_VERSION)" = "$(HEAD_VERSION)" ]; then \
 		echo "Version has not been updated in ${GALAXY_FILE} (still $(BASE_VERSION))"; \
 		exit 1; \
 	fi
 	@# Verify version update sequence
-	@LOWER_VERSION=$(printf '%s\n' "$BASE_VERSION" "$HEAD_VERSION" | sort -V | head -n1); \
-	if [[ "$(LOWER_VERSION)" = "$(HEAD_VERSION)" ]]; then \
+	@echo "Min version is $(MIN_VERSION)";
+	@if [ "$(MIN_VERSION)" = "$(HEAD_VERSION)" ]; then \
 		echo "New version ($(HEAD_VERSION)) must be greater than base version ($(BASE_VERSION))"; \
 		exit 1; \
 	fi
