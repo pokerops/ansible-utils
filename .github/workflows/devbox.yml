@@ -87,6 +87,7 @@ jobs:
         uses: ./
         with:
           checkout: false
+          path: tests/collection
           run: |
             make install version-check \
               GALAXY_FILE=tests/collection/galaxy.yml GALAXY_HEAD=tests/collection/galaxy.yml \
@@ -106,6 +107,7 @@ jobs:
         uses: ./
         with:
           checkout: false
+          path: tests/collection
           run: |
             make install version-check \
               GALAXY_FILE=tests/collection/galaxy.yml GALAXY_HEAD=tests/collection/galaxy.yml \
@@ -133,6 +135,7 @@ jobs:
         uses: ./
         with:
           checkout: false
+          path: tests/collection
           run: |
             make install version-check \
               GALAXY_FILE=tests/collection/galaxy.yml GALAXY_HEAD=tests/collection/galaxy.yml \
