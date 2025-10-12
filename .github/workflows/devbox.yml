@@ -77,6 +77,9 @@ jobs:
   version-update:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v5
+
       - name: Run make configure
         uses: ./
         with:
@@ -95,6 +98,9 @@ jobs:
   version-unchanged:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v5
+
       - name: Run make configure
         uses: ./
         with:
@@ -121,6 +127,9 @@ jobs:
   version-downgrade:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v5
+
       - name: Run make configure
         uses: ./
         with:
