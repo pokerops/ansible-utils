@@ -75,11 +75,11 @@ configure: reset
 	@sed -i "s/\(pokerops\/ansible-utils\)@[^\"]*/\1@${GIT_BRANCH}/g" devbox/molecule/config/pyproject.toml
 	@TEMP=$$(mktemp); \
 		echo "include .devbox/virtenv/molecule/Makefile" >> $$TEMP; \
-		echo "" > $$TEMP; \
-		grep -v '^include .devbox/virtenv/molecule/Makefile$$' Makefile > $$TEMP || true;
+		echo "" >> $$TEMP; \
+		grep -v '^include .devbox/virtenv/molecule/Makefile$$' Makefile >> $$TEMP || true; \
+		mv $$TEMP Makefile
 
 reset:
-	# Revert changes to workflow config files and Makefile
 	@git checkout -- devbox/molecule/config/pyproject.toml
 	@git checkout -- .gitignore
-	@sed -i '/^include .devbox\/virtenv\/molecule\/Makefile$$/d' Makefile || true
+	@git checkout -- Makefile
