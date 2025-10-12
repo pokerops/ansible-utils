@@ -106,7 +106,7 @@ version-check:
 	@echo "HEAD VERSION: ${HEAD_VERSION}"
 	@# Validate galaxy versions
 	@if [[ -z "$(HEAD_VERSION)" || -z "$(BASE_VERSION)" ]]; then \
-		echo "Version is missing in galaxy.yml"; \
+		echo "Version is missing in ${GALAXY_FILE}"; \
 		exit 1; \
 	fi
 	@# Validate semver format
@@ -116,7 +116,7 @@ version-check:
 	fi
 	@# Check version is updated
 	@if [[ "$(BASE_VERSION)" = "$(HEAD_VERSION)" ]]; then \
-		echo "Version has not been updated in galaxy.yml (still $(BASE_VERSION))"; \
+		echo "Version has not been updated in ${GALAXY_FILE} (still $(BASE_VERSION))"; \
 		exit 1; \
 	fi
 	@# Verify version update sequence

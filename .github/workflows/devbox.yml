@@ -83,9 +83,12 @@ jobs:
       - name: Run make test
         run: make test GIT_BRANCH=${{ github.head_ref || github.ref_name }}
 
-      - name: Run make check_version
+      - name: Run make version-check
         uses: ./
         with:
           checkout: false
-          run: "make install check_version BASE_SHA=${{ github.event.pull_request.base.sha }} HEAD_SHA=${{ github.event.pull_request.head.sha }}"
-          path: tests/collection
+          run: |
+            make install version-check \
+              GALAXY_FILE=tests/collection/galaxy.yml GALAXY_HEAD=tests/collection/galaxy.yml \
+              BASE_SHA=${{ github.event.pull_request.base.sha }} \
+              HEAD_SHA=${{ github.event.pull_request.head.sha }}
