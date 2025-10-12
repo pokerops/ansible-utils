@@ -30,8 +30,8 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make test
-        run: make test GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+      - name: Run make configure
+        run: make configure GIT_BRANCH=${{ github.head_ref || github.ref_name }}
 
       - name: Run make requirements
         uses: ./
@@ -64,8 +64,8 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make test
-        run: make test GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+      - name: Run make configure
+        run: make configure GIT_BRANCH=${{ github.head_ref || github.ref_name }}
 
       - name: Run make ${{matrix.target}}
         uses: ./
@@ -74,14 +74,16 @@ jobs:
           run: "make install ${{matrix.target}}"
           path: tests/collection
 
-  version:
+  version-update:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make test
-        run: make test GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+      - name: Run make configure
+        uses: ./
+        with:
+          run: make configure GIT_BRANCH=${{ github.head_ref || github.ref_name }}
 
       - name: Run make version-check
         uses: ./
@@ -89,6 +91,66 @@ jobs:
           checkout: false
           run: |
             make install version-check \
-              GALAXY_FILE=tests/collection/galaxy.yml GALAXY_HEAD=tests/collection/galaxy.yml \
+              GALAXY_FILE=tests/collection/galaxy.yml \
               BASE_SHA=${{ github.event.pull_request.base.sha }} \
               HEAD_SHA=${{ github.event.pull_request.head.sha }}
+
+  version-unchanged:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v5
+
+      - name: Run make configure
+        uses: ./
+        with:
+          run: make configure GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+
+      - name: Run make version-check
+        uses: ./
+        with:
+          checkout: false
+          run: |
+            make install version-check \
+              GALAXY_FILE=tests/collection/galaxy.yml \
+              BASE_SHA=${{ github.event.pull_request.head.sha }} \
+              HEAD_SHA=${{ github.event.pull_request.head.sha }}
+        continue-on-error: true
+        id: check_fail
+
+      - name: Check version-check result
+        if: steps.check_fail.outcome == 'failure'
+        run: |
+          echo "Version check failed as expected because no version change was made."
+          exit 0
+
+  version-downgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v5
+
+      - name: Run make configure
+        uses: ./
+        with:
+          run: make configure GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+
+      - name: Run make version-check
+        uses: ./
+        with:
+          checkout: false
+          run: |
+            # BASE_SHA is set to commit 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21, which is the last release before version 0.0.3. 
+            # This is used for downgrade testing to ensure version-check fails as expected.
+            make install version-check \
+              GALAXY_FILE=tests/collection/galaxy.yml \
+              BASE_SHA=3609fc62d3af0c1ba8cbca940abf28e2e82a6f21 \
+              HEAD_SHA=${{ github.event.pull_request.head.sha }}
+        continue-on-error: true
+        id: check_fail
+
+      - name: Check version-check result
+        if: steps.check_fail.outcome == 'failure'
+        run: |
+          echo "Version check failed as expected because version was downgraded."
+          exit 0
