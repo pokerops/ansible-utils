@@ -12,7 +12,7 @@
     "xfsprogs@latest"
   ],
   "env": {
-    "VIRTENV": "{{.DevboxRoot}}/molecule",
+    "VIRTENV": "{{.Virtenv}}",
     "PYPROJECT": "{{.Virtenv}}",
     "MAKEFILE": "{{.Virtenv}}/Makefile"
   },
