@@ -135,7 +135,7 @@ publish: build
 		GITHUB_REPO = $$(echo $${GITHUB_REPOSITORY} | cut -d/ -f 2) \
 		echo GITHUB_REPOSITORY=$${GITHUB_REPOSITORY} \
 		echo GITHUB_ORGANIZATION=$${GITHUB_ORGANIZATION} \
-		echo GITHUB_REPOSITORY=$${GITHUB_REPO} \
+		echo GITHUB_REPO=$${GITHUB_REPO} \
 		uv run ansible-galaxy role import \
 			--api-key $${GALAXY_API_KEY} $${GITHUB_ORGANIZATION} $${GITHUB_REPO}
 	fi
