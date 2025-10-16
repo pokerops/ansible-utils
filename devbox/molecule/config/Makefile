@@ -76,9 +76,16 @@ endif
 
 test dependency create prepare converge idempotence side-effect verify destroy cleanup reset list login:
 		find .venv -type d -name ansible_collections | xargs -r -- rm -r
+		if [ -f "${META_FILE}" ]; then \
+			ln -s ../ ${ROLE_DIR}/$$(yq -r '.author' ${META_FILE}).$$(yq -r '.role_name' ${META_FILE}) ; \
+		fi
+		ANSIBLE_ROLES_PATH=./${ROLE_DIR}; \
 		MOLECULE_KVM_IMAGE=${MOLECULE_KVM_IMAGE} \
 		MOLECULE_LOGDIR=${MOLECULE_LOGDIR} \
 		molecule $@ -s ${MOLECULE_SCENARIO} ${LOGIN_ARGS};
+		@if [ -f "${META_FILE}" ]; then \
+			find ${ROLE_DIR} -maxdepth 1 -type l -delete; \
+		fi
 		@if [ "$@" = "destroy" ] || [ "$@" = "cleanup" ] || [ "$@" = "reset" ]; then \
 			$(MAKE) clean; \
 		fi
@@ -97,6 +104,15 @@ publish: build
 		COLLECTION_VERSION=$$(yq -r '.version' ${GALAXY_FILE}) \
 			ansible-galaxy collection publish --api-key ${GALAXY_API_KEY} \
 				"$${COLLECTION_NAMESPACE}-$${COLLECTION_NAME}-$${COLLECTION_VERSION}.tar.gz"
+	else \
+		GITHUB_REPOSITORY ?= $$(git config --get remote.origin.url | cut -d':' -f 2 | cut -d. -f 1) \
+		GITHUB_ORGANIZATION = $$(echo $${GITHUB_REPOSITORY} | cut -d/ -f 1) \
+		GITHUB_REPO = $$(echo $${GITHUB_REPOSITORY} | cut -d/ -f 2) \
+		echo GITHUB_REPOSITORY=$${GITHUB_REPOSITORY} \
+		echo GITHUB_ORGANIZATION=$${GITHUB_ORGANIZATION} \
+		echo GITHUB_REPOSITORY=$${GITHUB_REPO} \
+		uv run ansible-galaxy role import \
+			--api-key $${GALAXY_API_KEY} $${GITHUB_ORGANIZATION} $${GITHUB_REPO}
 	fi
 
 version-check:

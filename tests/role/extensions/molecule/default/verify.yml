@@ -1,0 +1,15 @@
+---
+- name: Verify
+  hosts: localhost
+  tasks:
+    - name: Stat test file
+      stat:
+        path: /tmp/test-role-file
+      register: test_file_stat
+
+    - name: Assert test file was created
+      assert:
+        that:
+          - test_file_stat.stat.exists
+        fail_msg: "Test file was not created"
+        success_msg: "Test file created successfully"

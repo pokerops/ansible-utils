@@ -1,0 +1,6 @@
+---
+- name: Create test file
+  file:
+    path: "{{ test_temp_file }}"
+    state: touch
+    mode: "0644"
