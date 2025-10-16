@@ -24,14 +24,37 @@ VERSION_CHECK_ARGS ?=
 
 init overwrite:
 	@mkdir -p .github/workflows
-	@for action in {{.Virtenv}}/action_*.yml; do \
-		ACTION_NAME=$$(basename $${action}); \
-		ACTION_PATH=".github/workflows/$${ACTION_NAME#action_}"; \
+	echo "Processing common actions"
+	@for action in {{.Virtenv}}/action_all_*.yml; do \
+		ACTION_SOURCE=$$(basename $${action}); \
+		ACTION_PATH=".github/workflows/$${ACTION_SOURCE#action_all_}"; \
 		if [[ "$@" == "overwrite" ]] || [[ ! -f "$${ACTION_PATH}" ]]; then \
-			echo "Installing $${ACTION_NAME} to $${ACTION_PATH}"; \
+			echo "Installing action to $${ACTION_PATH}"; \
 			cp -a $${action} $${ACTION_PATH} || true; \
 		fi \
 	done;
+	@if [ -f $(GALAXY_FILE) ]; then \
+		echo "Processing collection actions"; \
+		for action in {{.Virtenv}}/action_collection_*.yml; do \
+			ACTION_SOURCE=$$(basename $${action}); \
+			ACTION_PATH=".github/workflows/$${ACTION_SOURCE#action_collection_}"; \
+			if [[ "$@" == "overwrite" ]] || [[ ! -f "$${ACTION_PATH}" ]]; then \
+				echo "Installing action to $${ACTION_PATH}"; \
+				cp -a $${action} $${ACTION_PATH} || true; \
+			fi \
+		done; \
+	fi
+	@if [ -f $(META_FILE) ]; then \
+		echo "Processing role actions"; \
+		for action in {{.Virtenv}}/action_role_*.yml; do \
+			ACTION_SOURCE=$$(basename $${action}); \
+			ACTION_PATH=".github/workflows/$${ACTION_SOURCE#action_role_}"; \
+			if [[ "$@" == "overwrite" ]] || [[ ! -f "$${ACTION_PATH}" ]]; then \
+				echo "Installing action to $${ACTION_PATH}"; \
+				cp -a $${action} $${ACTION_PATH} || true; \
+			fi \
+		done; \
+	fi
 
 sync install: init
 	@${UV} sync --no-managed-python
@@ -43,14 +66,14 @@ lint: sync
 	fi
 
 requirements: clean sync
-	@mkdir -p ${ROLE_DIR}
-	@if [ -f "${ROLE_FILE}" ]; then \
+	@mkdir -p $(ROLE_DIR)
+	@if [ -f "$(ROLE_FILE)" ]; then \
 		ansible-galaxy role install \
 			--force --no-deps \
-			--roles-path ${ROLE_DIR} \
-			--role-file ${ROLE_FILE}; \
+			--roles-path $(ROLE_DIR) \
+			--role-file $(ROLE_FILE); \
 	fi
-	@if [ -f "${GALAXY_FILE}" ]; then \
+	@if [ -f "$(GALAXY_FILE)" ]; then \
 		ansible-galaxy collection install \
 			--force-with-deps \
 			.; \
@@ -59,10 +82,10 @@ requirements: clean sync
 
 build:
 	@git status --porcelain | wc -l | grep -q '^0$$' || (echo "Uncommitted build detected, please run build stage and commit changes" && exit 1)
-	@if [ -f "${GALAXY_FILE}" ]; then \
+	@if [ -f "$(GALAXY_FILE)" ]; then \
 		ansible-galaxy collection build --force .; \
 	else \
-		echo "No ${GALAXY_FILE} found, skipping ansible build"; \
+		echo "No $(GALAXY_FILE) found, skipping ansible build"; \
 	fi
 	${UV} build
 
@@ -76,16 +99,18 @@ endif
 
 test dependency create prepare converge idempotence side-effect verify destroy cleanup reset list login:
 		find .venv -type d -name ansible_collections | xargs -r -- rm -r
-		if [ -f "${META_FILE}" ]; then \
-			ln -s ../ ${ROLE_DIR}/$$(yq -r '.author' ${META_FILE}).$$(yq -r '.role_name' ${META_FILE}) ; \
+		if [ -f "$(META_FILE)" ]; then \
+			SCENARIO_DIR="$$(pwd)/molecule/$(MOLECULE_SCENARIO)/"; \
+			if [ -d "$${SCENARIO_DIR}" ]; then \
+			  mkdir -p $${SCENARIO_DIR}/roles; \
+				ROLE_LINK=$${SCENARIO_DIR}/roles/$$(yq -r '.galaxy_info.author' $(META_FILE)).$$(yq -r '.galaxy_info.role_name' $(META_FILE)); \
+				rm -f $${ROLE_LINK} ; \
+				ln -sf $$(pwd) $${ROLE_LINK} ; \
+			fi; \
 		fi
-		ANSIBLE_ROLES_PATH=./${ROLE_DIR}; \
-		MOLECULE_KVM_IMAGE=${MOLECULE_KVM_IMAGE} \
-		MOLECULE_LOGDIR=${MOLECULE_LOGDIR} \
-		molecule $@ -s ${MOLECULE_SCENARIO} ${LOGIN_ARGS};
-		@if [ -f "${META_FILE}" ]; then \
-			find ${ROLE_DIR} -maxdepth 1 -type l -delete; \
-		fi
+		MOLECULE_KVM_IMAGE=$(MOLECULE_KVM_IMAGE) \
+		MOLECULE_LOGDIR=$(MOLECULE_LOGDIR) \
+		molecule $@ -s ${MOLECULE_SCENARIO} $(LOGIN_ARGS);
 		@if [ "$@" = "destroy" ] || [ "$@" = "cleanup" ] || [ "$@" = "reset" ]; then \
 			$(MAKE) clean; \
 		fi
@@ -99,10 +124,10 @@ publish: build
 		exit 1; \
 	fi
 	if [ -f "${GALAXY_FILE}" ]; \
-		COLLECTION_NAMESPACE=$$(yq -r '.namespace' ${GALAXY_FILE}) \
-		COLLECTION_NAME=$$(yq -r '.name' ${GALAXY_FILE}) \
-		COLLECTION_VERSION=$$(yq -r '.version' ${GALAXY_FILE}) \
-			ansible-galaxy collection publish --api-key ${GALAXY_API_KEY} \
+		COLLECTION_NAMESPACE=$$(yq -r '.namespace' $(GALAXY_FILE)) \
+		COLLECTION_NAME=$$(yq -r '.name' $(GALAXY_FILE)) \
+		COLLECTION_VERSION=$$(yq -r '.version' $(GALAXY_FILE)) \
+			ansible-galaxy collection publish --api-key $(GALAXY_API_KEY) \
 				"$${COLLECTION_NAMESPACE}-$${COLLECTION_NAME}-$${COLLECTION_VERSION}.tar.gz"
 	else \
 		GITHUB_REPOSITORY ?= $$(git config --get remote.origin.url | cut -d':' -f 2 | cut -d. -f 1) \

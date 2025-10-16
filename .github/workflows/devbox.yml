@@ -57,7 +57,6 @@ jobs:
       matrix:
         target:
           - lint
-          - requirements
           - test
           - init
     steps:
@@ -80,7 +79,6 @@ jobs:
       matrix:
         target:
           - lint
-          - requirements
           - test
           - init
     steps:
@@ -94,7 +92,7 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: "make install ${{matrix.target}}"
+          run: "make requirements install ${{matrix.target}}"
           path: tests/role
 
   version-update:
