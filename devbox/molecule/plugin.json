@@ -20,10 +20,11 @@
     "{{.Virtenv}}/Makefile": "config/Makefile",
     "{{.Virtenv}}/pyproject.toml": "config/pyproject.toml",
     "{{.Virtenv}}/.yamllint": "config/.yamllint",
-    "{{.Virtenv}}/action_version.yml": "config/version.yml",
-    "{{.Virtenv}}/action_lint.yml": "config/lint.yml",
-    "{{.Virtenv}}/action_build.yml": "config/build.yml",
-    "{{.Virtenv}}/action_release.yml": "config/release.yml"
+    "{{.Virtenv}}/action_all_version.yml": "config/version.yml",
+    "{{.Virtenv}}/action_all_lint.yml": "config/lint.yml",
+    "{{.Virtenv}}/action_all_release.yml": "config/release.yml",
+    "{{.Virtenv}}/action_collection_build.yml": "config/build.yml",
+    "{{.Virtenv}}/action_role_molecule.yml": "config/molecule.yml"
   },
   "shell": {
     "init_hook": [

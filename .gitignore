@@ -7,3 +7,6 @@
 tests/**/.venv/
 tests/collection/.github/
 tests/collection/.ansible/
+tests/role/.github/
+tests/role/.ansible/
+**/molecule/**/roles/

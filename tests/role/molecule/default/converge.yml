@@ -1,0 +1,5 @@
+---
+- name: Apply test role
+  hosts: all
+  roles:
+    - pokerops.test
