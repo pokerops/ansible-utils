@@ -4,7 +4,7 @@
   gather_facts: false
   tasks:
     - name: Create test file
-      file:
+      ansible.builtin.file:
         path: /tmp/test-collection-file
         state: touch
         mode: "0644"
