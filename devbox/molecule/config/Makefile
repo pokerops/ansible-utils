@@ -1,4 +1,9 @@
+export
+
+.EXPORT_ALL_VARIABLES:
 .PHONY: all ${MAKECMDGOALS}
+
+SHELL := /bin/bash
 
 UV := $(shell if [ -f pyproject.toml ]; then echo uv; else echo "uv --directory {{.Virtenv}}"; fi)
 MOLECULE_SCENARIO ?= default
@@ -108,8 +113,6 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 				ln -sf $$(pwd) $${ROLE_LINK} ; \
 			fi; \
 		fi
-		MOLECULE_KVM_IMAGE=$(MOLECULE_KVM_IMAGE) \
-		MOLECULE_LOGDIR=$(MOLECULE_LOGDIR) \
 		molecule $@ -s ${MOLECULE_SCENARIO} $(LOGIN_ARGS);
 		@if [ "$@" = "destroy" ] || [ "$@" = "cleanup" ] || [ "$@" = "reset" ]; then \
 			$(MAKE) clean; \
