@@ -171,7 +171,7 @@ version-check:
 	fi; \
 	# Verify version update sequence
 	echo "Min version is $${MIN_VERSION}"; \
-	@if [ "$${MIN_VERSION}" = "$${HEAD_VERSION}" ]; then \
+	if [ "$${MIN_VERSION}" = "$${HEAD_VERSION}" ]; then \
 		echo "New version ($${HEAD_VERSION}) must be greater than base version ($${BASE_VERSION})"; \
 		exit 1; \
 	fi; \
