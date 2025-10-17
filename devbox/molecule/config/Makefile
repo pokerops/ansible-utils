@@ -127,8 +127,8 @@ publish: build
 			ansible-galaxy collection publish --api-key $(GALAXY_API_KEY) \
 				"$${COLLECTION_NAMESPACE}-$${COLLECTION_NAME}-$${COLLECTION_VERSION}.tar.gz"; \
 	else \
-		GITHUB_REPOSITORY ?= $$(git config --get remote.origin.url | cut -d':' -f 2 | cut -d. -f 1) \
-		GITHUB_ORGANIZATION = $$(echo $${GITHUB_REPOSITORY} | cut -d/ -f 1) \
+		GITHUB_REPOSITORY=$$(git config --get remote.origin.url | cut -d':' -f 2 | cut -d. -f 1) \
+		GITHUB_ORGANIZATION=$$(echo $${GITHUB_REPOSITORY} | cut -d/ -f 1) \
 		GITHUB_REPO = $$(echo $${GITHUB_REPOSITORY} | cut -d/ -f 2) \
 		echo GITHUB_REPOSITORY=$${GITHUB_REPOSITORY} \
 		echo GITHUB_ORGANIZATION=$${GITHUB_ORGANIZATION} \
