@@ -18,12 +18,6 @@ REQUIREMENTS = requirements.yml
 ROLE_DIR = roles
 ROLE_FILE = roles.yml
 
-BASE_SHA ?= $(shell git rev-parse master)
-HEAD_SHA ?= $(shell git rev-parse HEAD)
-BASE_VERSION = $(shell if [ -f $(GALAXY_FILE) ]; then git show $(BASE_SHA):$(GALAXY_FILE) | yq -r '.version // ""'; else echo ""; fi)
-HEAD_VERSION = $(shell if [ -f $(GALAXY_FILE) ]; then git show $(HEAD_SHA):$(GALAXY_FILE) | yq -r '.version // ""'; else echo ""; fi)
-MIN_VERSION = $(shell printf '%s\n' "$(BASE_VERSION)" "$(HEAD_VERSION)" | sort -V | head -n1)
-
 LOGIN_ARGS ?=
 VERSION_CHECK_ARGS ?=
 
@@ -144,30 +138,41 @@ publish: build
 	fi
 
 version-check:
-	@echo "Running version check for ${GALAXY_FILE}..."
-	@echo "BASE SHA: ${BASE_SHA}"
-	@echo "HEAD SHA: ${HEAD_SHA}"
-	@echo "BASE VERSION: ${BASE_VERSION}"
-	@echo "HEAD VERSION: ${HEAD_VERSION}"
-	@# Validate galaxy versions
-	@if [ -z "$(HEAD_VERSION)" ] || [ -z "$(BASE_VERSION)" ]; then \
+	if [ -z "$$(BASE_SHA)" ] || [ -z "$$(HEAD_SHA)" ]; then \
+	  BASE_SHA=$$(git rev-parse master); \
+		HEAD_SHA=$$(git rev-parse HEAD); \
+	fi; \
+	if [ "$${BASE_SHA}" = "$${HEAD_SHA}" ]; then \
+		echo "No changes detected between base ($${BASE_SHA}) and head ($${HEAD_SHA})"; \
+		exit 0; \
+	fi; \
+	BASE_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${BASE_SHA}:$(GALAXY_FILE) | yq -r '.version // ""'; else echo ""; fi); \
+	HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${HEAD_SHA}:$(GALAXY_FILE) | yq -r '.version // ""'; else echo ""; fi); \
+	MIN_VERSION=$$(printf '%s\n' "$${BASE_VERSION}" "$${HEAD_VERSION}" | sort -V | head -n1); \
+	echo "Running version check for ${GALAXY_FILE}..."; \
+	echo "BASE SHA: $${BASE_SHA}"; \
+	echo "HEAD SHA: $${HEAD_SHA}"; \
+	echo "BASE VERSION: $${BASE_VERSION}"; \
+	echo "HEAD VERSION: $${HEAD_VERSION}"; \
+	# Validate galaxy versions \
+	if [ -z "$${HEAD_VERSION}" ] || [ -z "$${BASE_VERSION}" ]; then \
 		echo "Version is missing in ${GALAXY_FILE}"; \
 		exit 1; \
-	fi
-	@# Validate semver format
-	@if ! echo "$(HEAD_VERSION)" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$$'; then \
-		echo "$(HEAD_VERSION) does not follow standard semver format (X.Y.Z)"; \
+	fi; \
+	# Validate semver format \
+	if ! echo "$${HEAD_VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+{-[0-9A-Za-z-]+{\.[0-9A-Za-z-]+}*}?{\+[0-9A-Za-z-]+{\.[0-9A-Za-z-]+}*}?$$'; then \
+		echo "$${HEAD_VERSION} does not follow standard semver format (X.Y.Z)"; \
 		exit 1; \
-	fi
-	@# Check version is updated
-	@if [ "$(BASE_VERSION)" = "$(HEAD_VERSION)" ]; then \
-		echo "Version has not been updated in ${GALAXY_FILE} (still $(BASE_VERSION))"; \
+	fi; \
+	# Check version is updated \
+	if [ "$${BASE_VERSION}" = "$${HEAD_VERSION}" ]; then \
+		echo "Version has not been updated in ${GALAXY_FILE} (still $${BASE_VERSION})"; \
 		exit 1; \
-	fi
-	@# Verify version update sequence
-	@echo "Min version is $(MIN_VERSION)";
-	@if [ "$(MIN_VERSION)" = "$(HEAD_VERSION)" ]; then \
-		echo "New version ($(HEAD_VERSION)) must be greater than base version ($(BASE_VERSION))"; \
+	fi; \
+	# Verify version update sequence
+	echo "Min version is $${MIN_VERSION}"; \
+	@if [ "$${MIN_VERSION}" = "$${HEAD_VERSION}" ]; then \
+		echo "New version ($${HEAD_VERSION}) must be greater than base version ($${BASE_VERSION})"; \
 		exit 1; \
-	fi
-	@echo "Version updated from $(BASE_VERSION) to $(HEAD_VERSION)"
+	fi; \
+	echo "Version updated from $${BASE_VERSION} to $${HEAD_VERSION}"
