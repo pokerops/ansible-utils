@@ -110,11 +110,10 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: |
-            make version-check \
-              GALAXY_FILE=tests/collection/galaxy.yml \
-              BASE_SHA=${{ github.event.pull_request.base.sha }} \
-              HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          run: make version-check GALAXY_FILE=tests/collection/galaxy.yml
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 
   version-unchanged:
     runs-on: ubuntu-latest
@@ -131,11 +130,10 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: |
-            make version-check \
-              GALAXY_FILE=tests/collection/galaxy.yml \
-              BASE_SHA=${{ github.event.pull_request.head.sha }} \
-              HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          run: make version-check GALAXY_FILE=tests/collection/galaxy.yml
+        env:
+          BASE_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         continue-on-error: true
         id: check_fail
 
@@ -156,17 +154,16 @@ jobs:
         with:
           run: make configure GIT_BRANCH=${{ github.head_ref || github.ref_name }}
 
+      # HEAD_SHA is set to commit 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21, which is the last release before version 0.0.3.
+      # This is used for downgrade testing to ensure version-check fails as expected.
       - name: Run make version-check
         uses: ./
         with:
           checkout: false
-          run: |
-            # HEAD_SHA is set to commit 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21, which is the last release before version 0.0.3. 
-            # This is used for downgrade testing to ensure version-check fails as expected.
-            make version-check \
-              GALAXY_FILE=tests/collection/galaxy.yml \
-              BASE_SHA=${{ github.event.pull_request.head.sha }} \
-              HEAD_SHA=3609fc62d3af0c1ba8cbca940abf28e2e82a6f21
+          run: make version-check GALAXY_FILE=tests/collection/galaxy.yml
+        env:
+          BASE_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_SHA: 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21
         continue-on-error: true
         id: check_fail
 

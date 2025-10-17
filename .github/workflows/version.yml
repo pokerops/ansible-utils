@@ -33,4 +33,7 @@ jobs:
       - name: Run make ${{matrix.target}}
         uses: pokerops/ansible-utils@master
         with:
-          run: "make version-check BASE_SHA=${{ github.event.pull_request.base.sha }} HEAD_SHA=${{ github.event.pull_request.head.sha }}"
+          run: "make version-check"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
