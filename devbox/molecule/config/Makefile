@@ -103,8 +103,8 @@ ifeq (login,$(firstword $(MAKECMDGOALS)))
 endif
 
 test dependency create prepare converge idempotence side-effect verify destroy cleanup reset list login:
-		find .venv -type d -name ansible_collections | xargs -r -- rm -r
-		if [ -f "$(META_FILE)" ]; then \
+		@find .venv -type d -name ansible_collections | xargs -r -- rm -r
+		@if [ -f "$(META_FILE)" ]; then \
 			SCENARIO_DIR="$$(pwd)/molecule/$(MOLECULE_SCENARIO)/"; \
 			if [ -d "$${SCENARIO_DIR}" ]; then \
 			  mkdir -p $${SCENARIO_DIR}/roles; \
@@ -122,16 +122,16 @@ clean:
 		rm -rf $${HOME}/.ansible/{collections,roles}
 
 publish: build
-	if [ -z "${GALAXY_API_KEY}" ]; \
+	@if [ -z "${GALAXY_API_KEY}" ]; \
 		then echo "GALAXY_API_KEY is not set"; \
 		exit 1; \
 	fi
-	if [ -f "${GALAXY_FILE}" ]; \
+	@if [ -f "${GALAXY_FILE}" ]; \
 		COLLECTION_NAMESPACE=$$(yq -r '.namespace' $(GALAXY_FILE)) \
 		COLLECTION_NAME=$$(yq -r '.name' $(GALAXY_FILE)) \
 		COLLECTION_VERSION=$$(yq -r '.version' $(GALAXY_FILE)) \
 			ansible-galaxy collection publish --api-key $(GALAXY_API_KEY) \
-				"$${COLLECTION_NAMESPACE}-$${COLLECTION_NAME}-$${COLLECTION_VERSION}.tar.gz"
+				"$${COLLECTION_NAMESPACE}-$${COLLECTION_NAME}-$${COLLECTION_VERSION}.tar.gz"; \
 	else \
 		GITHUB_REPOSITORY ?= $$(git config --get remote.origin.url | cut -d':' -f 2 | cut -d. -f 1) \
 		GITHUB_ORGANIZATION = $$(echo $${GITHUB_REPOSITORY} | cut -d/ -f 1) \
@@ -140,7 +140,7 @@ publish: build
 		echo GITHUB_ORGANIZATION=$${GITHUB_ORGANIZATION} \
 		echo GITHUB_REPO=$${GITHUB_REPO} \
 		uv run ansible-galaxy role import \
-			--api-key $${GALAXY_API_KEY} $${GITHUB_ORGANIZATION} $${GITHUB_REPO}
+			--api-key $${GALAXY_API_KEY} $${GITHUB_ORGANIZATION} $${GITHUB_REPO}; \
 	fi
 
 version-check:
