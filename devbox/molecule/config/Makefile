@@ -160,7 +160,7 @@ version-check:
 		exit 1; \
 	fi; \
 	# Validate semver format \
-	if ! echo "$${HEAD_VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+{-[0-9A-Za-z-]+{\.[0-9A-Za-z-]+}*}?{\+[0-9A-Za-z-]+{\.[0-9A-Za-z-]+}*}?$$'; then \
+	if ! echo "$${HEAD_VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$$'; then \
 		echo "$${HEAD_VERSION} does not follow standard semver format (X.Y.Z)"; \
 		exit 1; \
 	fi; \
