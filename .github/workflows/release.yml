@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GALAXY_API_KEY: "${{ secrets.GALAXY_API_KEY }}"
+      GITHUB_REPOSITORY: "${{ github.repository }}"
     steps:
       - name: Set up repository
         uses: pokerops/ansible-utils@master
