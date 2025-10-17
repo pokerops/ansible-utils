@@ -138,7 +138,7 @@ publish: build
 	fi
 
 version-check:
-	if [ -z "$$(BASE_SHA)" ] || [ -z "$$(HEAD_SHA)" ]; then \
+	if [ -z "$${BASE_SHA}" ] || [ -z "$${HEAD_SHA}" ]; then \
 	  BASE_SHA=$$(git rev-parse master); \
 		HEAD_SHA=$$(git rev-parse HEAD); \
 	fi; \
