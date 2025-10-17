@@ -84,9 +84,12 @@ build:
 	@if [ -f "$(GALAXY_FILE)" ]; then \
 		ansible-galaxy collection build --force .; \
 	else \
-		echo "No $(GALAXY_FILE) found, skipping ansible build"; \
+		echo "No $(GALAXY_FILE) found, skipping ansible collection build"; \
 	fi
-	${UV} build
+	@if [ -f pyproject.toml ]; then \
+		${UV} build; \
+	fi
+
 
 update:
 	${UV} update
@@ -121,18 +124,21 @@ publish: build
 		exit 1; \
 	fi
 	@if [ -f "${GALAXY_FILE}" ]; then \
-		COLLECTION_NAMESPACE=$$(yq -r '.namespace' $(GALAXY_FILE)) \
-		COLLECTION_NAME=$$(yq -r '.name' $(GALAXY_FILE)) \
-		COLLECTION_VERSION=$$(yq -r '.version' $(GALAXY_FILE)) \
-			ansible-galaxy collection publish --api-key $(GALAXY_API_KEY) \
-				"$${COLLECTION_NAMESPACE}-$${COLLECTION_NAME}-$${COLLECTION_VERSION}.tar.gz"; \
+		export COLLECTION_NAMESPACE=$$(yq -r '.namespace' $(GALAXY_FILE)); \
+		export COLLECTION_NAME=$$(yq -r '.name' $(GALAXY_FILE)); \
+		export COLLECTION_VERSION=$$(yq -r '.version' $(GALAXY_FILE)); \
+		echo COLLECTION_NAMESPACE=$${COLLECTION_NAMESPACE}; \
+		echo COLLECTION_NAME=$${COLLECTION_NAME}; \
+		echo COLLECTION_VERSION=$${COLLECTION_VERSION}; \
+		ansible-galaxy collection publish --api-key $${GALAXY_API_KEY} \
+			"$${COLLECTION_NAMESPACE}-$${COLLECTION_NAME}-$${COLLECTION_VERSION}.tar.gz"; \
 	else \
-		GITHUB_REPOSITORY=$$(git config --get remote.origin.url | cut -d':' -f 2 | cut -d. -f 1) \
-		GITHUB_ORGANIZATION=$$(echo $${GITHUB_REPOSITORY} | cut -d/ -f 1) \
-		GITHUB_REPO=$$(echo $${GITHUB_REPOSITORY} | cut -d/ -f 2) \
-		echo GITHUB_REPOSITORY=$${GITHUB_REPOSITORY} \
-		echo GITHUB_ORGANIZATION=$${GITHUB_ORGANIZATION} \
-		echo GITHUB_REPO=$${GITHUB_REPO} \
+		export GITHUB_REPOSITORY=$$(git config --get remote.origin.url | cut -d':' -f 2 | cut -d. -f 1); \
+		export GITHUB_ORGANIZATION=$$(echo $${GITHUB_REPOSITORY} | cut -d/ -f 1); \
+		export GITHUB_REPO=$$(echo $${GITHUB_REPOSITORY} | cut -d/ -f 2); \
+		echo GITHUB_REPOSITORY=$${GITHUB_REPOSITORY}; \
+		echo GITHUB_ORGANIZATION=$${GITHUB_ORGANIZATION}; \
+		echo GITHUB_REPO=$${GITHUB_REPO}; \
 		uv run ansible-galaxy role import \
 			--api-key $${GALAXY_API_KEY} $${GITHUB_ORGANIZATION} $${GITHUB_REPO}; \
 	fi
