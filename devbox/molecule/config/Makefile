@@ -122,11 +122,11 @@ clean:
 		rm -rf $${HOME}/.ansible/{collections,roles}
 
 publish: build
-	@if [ -z "${GALAXY_API_KEY}" ]; \
-		then echo "GALAXY_API_KEY is not set"; \
+	@if [ -z "${GALAXY_API_KEY}" ]; then \
+		echo "GALAXY_API_KEY is not set"; \
 		exit 1; \
 	fi
-	@if [ -f "${GALAXY_FILE}" ]; \
+	@if [ -f "${GALAXY_FILE}" ]; then \
 		COLLECTION_NAMESPACE=$$(yq -r '.namespace' $(GALAXY_FILE)) \
 		COLLECTION_NAME=$$(yq -r '.name' $(GALAXY_FILE)) \
 		COLLECTION_VERSION=$$(yq -r '.version' $(GALAXY_FILE)) \
