@@ -130,7 +130,7 @@ publish: build
 		echo COLLECTION_NAMESPACE=$${COLLECTION_NAMESPACE}; \
 		echo COLLECTION_NAME=$${COLLECTION_NAME}; \
 		echo COLLECTION_VERSION=$${COLLECTION_VERSION}; \
-		ansible-galaxy collection publish --api-key $(GALAXY_API_KEY) \
+		ansible-galaxy collection publish --api-key $${GALAXY_API_KEY} \
 			"$${COLLECTION_NAMESPACE}-$${COLLECTION_NAME}-$${COLLECTION_VERSION}.tar.gz"; \
 	else \
 		export GITHUB_REPOSITORY=$$(git config --get remote.origin.url | cut -d':' -f 2 | cut -d. -f 1); \
