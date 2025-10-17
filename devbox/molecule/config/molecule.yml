@@ -6,5 +6,5 @@ on:
   pull_request:
     branches: ["main", "master"]
 jobs:
-  build:
+  molecule:
     uses: pokerops/ansible-utils/.github/workflows/molecule.yml@master
