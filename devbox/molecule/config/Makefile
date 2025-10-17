@@ -169,7 +169,7 @@ version-check:
 		echo "Version has not been updated in ${GALAXY_FILE} (still $${BASE_VERSION})"; \
 		exit 1; \
 	fi; \
-	# Verify version update sequence
+	# Verify version update sequence \
 	echo "Min version is $${MIN_VERSION}"; \
 	if [ "$${MIN_VERSION}" = "$${HEAD_VERSION}" ]; then \
 		echo "New version ($${HEAD_VERSION}) must be greater than base version ($${BASE_VERSION})"; \
