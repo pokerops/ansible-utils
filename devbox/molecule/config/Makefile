@@ -124,9 +124,9 @@ publish: build
 		exit 1; \
 	fi
 	@if [ -f "${GALAXY_FILE}" ]; then \
-		export COLLECTION_NAMESPACE=$$(yq -r '.namespace' $(GALAXY_FILE)) \
-		export COLLECTION_NAME=$$(yq -r '.name' $(GALAXY_FILE)) \
-		export COLLECTION_VERSION=$$(yq -r '.version' $(GALAXY_FILE)) \
+		export COLLECTION_NAMESPACE=$$(yq -r '.namespace' $(GALAXY_FILE)); \
+		export COLLECTION_NAME=$$(yq -r '.name' $(GALAXY_FILE)); \
+		export COLLECTION_VERSION=$$(yq -r '.version' $(GALAXY_FILE)); \
 		echo COLLECTION_NAMESPACE=$${COLLECTION_NAMESPACE}; \
 		echo COLLECTION_NAME=$${COLLECTION_NAME}; \
 		echo COLLECTION_VERSION=$${COLLECTION_VERSION}; \
