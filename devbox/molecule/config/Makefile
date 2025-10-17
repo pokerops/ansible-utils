@@ -86,7 +86,7 @@ build:
 	else \
 		echo "No $(GALAXY_FILE) found, skipping ansible collection build"; \
 	fi
-	if [ -f pyproject.toml ]; then \
+	@if [ -f pyproject.toml ]; then \
 		${UV} build; \
 	fi
 
