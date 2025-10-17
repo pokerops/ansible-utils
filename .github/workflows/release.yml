@@ -3,6 +3,10 @@ name: release
 description: Release workflow
 on:
   workflow_call:
+    secrets:
+      GALAXY_API_KEY:
+        description: "Galaxy API key"
+        required: true
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
