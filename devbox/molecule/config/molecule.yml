@@ -5,7 +5,7 @@ on:
     branches:
       - master
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: $\{\{ github.workflow \}\}-$\{\{ github.ref \}\}
   cancel-in-progress: true
 jobs:
   molecule:
@@ -23,4 +23,4 @@ jobs:
         env:
           PY_COLORS: "1"
           ANSIBLE_FORCE_COLOR: "1"
-          MOLECULE_SCENARIO: ${{ matrix.scenario }}
+          MOLECULE_SCENARIO: $\{\{ matrix.scenario \}\}
