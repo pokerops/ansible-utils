@@ -18,7 +18,7 @@ REQUIREMENTS = requirements.yml
 ROLE_DIR = roles
 ROLE_FILE = roles.yml
 
-GITHUB_REPOSITORY ?= $(shell git config --get remote.origin.url | cut -d':' -f 2 | cut -d. -f 1)
+GITHUB_REPOSITORY ?= $(shell git config --get remote.origin.url | sed -E 's#(git@|https://|http://)[^/:]+[:/](.+?)(\.git)?$$#\2#')
 GITHUB_ORGANIZATION ?= $(shell echo $(GITHUB_REPOSITORY) | cut -d/ -f 1)
 GITHUB_REPO ?= $(shell echo $(GITHUB_REPOSITORY) | cut -d/ -f 2)
 
