@@ -18,6 +18,10 @@ REQUIREMENTS = requirements.yml
 ROLE_DIR = roles
 ROLE_FILE = roles.yml
 
+GITHUB_REPOSITORY ?= $(shell git config --get remote.origin.url | sed -E 's#(git@|https://|http://)[^/:]+[:/](.+?)(\.git)?$$#\2#')
+GITHUB_ORGANIZATION ?= $(shell echo $(GITHUB_REPOSITORY) | cut -d/ -f 1)
+GITHUB_REPO ?= $(shell echo $(GITHUB_REPOSITORY) | cut -d/ -f 2)
+
 LOGIN_ARGS ?=
 VERSION_CHECK_ARGS ?=
 
@@ -133,14 +137,11 @@ publish: build
 		ansible-galaxy collection publish --api-key $${GALAXY_API_KEY} \
 			"$${COLLECTION_NAMESPACE}-$${COLLECTION_NAME}-$${COLLECTION_VERSION}.tar.gz"; \
 	else \
-		export GITHUB_REPOSITORY=$$(git config --get remote.origin.url | cut -d':' -f 2 | cut -d. -f 1); \
-		export GITHUB_ORGANIZATION=$$(echo $${GITHUB_REPOSITORY} | cut -d/ -f 1); \
-		export GITHUB_REPO=$$(echo $${GITHUB_REPOSITORY} | cut -d/ -f 2); \
-		echo GITHUB_REPOSITORY=$${GITHUB_REPOSITORY}; \
-		echo GITHUB_ORGANIZATION=$${GITHUB_ORGANIZATION}; \
-		echo GITHUB_REPO=$${GITHUB_REPO}; \
+		echo GITHUB_REPOSITORY=$(GITHUB_REPOSITORY); \
+		echo GITHUB_ORGANIZATION=$(GITHUB_ORGANIZATION); \
+		echo GITHUB_REPO=$(GITHUB_REPO); \
 		uv run ansible-galaxy role import \
-			--api-key $${GALAXY_API_KEY} $${GITHUB_ORGANIZATION} $${GITHUB_REPO}; \
+			--api-key $(GALAXY_API_KEY) $(GITHUB_ORGANIZATION) $(GITHUB_REPO); \
 	fi
 
 version-check:
