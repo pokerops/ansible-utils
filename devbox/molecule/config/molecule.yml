@@ -1,10 +1,26 @@
 ---
 name: molecule
-permissions:
-  contents: read
 on:
   pull_request:
-    branches: ["main", "master"]
+    branches:
+      - master
+concurrency:
+  group: {{ "${{ github.workflow }}-${{ github.ref }}" }}
+  cancel-in-progress: true
 jobs:
   molecule:
-    uses: pokerops/ansible-utils/.github/workflows/molecule.yml@master
+    name: molecule
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        scenario:
+          - default
+    steps:
+      - name: Run molecule test
+        uses: pokerops/ansible-utils@master
+        with:
+          run: "make install requirements test"
+        env:
+          PY_COLORS: "1"
+          ANSIBLE_FORCE_COLOR: "1"
+          MOLECULE_SCENARIO: {{ "${{ matrix.scenario }}" }}
