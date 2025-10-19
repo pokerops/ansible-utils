@@ -9,7 +9,8 @@
     "expect@latest",
     "libisoburn@latest",
     "gnupg@latest",
-    "xfsprogs@latest"
+    "xfsprogs@latest",
+    "claude-code@latest"
   ],
   "env": {
     "VIRTENV": "{{.Virtenv}}",
