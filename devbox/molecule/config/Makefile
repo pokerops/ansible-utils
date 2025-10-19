@@ -183,3 +183,6 @@ version-check:
 		exit 1; \
 	fi; \
 	echo "Version updated from $${BASE_VERSION} to $${HEAD_VERSION}"
+
+code:
+	@claude code .
