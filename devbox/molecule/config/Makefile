@@ -61,6 +61,9 @@ init overwrite:
 
 sync install: init
 	@${UV} sync --no-managed-python
+	@if [ -f ${GALAXY_FILE} ]; then \
+		ansible-galaxy collection install --force-with-deps .; \
+	fi
 
 lint: sync
 	@yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
@@ -68,18 +71,13 @@ lint: sync
 		ansible-lint -p . --exclude ".ansible/*"; \
 	fi
 
-requirements: clean sync
+requirements: clean sync install
 	@mkdir -p $(ROLE_DIR)
 	@if [ -f "$(ROLE_FILE)" ]; then \
 		ansible-galaxy role install \
 			--force --no-deps \
 			--roles-path $(ROLE_DIR) \
 			--role-file $(ROLE_FILE); \
-	fi
-	@if [ -f "$(GALAXY_FILE)" ]; then \
-		ansible-galaxy collection install \
-			--force-with-deps \
-			.; \
 	fi
 	@find ./ -name "*.ymle*" -delete
 
