@@ -61,9 +61,11 @@ init overwrite:
 
 sync install: init
 	@${UV} sync --no-managed-python
-	@ansible-galaxy collection install \
-		--force-with-deps \
-		.
+	@if [ -f ${GALAXY_FILE} ]; then \
+		@ansible-galaxy collection install \
+			--force-with-deps \
+			.
+	fi
 
 lint: sync
 	@yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
