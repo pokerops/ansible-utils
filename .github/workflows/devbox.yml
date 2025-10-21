@@ -23,6 +23,7 @@ jobs:
         with:
           checkout: false
           run: "make ${{matrix.target}}"
+          cache: "false"
 
   build:
     runs-on: ubuntu-latest
@@ -39,6 +40,7 @@ jobs:
           checkout: false
           run: "make requirements"
           path: tests/collection
+          cache: "false"
 
       - name: Run make checkout
         run: make checkout
@@ -50,6 +52,7 @@ jobs:
           install: false
           run: "make install build"
           path: tests/collection
+          cache: "false"
 
   collection:
     runs-on: ubuntu-latest
@@ -72,6 +75,7 @@ jobs:
           checkout: false
           run: "make install ${{matrix.target}}"
           path: tests/collection
+          cache: "false"
 
   role:
     runs-on: ubuntu-latest
@@ -94,6 +98,7 @@ jobs:
           checkout: false
           run: "make requirements install ${{matrix.target}}"
           path: tests/role
+          cache: "false"
 
   version-update:
     runs-on: ubuntu-latest
@@ -105,12 +110,14 @@ jobs:
         uses: ./
         with:
           run: make configure GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+          cache: "false"
 
       - name: Run make version-check
         uses: ./
         with:
           checkout: false
           run: make version-check GALAXY_FILE=tests/collection/galaxy.yml
+          cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -125,12 +132,14 @@ jobs:
         uses: ./
         with:
           run: make configure GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+          cache: "false"
 
       - name: Run make version-check
         uses: ./
         with:
           checkout: false
           run: make version-check GALAXY_FILE=tests/collection/galaxy.yml
+          cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -153,6 +162,7 @@ jobs:
         uses: ./
         with:
           run: make configure GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+          cache: "false"
 
       # HEAD_SHA is set to commit 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21, which is the last release before version 0.0.3.
       # This is used for downgrade testing to ensure version-check fails as expected.
@@ -161,6 +171,7 @@ jobs:
         with:
           checkout: false
           run: make version-check GALAXY_FILE=tests/collection/galaxy.yml
+          cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21
