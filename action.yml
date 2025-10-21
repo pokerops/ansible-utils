@@ -13,13 +13,17 @@ inputs:
   run:
     description: "Devbox command to run"
     required: false
-    default: "true"
+    default: "make test"
   checkout:
     description: "Checkout the codebase"
     required: false
     default: "true"
   install:
     description: "Install Devbox"
+    required: false
+    default: "true"
+  cache:
+    description: "Enable caching for Devbox installation"
     required: false
     default: "true"
 runs:
@@ -39,7 +43,7 @@ runs:
     - name: Install devbox
       uses: jetify-com/devbox-install-action@v0.13.0
       with:
-        enable-cache: true
+        enable-cache: ${{ inputs.cache }}
         project-path: ${{ inputs.path }}
       if: ${{ inputs.install == 'true' }}
 

@@ -4,24 +4,24 @@ Reusable GitHub Actions workflows for Ansible collections, featuring devbox-base
 
 ## Overview
 
-This repository provides standardized CI/CD workflows for Ansible collections, including:
+This repository provides standardized CI/CD workflows for Ansible collections and roles, including:
 
-- **Build workflows** - Collection building and validation
+- **Build workflows** - Collection build and validation
 - **Lint workflows** - YAML and Ansible linting
 - **Release workflows** - Automated publishing to Ansible Galaxy
-- **Version workflows** - PR version validation
+- **Version workflows** - Collection version validation
 
 The workflows are designed to be consumed by other repositories via `workflow_call`.
 
 ## Development Environment
 
-This project uses **devbox** for reproducible development environments with **uv** for Python dependency management.
+This project uses [Devbox](https://www.jetify.com/devbox) for reproducible development environments with [UV](https://docs.astral.sh/uv/) for Python dependency management.
 
 ### Quick Start
 
 ```bash
 devbox install           # Install all required packages
-devbox run uv sync       # Sync Python dependencies
+make install             # Install dependencies
 make lint                # Run linting
 make test                # Run molecule tests
 ```
@@ -32,15 +32,17 @@ A minimal test collection is provided in `tests/collection/` to verify the devbo
 
 ```bash
 cd tests/collection/
-devbox shell             # Enter devbox environment
-molecule init            # Initialize molecule testing
-molecule test            # Run full test suite
+devbox shell
+make test
 ```
 
-The test collection includes:
+A minimal role is also available in `tests/role/` for role-specific testing:
 
-- `galaxy.yml` - Collection metadata for `pokerops.test`
-- `playbooks/test.yml` - Simple test playbook that creates and verifies a file
+```bash
+cd tests/role/
+devbox shell
+make test
+```
 
 ## Architecture
 
@@ -56,25 +58,12 @@ The test collection includes:
 - `molecule/` - Molecule testing configuration with Python 3.13, uv, make, and testing tools
 - `plugin.json` - Devbox plugin definition for molecule environments
 
-### Configuration
-
-- `devbox.json` - Main devbox configuration
-- `.ansible-lint.yml` - Ansible-lint rules (skips run-once[task])
-- `actions/.yamllint` - YAML linting with 160 character line length
-
-## Key Dependencies
-
-- **Ansible 11.5.0+** - Core automation framework
-- **Molecule 25.4.0+** - Testing framework for roles/collections
-- **Python 3.13** - Runtime environment via devbox
-- **uv** - Fast Python package manager
-
 ## Usage
 
 Consuming repositories should:
 
 1. Have a `galaxy.yml` file for collection metadata
-2. Reference these workflows in their `.github/workflows/` files
+2. Reference these workflows in their `.github/workflows/` files (`make override` will generate common workflow files)
 3. Set up appropriate secrets for Galaxy publishing (`GALAXY_API_KEY`)
 
 Example workflow reference:
@@ -84,4 +73,3 @@ jobs:
   lint:
     uses: pokerops/ansible-utils/.github/workflows/lint.yml@main
 ```
-

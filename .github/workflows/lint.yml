@@ -14,3 +14,4 @@ jobs:
         uses: pokerops/ansible-utils@master
         with:
           run: "make lint"
+          cache: "false"
