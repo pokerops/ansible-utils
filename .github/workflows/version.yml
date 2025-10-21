@@ -34,6 +34,7 @@ jobs:
         uses: pokerops/ansible-utils@master
         with:
           run: "make version-check"
+          cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
