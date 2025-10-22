@@ -65,13 +65,13 @@ sync install: init
 		ansible-galaxy collection install --force-with-deps .; \
 	fi
 
-lint: sync
+lint: install
 	@yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
 	@if [[ -f "${GALAXY_FILE}" || -f "${META_FILE}" ]]; then \
 		ansible-lint -p . --exclude ".ansible/*"; \
 	fi
 
-requirements: clean sync install
+requirements: clean install
 	@mkdir -p $(ROLE_DIR)
 	@if [ -f $(REQUIREMENTS) ]; then \
 		ansible-galaxy collection install \
@@ -143,7 +143,7 @@ publish: build
 		echo GITHUB_REPOSITORY=$(GITHUB_REPOSITORY); \
 		echo GITHUB_ORGANIZATION=$(GITHUB_ORGANIZATION); \
 		echo GITHUB_REPO=$(GITHUB_REPO); \
-		uv run ansible-galaxy role import \
+		ansible-galaxy role import \
 			--api-key $(GALAXY_API_KEY) $(GITHUB_ORGANIZATION) $(GITHUB_REPO); \
 	fi
 
