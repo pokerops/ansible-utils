@@ -59,7 +59,7 @@ init overwrite:
 		done; \
 	fi
 
-sync install: init
+sync install:
 	@${UV} sync --no-managed-python
 	@if [ -f ${GALAXY_FILE} ]; then \
 		ansible-galaxy collection install --force-with-deps .; \
@@ -96,10 +96,6 @@ build:
 	@if [ -f pyproject.toml ]; then \
 		${UV} build; \
 	fi
-
-
-update:
-	${UV} update
 
 ifeq (login,$(firstword $(MAKECMDGOALS)))
     LOGIN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
