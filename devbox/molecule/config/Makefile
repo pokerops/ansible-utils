@@ -13,6 +13,7 @@ UBUNTU_KVM_IMAGE = https://cloud-images.ubuntu.com/${UBUNTU_RELEASE}/current/${U
 MOLECULE_KVM_IMAGE ?= $(UBUNTU_KVM_IMAGE)
 GALAXY_API_KEY ?=
 GALAXY_FILE = galaxy.yml
+RUNTIME_FILE= meta/runtime.yml
 META_FILE = meta/main.yml
 REQUIREMENTS = requirements.yml
 ROLE_DIR = roles
@@ -31,7 +32,7 @@ init overwrite:
 	@for action in {{.Virtenv}}/action_all_*.yml; do \
 		ACTION_SOURCE=$$(basename $${action}); \
 		ACTION_PATH=".github/workflows/$${ACTION_SOURCE#action_all_}"; \
-		if [[ "$@" == "overwrite" ]] || [[ ! -f "$${ACTION_PATH}" ]]; then \
+		if [ "$@" == "overwrite" ] || [ ! -f "$${ACTION_PATH}" ]; then \
 			echo "Installing action to $${ACTION_PATH}"; \
 			cp -a $${action} $${ACTION_PATH} || true; \
 		fi \
@@ -41,7 +42,7 @@ init overwrite:
 		for action in {{.Virtenv}}/action_collection_*.yml; do \
 			ACTION_SOURCE=$$(basename $${action}); \
 			ACTION_PATH=".github/workflows/$${ACTION_SOURCE#action_collection_}"; \
-			if [[ "$@" == "overwrite" ]] || [[ ! -f "$${ACTION_PATH}" ]]; then \
+			if [ "$@" == "overwrite" ] || [ ! -f "$${ACTION_PATH}" ]; then \
 				echo "Installing action to $${ACTION_PATH}"; \
 				cp -a $${action} $${ACTION_PATH} || true; \
 			fi \
@@ -52,26 +53,34 @@ init overwrite:
 		for action in {{.Virtenv}}/action_role_*.yml; do \
 			ACTION_SOURCE=$$(basename $${action}); \
 			ACTION_PATH=".github/workflows/$${ACTION_SOURCE#action_role_}"; \
-			if [[ "$@" == "overwrite" ]] || [[ ! -f "$${ACTION_PATH}" ]]; then \
+			if [ "$@" == "overwrite" ] || [ ! -f "$${ACTION_PATH}" ]; then \
 				echo "Installing action to $${ACTION_PATH}"; \
 				cp -a $${action} $${ACTION_PATH} || true; \
 			fi \
 		done; \
 	fi
 
-sync install: init
+sync install:
 	@${UV} sync --no-managed-python
 	@if [ -f ${GALAXY_FILE} ]; then \
 		ansible-galaxy collection install --force-with-deps .; \
 	fi
 
-lint: sync
+lint: install
 	@yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
-	@if [[ -f "${GALAXY_FILE}" || -f "${META_FILE}" ]]; then \
+	@if [ -f "${GALAXY_FILE}" ]; then \
+		if [ ! -f "$(RUNTIME_FILE)" ]; then \
+			echo "No $(RUNTIME_FILE) found"; \
+		elif [ "$(yq < $(RUNTIME_FILE) '.requires_ansible' -r)" = "null" ]; then \
+			echo "No 'requires_ansible' field found in $(RUNTIME_FILE)"; \
+			exit 1; \
+		fi; \
+	fi
+	@if [ -f "${GALAXY_FILE}" ] || [ -f "${META_FILE}" ]; then \
 		ansible-lint -p . --exclude ".ansible/*"; \
 	fi
 
-requirements: clean sync install
+requirements: clean install
 	@mkdir -p $(ROLE_DIR)
 	@if [ -f $(REQUIREMENTS) ]; then \
 		ansible-galaxy collection install \
@@ -96,10 +105,6 @@ build:
 	@if [ -f pyproject.toml ]; then \
 		${UV} build; \
 	fi
-
-
-update:
-	${UV} update
 
 ifeq (login,$(firstword $(MAKECMDGOALS)))
     LOGIN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -143,7 +148,7 @@ publish: build
 		echo GITHUB_REPOSITORY=$(GITHUB_REPOSITORY); \
 		echo GITHUB_ORGANIZATION=$(GITHUB_ORGANIZATION); \
 		echo GITHUB_REPO=$(GITHUB_REPO); \
-		uv run ansible-galaxy role import \
+		ansible-galaxy role import \
 			--api-key $(GALAXY_API_KEY) $(GITHUB_ORGANIZATION) $(GITHUB_REPO); \
 	fi
 
