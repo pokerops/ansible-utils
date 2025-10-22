@@ -71,9 +71,9 @@ lint: install
 	@if [ -f "${GALAXY_FILE}" ]; then \
 		if [ ! -f "$(RUNTIME_FILE)" ]; then \
 			echo "No $(RUNTIME_FILE) found"; \
-		elif [[ $(yq < $(RUNTIME_FILE) '.requires_ansible' -r) == "null" ]]; then \
-			  echo "No 'requires_ansible' field found in $(RUNTIME_FILE)"; \
-				exit 1; \
+		elif [ "$(yq < $(RUNTIME_FILE) '.requires_ansible' -r)" = "null" ]; then \
+			echo "No 'requires_ansible' field found in $(RUNTIME_FILE)"; \
+			exit 1; \
 		fi
 	@if [ -f "${GALAXY_FILE}" ] || [ -f "${META_FILE}" ]; then \
 		ansible-lint -p . --exclude ".ansible/*"; \
