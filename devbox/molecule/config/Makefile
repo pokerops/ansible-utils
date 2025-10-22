@@ -73,6 +73,11 @@ lint: sync
 
 requirements: clean sync install
 	@mkdir -p $(ROLE_DIR)
+	@if [ -f $(REQUIREMENTS) ]; then \
+		ansible-galaxy collection install \
+			--force-with-deps \
+			--requirements-file $(REQUIREMENTS); \
+	fi
 	@if [ -f "$(ROLE_FILE)" ]; then \
 		ansible-galaxy role install \
 			--force --no-deps \
