@@ -13,6 +13,7 @@ UBUNTU_KVM_IMAGE = https://cloud-images.ubuntu.com/${UBUNTU_RELEASE}/current/${U
 MOLECULE_KVM_IMAGE ?= $(UBUNTU_KVM_IMAGE)
 GALAXY_API_KEY ?=
 GALAXY_FILE = galaxy.yml
+RUNTIME_FILE= meta/runtime.yml
 META_FILE = meta/main.yml
 REQUIREMENTS = requirements.yml
 ROLE_DIR = roles
@@ -31,7 +32,7 @@ init overwrite:
 	@for action in {{.Virtenv}}/action_all_*.yml; do \
 		ACTION_SOURCE=$$(basename $${action}); \
 		ACTION_PATH=".github/workflows/$${ACTION_SOURCE#action_all_}"; \
-		if [[ "$@" == "overwrite" ]] || [[ ! -f "$${ACTION_PATH}" ]]; then \
+		if [ "$@" == "overwrite" ] || [ ! -f "$${ACTION_PATH}" ]; then \
 			echo "Installing action to $${ACTION_PATH}"; \
 			cp -a $${action} $${ACTION_PATH} || true; \
 		fi \
@@ -41,7 +42,7 @@ init overwrite:
 		for action in {{.Virtenv}}/action_collection_*.yml; do \
 			ACTION_SOURCE=$$(basename $${action}); \
 			ACTION_PATH=".github/workflows/$${ACTION_SOURCE#action_collection_}"; \
-			if [[ "$@" == "overwrite" ]] || [[ ! -f "$${ACTION_PATH}" ]]; then \
+			if [ "$@" == "overwrite" ] || [ ! -f "$${ACTION_PATH}" ]; then \
 				echo "Installing action to $${ACTION_PATH}"; \
 				cp -a $${action} $${ACTION_PATH} || true; \
 			fi \
@@ -52,7 +53,7 @@ init overwrite:
 		for action in {{.Virtenv}}/action_role_*.yml; do \
 			ACTION_SOURCE=$$(basename $${action}); \
 			ACTION_PATH=".github/workflows/$${ACTION_SOURCE#action_role_}"; \
-			if [[ "$@" == "overwrite" ]] || [[ ! -f "$${ACTION_PATH}" ]]; then \
+			if [ "$@" == "overwrite" ] || [ ! -f "$${ACTION_PATH}" ]; then \
 				echo "Installing action to $${ACTION_PATH}"; \
 				cp -a $${action} $${ACTION_PATH} || true; \
 			fi \
@@ -67,7 +68,11 @@ sync install:
 
 lint: install
 	@yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
-	@if [[ -f "${GALAXY_FILE}" || -f "${META_FILE}" ]]; then \
+	@if [ -f "${GALAXY_FILE}" ] && [ ! -f "$(RUNTIME_FILE)" ]; then \
+		echo "No $(RUNTIME_FILE) found"; \
+		exit 1; \
+	fi
+	@if [ -f "${GALAXY_FILE}" ] || [ -f "${META_FILE}" ]; then \
 		ansible-lint -p . --exclude ".ansible/*"; \
 	fi
 
