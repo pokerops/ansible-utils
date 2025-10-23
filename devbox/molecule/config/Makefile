@@ -106,6 +106,12 @@ build:
 		${UV} build; \
 	fi
 
+deploy:
+	ansible-galaxy collection install --force-with-deps .
+
+local:
+	ansible-galaxy collection install --force .
+
 ifeq (login,$(firstword $(MAKECMDGOALS)))
     LOGIN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
     $(eval $(subst $(space),,$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))):;@:)
