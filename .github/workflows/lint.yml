@@ -10,7 +10,7 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - name: Set up repository
+      - name: Lint repository
         uses: pokerops/ansible-utils@master
         with:
           run: "make lint"

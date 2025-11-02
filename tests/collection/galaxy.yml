@@ -1,7 +1,7 @@
 ---
 namespace: pokerops
 name: test
-version: 0.0.26
+version: 0.0.27
 readme: README.md
 authors: []
 description: Test collection for devbox molecule plugin verification
