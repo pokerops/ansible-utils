@@ -846,7 +846,7 @@ requires-dist = [
     { name = "docker", specifier = "==7.1.0" },
     { name = "dotenv-cli", specifier = "==3.4.1" },
     { name = "github3-py", specifier = "==4.0.1" },
-    { name = "jmespath", specifier = "==1.0.1" },
+    { name = "jmespath", specifier = "~=1.0" },
     { name = "kubernetes", specifier = "==33.1.0" },
     { name = "lxml", specifier = "==6.0.2" },
     { name = "molecule", specifier = "==25.12.0" },
