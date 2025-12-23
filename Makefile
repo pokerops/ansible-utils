@@ -1,3 +1,5 @@
+include .devbox/virtenv/molecule/Makefile
+
 .PHONY: all ${MAKECMDGOALS}
 
 GIT_REPO = $(shell git config --get remote.origin.url | sed -E 's#^[^:/@]+[:/]+##; s#\.git$$##')
@@ -73,8 +75,10 @@ upgrade: upgrade_deps lock
 
 configure: checkout
 	# Update all workflow config files to use current branch instead of @master
-	@dasel put -f devbox/molecule/config/pyproject.toml \
-		-r toml -v '["git+https://${GIT_REPO}@${GIT_BRANCH}"]' 'dependency-groups.dev'
+	@sed -i \
+		-e 's#"\(pokerops-ansible-utils@git+\).*#"\1https://$(GIT_REPO)@$(GIT_BRANCH)"#' \
+		devbox/molecule/config/pyproject.toml
+	echo "Updating .gitignore to include .devbox/virtenv/molecule/Makefile"
 	@TEMP=$$(mktemp); \
 		DEVBOX_MAKEFILE=".devbox/virtenv/molecule/Makefile"; \
 		if [ -f $${DEVBOX_MAKEFILE} ]; then \
