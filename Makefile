@@ -75,7 +75,6 @@ configure: checkout
 	# Update all workflow config files to use current branch instead of @master
 	@dasel put -f devbox/molecule/config/pyproject.toml \
 		-r toml -v '["git+https://${GIT_REPO}@${GIT_BRANCH}"]' 'dependency-groups.dev'
-	exit 1
 	@TEMP=$$(mktemp); \
 		DEVBOX_MAKEFILE=".devbox/virtenv/molecule/Makefile"; \
 		if [ -f $${DEVBOX_MAKEFILE} ]; then \
