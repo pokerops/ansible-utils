@@ -1,0 +1,20 @@
+---
+name: dependencies
+on:
+  pull_request:
+    branches: [main, master]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  pin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v5
+
+      - name: Install dasel
+        run: apt-get update && apt-get install -y dasel
+
+      - name: Run make check_deps
+        run: make check_deps
