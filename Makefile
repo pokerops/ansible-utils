@@ -45,7 +45,7 @@ update_deps:
 	@\uv lock --upgrade || true
 
 check_deps: ## Check for unpinned dependencies
-	@echo "Checking for outdated dependencies..."
+	@echo "Checking for unpinned dependencies..."
 	@UNPINNED_DEPS=$$(dasel -f pyproject.toml -r toml 'project.dependencies.all()' | \
 			sed "s/'//g" | \
 			grep -v '^git+' | \
