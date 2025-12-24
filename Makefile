@@ -74,7 +74,7 @@ upgrade: upgrade_deps lock
 configure: checkout
 	# Update all workflow config files to use current branch instead of @master
 	@sed -i \
-		-e 's#"\(pokerops-ansible-utils@git+\).*#"\1https://$(GIT_REPO)@$(GIT_BRANCH)"#' \
+		-e 's#"\(pokerops-ansible-utils@git+https://github.com\).*#"\1/$(GIT_REPO)@$(GIT_BRANCH)"#' \
 		devbox/molecule/config/pyproject.toml
 	echo "Updating .gitignore to include .devbox/virtenv/molecule/Makefile"
 	@TEMP=$$(mktemp); \
