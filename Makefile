@@ -1,6 +1,8 @@
+include .devbox/virtenv/molecule/Makefile
+
 .PHONY: all ${MAKECMDGOALS}
 
-GIT_REPO = $(shell git config --get remote.origin.url | sed -E 's#^[^:/@]+[:/]+##; s#\.git$$##')
+GIT_REPO = $(shell git config --get remote.origin.url | sed -E 's#^git@github.com:##; s#\.git$$##')
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MAIN_DEPS = $(shell dasel -f pyproject.toml -r toml 'project.dependencies.all()' | \
 	sed "s/'//g" | \
