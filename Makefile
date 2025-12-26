@@ -44,6 +44,18 @@ update_deps:
 	@echo ${PINNED_DEPS} | xargs -r \uv add
 	@\uv lock --upgrade || true
 
+check_deps: ## Check for unpinned dependencies
+	@echo "Checking for unpinned dependencies..."
+	@UNPINNED_DEPS=$$(dasel -f pyproject.toml -r toml 'project.dependencies.all()' | \
+			sed "s/'//g" | \
+			grep -v '^git+' | \
+			grep -v '=='); \
+	if [ -n "$${UNPINNED_DEPS}" ]; then \
+		echo "The following dependencies are unpinned:"; \
+		echo "$${UNPINNED_DEPS}"; \
+		exit 1; \
+	fi
+
 lock: ## Regenerate the lock file
 	@echo "Updating dependencies to latest versions...";
 	TEMPFILE=$$(mktemp); \
