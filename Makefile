@@ -1,5 +1,3 @@
-include .devbox/virtenv/molecule/Makefile
-
 .PHONY: all ${MAKECMDGOALS}
 
 GIT_REPO = $(shell git config --get remote.origin.url | sed -E 's#^git@github.com:##; s#\.git$$##')
@@ -85,7 +83,7 @@ lock: ## Regenerate the lock file
 update: update_deps lock
 upgrade: upgrade_deps lock
 
-configure: checkout
+configure:
 	# Update all workflow config files to use current branch instead of @master
 	@sed -i \
 		-e 's#"\(pokerops-ansible-utils@git+https://github.com\).*#"\1/$(GIT_REPO)@$(GIT_BRANCH)"#' \
