@@ -1,3 +1,5 @@
+include .devbox/virtenv/molecule/Makefile
+
 .PHONY: all ${MAKECMDGOALS}
 
 GIT_REPO = $(shell git config --get remote.origin.url | sed -E 's#^git@github.com:##; s#\.git$$##')
@@ -88,17 +90,6 @@ configure:
 	@sed -i \
 		-e 's#"\(pokerops-ansible-utils@git+https://github.com\).*#"\1/$(GIT_REPO)@$(GIT_BRANCH)"#' \
 		devbox/molecule/config/pyproject.toml
-	echo "Updating .gitignore to include .devbox/virtenv/molecule/Makefile"
-	@TEMP=$$(mktemp); \
-		DEVBOX_MAKEFILE=".devbox/virtenv/molecule/Makefile"; \
-		if [ -f $${DEVBOX_MAKEFILE} ]; then \
-			echo "include $${DEVBOX_MAKEFILE}" >> $$TEMP; \
-			echo "" >> $$TEMP; \
-		else \
-			echo "# No $${DEVBOX_MAKEFILE} found" >> $$TEMP; \
-		fi; \
-		grep -v '^include $${DEVBOX_MAKEFILE}$$' Makefile >> $$TEMP || true; \
-		mv $$TEMP Makefile
 
 checkout:
 	@git checkout -- devbox/molecule/config/pyproject.toml
