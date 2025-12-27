@@ -2,7 +2,7 @@
 name = "ansible-utils"
 version = "0.0.0"
 description = ""
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = []
 
 [dependency-groups]

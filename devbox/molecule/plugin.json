@@ -1,7 +1,7 @@
 {
   "name": "molecule",
   "packages": [
-    "python@3.13",
+    "python@3.12",
     "uv@latest",
     "gnumake@latest",
     "yq@latest",

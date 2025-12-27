@@ -10,3 +10,4 @@ tests/collection/.ansible/
 tests/role/.github/
 tests/role/.ansible/
 **/molecule/**/roles/
+**/*.tar.gz
