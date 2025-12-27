@@ -1,5 +1,3 @@
-include .devbox/virtenv/molecule/Makefile
-
 .PHONY: all ${MAKECMDGOALS}
 
 GIT_REPO = $(shell git config --get remote.origin.url | sed -E 's#^git@github.com:##; s#\.git$$##')

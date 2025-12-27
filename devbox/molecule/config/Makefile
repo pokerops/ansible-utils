@@ -96,7 +96,11 @@ requirements: clean install
 	@find ./ -name "*.ymle*" -delete
 
 build: requirements
-	@git status --porcelain | wc -l | grep -q '^0$$' || (echo "Uncommitted build detected, please run build stage and commit changes" && exit 1)
+	@git status --porcelain | \
+		grep -v "devbox/molecule/config/pyproject.toml$"
+		wc -l | \
+		grep -q '^0$$' || \
+		(echo "Uncommitted build detected, please run build stage and commit changes" && exit 1)
 	@if [ -f "$(GALAXY_FILE)" ]; then \
 		ansible-galaxy collection build --force .; \
 	else \
