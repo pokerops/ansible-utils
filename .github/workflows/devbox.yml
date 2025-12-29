@@ -44,9 +44,6 @@ jobs:
           path: tests/collection
           cache: "false"
 
-      - name: Run make checkout
-        run: make checkout
-
       - name: Run make build
         uses: ./
         with:

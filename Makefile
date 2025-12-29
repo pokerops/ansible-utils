@@ -88,8 +88,3 @@ configure:
 	@sed -i \
 		-e 's#"\(pokerops-ansible-utils@git+https://github.com\).*#"\1/$(GIT_REPO)@$(GIT_BRANCH)"#' \
 		devbox/molecule/config/pyproject.toml
-
-checkout:
-	@git checkout -- devbox/molecule/config/pyproject.toml
-	@git checkout -- .gitignore
-	@git checkout -- Makefile
