@@ -33,7 +33,7 @@ jobs:
       - name: Run make ${{matrix.target}}
         uses: pokerops/ansible-utils@master
         with:
-          run: "make version-check GALAXY_FILE=tests/collection/galaxy.yml"
+          run: "make version-check"
           cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}

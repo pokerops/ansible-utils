@@ -124,7 +124,7 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: make version-check
+          run: make version-check GALAXY_FILE=tests/collection/galaxy.yml
           path: tests/collection
           cache: "false"
         env:
