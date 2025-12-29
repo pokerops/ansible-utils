@@ -1,6 +1,6 @@
 .PHONY: all ${MAKECMDGOALS}
 
-GIT_REPO = $(shell git config --get remote.origin.url | sed -E 's#^[^:/@]+[:/]+##; s#\.git$$##')
+GIT_REPO = $(shell git config --get remote.origin.url | sed -E 's#^git@github.com:##; s#\.git$$##')
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MAIN_DEPS = $(shell dasel -f pyproject.toml -r toml 'project.dependencies.all()' | \
 	sed "s/'//g" | \
@@ -83,24 +83,8 @@ lock: ## Regenerate the lock file
 update: update_deps lock
 upgrade: upgrade_deps lock
 
-configure: checkout
+configure:
 	# Update all workflow config files to use current branch instead of @master
 	@sed -i \
 		-e 's#"\(pokerops-ansible-utils@git+https://github.com\).*#"\1/$(GIT_REPO)@$(GIT_BRANCH)"#' \
 		devbox/molecule/config/pyproject.toml
-	echo "Updating .gitignore to include .devbox/virtenv/molecule/Makefile"
-	@TEMP=$$(mktemp); \
-		DEVBOX_MAKEFILE=".devbox/virtenv/molecule/Makefile"; \
-		if [ -f $${DEVBOX_MAKEFILE} ]; then \
-			echo "include $${DEVBOX_MAKEFILE}" >> $$TEMP; \
-			echo "" >> $$TEMP; \
-		else \
-			echo "# No $${DEVBOX_MAKEFILE} found" >> $$TEMP; \
-		fi; \
-		grep -v '^include $${DEVBOX_MAKEFILE}$$' Makefile >> $$TEMP || true; \
-		mv $$TEMP Makefile
-
-checkout:
-	@git checkout -- devbox/molecule/config/pyproject.toml
-	@git checkout -- .gitignore
-	@git checkout -- Makefile

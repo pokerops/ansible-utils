@@ -44,9 +44,6 @@ jobs:
           path: tests/collection
           cache: "false"
 
-      - name: Run make checkout
-        run: make checkout
-
       - name: Run make build
         uses: ./
         with:
@@ -124,7 +121,8 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: make version-check GALAXY_FILE=tests/collection/galaxy.yml
+          run: make version-check
+          path: tests/collection
           cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -148,7 +146,8 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: make version-check GALAXY_FILE=tests/collection/galaxy.yml
+          run: make version-check
+          path: tests/collection
           cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
@@ -182,7 +181,8 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: make version-check GALAXY_FILE=tests/collection/galaxy.yml
+          run: make version-check
+          path: tests/collection
           cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}

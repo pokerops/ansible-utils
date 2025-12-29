@@ -12,12 +12,12 @@ UBUNTU_RELEASE ?= noble
 UBUNTU_KVM_IMAGE = https://cloud-images.ubuntu.com/${UBUNTU_RELEASE}/current/${UBUNTU_RELEASE}-server-cloudimg-amd64.img
 MOLECULE_KVM_IMAGE ?= $(UBUNTU_KVM_IMAGE)
 GALAXY_API_KEY ?=
-GALAXY_FILE = galaxy.yml
-RUNTIME_FILE= meta/runtime.yml
-META_FILE = meta/main.yml
-REQUIREMENTS = requirements.yml
-ROLE_DIR = roles
-ROLE_FILE = roles.yml
+GALAXY_FILE = ./galaxy.yml
+RUNTIME_FILE= ./meta/runtime.yml
+META_FILE = ./meta/main.yml
+REQUIREMENTS = ./requirements.yml
+ROLE_DIR = ./roles
+ROLE_FILE = ./roles.yml
 
 GITHUB_REPOSITORY ?= $(shell git config --get remote.origin.url | sed -E 's#(git@|https://|http://)[^/:]+[:/](.+?)(\.git)?$$#\2#')
 GITHUB_ORGANIZATION ?= $(shell echo $(GITHUB_REPOSITORY) | cut -d/ -f 1)
@@ -96,7 +96,13 @@ requirements: clean install
 	@find ./ -name "*.ymle*" -delete
 
 build: requirements
-	@git status --porcelain | wc -l | grep -q '^0$$' || (echo "Uncommitted build detected, please run build stage and commit changes" && exit 1)
+	@echo "Checking for uncommitted build changes..."
+	@git status --porcelain
+	@git status --porcelain | \
+		grep -v "devbox/molecule/config/pyproject.toml$$" | \
+		wc -l | \
+		grep -q '^0$$' || \
+		(echo "Uncommitted build detected, please run build stage and commit changes" && exit 1)
 	@if [ -f "$(GALAXY_FILE)" ]; then \
 		ansible-galaxy collection build --force .; \
 	else \
