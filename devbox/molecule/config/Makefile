@@ -96,6 +96,7 @@ requirements: clean install
 	@find ./ -name "*.ymle*" -delete
 
 build: requirements
+	@git status --porcelain | grep -v "devbox/molecule/config/pyproject.toml$"
 	@git status --porcelain | \
 		grep -v "devbox/molecule/config/pyproject.toml$" | \
 		wc -l | \
