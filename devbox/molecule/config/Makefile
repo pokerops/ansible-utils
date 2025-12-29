@@ -97,7 +97,7 @@ requirements: clean install
 
 build: requirements
 	@echo "Checking for uncommitted build changes..."
-	@git status --porcelain | grep -v "devbox/molecule/config/pyproject.toml$$"
+	@git status --porcelain
 	@git status --porcelain | \
 		grep -v "devbox/molecule/config/pyproject.toml$$" | \
 		wc -l | \
