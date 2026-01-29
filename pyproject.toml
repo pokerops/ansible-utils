@@ -30,7 +30,7 @@ dependencies = [
 ]
 description = 'Dependency management for PokerOps Ansible Actions devbox plugin'
 name = 'pokerops-ansible-utils'
-requires-python = '>=3.11,<3.14'
+requires-python = '>=3.8,<3.14'
 version = '0.0.0'
 
 [tool]
