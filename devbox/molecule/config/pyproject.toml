@@ -2,18 +2,10 @@
 name = "ansible-utils"
 version = "0.0.0"
 description = ""
-requires-python = ">=3.12"
+requires-python = ">=3.8"
 dependencies = []
 
 [dependency-groups]
 dev = [
   "pokerops-ansible-utils@git+https://github.com/pokerops/ansible-utils@master",
 ]
-
-[tool.pyright]
-venvPath = "."
-venv = ".venv"
-reportMissingTypeStubs = false
-
-[tool.ruff]
-line-length = 160
