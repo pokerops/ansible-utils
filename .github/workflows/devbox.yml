@@ -17,9 +17,11 @@ jobs:
     steps:
       - name: Update apt cache
         run: sudo apt-get update
+        shell: bash
 
       - name: Upgrade apt packages
         run: sudo apt-get upgrade -y
+        shell: bash
 
       - name: Check out the codebase
         uses: actions/checkout@v5
@@ -36,9 +38,11 @@ jobs:
     steps:
       - name: Update apt cache
         run: sudo apt-get update
+        shell: bash
 
       - name: Upgrade apt packages
         run: sudo apt-get upgrade -y
+        shell: bash
 
       - name: Check out the codebase
         uses: actions/checkout@v5
@@ -76,9 +80,11 @@ jobs:
     steps:
       - name: Update apt cache
         run: sudo apt-get update
+        shell: bash
 
       - name: Upgrade apt packages
         run: sudo apt-get upgrade -y
+        shell: bash
 
       - name: Check out the codebase
         uses: actions/checkout@v5
@@ -107,9 +113,11 @@ jobs:
     steps:
       - name: Update apt cache
         run: sudo apt-get update
+        shell: bash
 
       - name: Upgrade apt packages
         run: sudo apt-get upgrade -y
+        shell: bash
 
       - name: Check out the codebase
         uses: actions/checkout@v5
@@ -132,9 +140,11 @@ jobs:
     steps:
       - name: Update apt cache
         run: sudo apt-get update
+        shell: bash
 
       - name: Upgrade apt packages
         run: sudo apt-get upgrade -y
+        shell: bash
 
       - name: Check out the codebase
         uses: actions/checkout@v5
@@ -163,9 +173,11 @@ jobs:
     steps:
       - name: Update apt cache
         run: sudo apt-get update
+        shell: bash
 
       - name: Upgrade apt packages
         run: sudo apt-get upgrade -y
+        shell: bash
 
       - name: Check out the codebase
         uses: actions/checkout@v5
@@ -202,9 +214,11 @@ jobs:
     steps:
       - name: Update apt cache
         run: sudo apt-get update
+        shell: bash
 
       - name: Upgrade apt packages
         run: sudo apt-get upgrade -y
+        shell: bash
 
       - name: Check out the codebase
         uses: actions/checkout@v5
