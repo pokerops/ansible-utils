@@ -10,10 +10,11 @@ jobs:
   pin:
     runs-on: ubuntu-latest
     steps:
-      - name: Update apt packages
-        run: |
-          sudo apt-get update
-          sudo apt-get upgrade -y
+      - name: Update apt cache
+        run: sudo apt-get update
+
+      - name: Upgrade apt packages
+        run: sudo apt-get upgrade -y
 
       - name: Check out the codebase
         uses: actions/checkout@v5
