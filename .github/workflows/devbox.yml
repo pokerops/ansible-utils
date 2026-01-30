@@ -15,6 +15,11 @@ jobs:
           - update
           - upgrade
     steps:
+      - name: Update apt packages
+        run: |
+          sudo apt-get update
+          sudo apt-get upgrade -y
+
       - name: Check out the codebase
         uses: actions/checkout@v5
 
@@ -28,6 +33,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Update apt packages
+        run: |
+          sudo apt-get update
+          sudo apt-get upgrade -y
+
       - name: Check out the codebase
         uses: actions/checkout@v5
 
@@ -62,6 +72,11 @@ jobs:
           - test
           - init
     steps:
+      - name: Update apt packages
+        run: |
+          sudo apt-get update
+          sudo apt-get upgrade -y
+
       - name: Check out the codebase
         uses: actions/checkout@v5
 
@@ -87,6 +102,11 @@ jobs:
           - test
           - init
     steps:
+      - name: Update apt packages
+        run: |
+          sudo apt-get update
+          sudo apt-get upgrade -y
+
       - name: Check out the codebase
         uses: actions/checkout@v5
 
@@ -106,6 +126,11 @@ jobs:
   version-update:
     runs-on: ubuntu-latest
     steps:
+      - name: Update apt packages
+        run: |
+          sudo apt-get update
+          sudo apt-get upgrade -y
+
       - name: Check out the codebase
         uses: actions/checkout@v5
 
@@ -131,6 +156,11 @@ jobs:
   version-unchanged:
     runs-on: ubuntu-latest
     steps:
+      - name: Update apt packages
+        run: |
+          sudo apt-get update
+          sudo apt-get upgrade -y
+
       - name: Check out the codebase
         uses: actions/checkout@v5
 
@@ -164,6 +194,11 @@ jobs:
   version-downgrade:
     runs-on: ubuntu-latest
     steps:
+      - name: Update apt packages
+        run: |
+          sudo apt-get update
+          sudo apt-get upgrade -y
+
       - name: Check out the codebase
         uses: actions/checkout@v5
 

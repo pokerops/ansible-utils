@@ -12,6 +12,11 @@ jobs:
     outputs:
       is_pr: ${{ steps.check.outputs.is_pr }}
     steps:
+      - name: Update apt packages
+        run: |
+          sudo apt-get update
+          sudo apt-get upgrade -y
+
       - name: Check action is running in PR context
         id: check
         run: |

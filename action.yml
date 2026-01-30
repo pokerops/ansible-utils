@@ -29,6 +29,11 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Update apt packages
+      run: |
+        sudo apt-get update
+        sudo apt-get upgrade -y
+
     - name: Check out the codebase
       uses: actions/checkout@v5
       with:
