@@ -31,7 +31,8 @@
       ". .venv/bin/activate",
       "echo Run 'make (init|overwrite)' to initialize or update the testing environment",
       "alias make='\\make $( ([ -f Makefile ] || echo \"-f {{.Virtenv}}/Makefile\") )'",
-      "alias uv='\\uv $( ([ -f pyproject.toml ] || echo \"--directory {{.Virtenv}}\") )'"
+      "alias uv='\\uv $( ([ -f pyproject.toml ] || echo \"--directory {{.Virtenv}}\") )'",
+      "export LD_LIBRARY_PATH=${DEVBOX_PACKAGES_DIR}/lib:$LD_LIBRARY_PATH"
     ],
     "scripts": {
       "init": "\\make -f ${MAKEFILE} init"
