@@ -61,7 +61,7 @@ init overwrite:
 	fi
 
 sync install:
-	@${UV} sync --no-managed-python
+	@${UV} sync --no-managed-python --only-dev
 	@if [ -f ${GALAXY_FILE} ]; then \
 		ansible-galaxy collection install --force-with-deps .; \
 	fi
