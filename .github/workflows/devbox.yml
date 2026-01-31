@@ -99,7 +99,7 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: "make requirements install ${{matrix.target}}"
+          run: "make install ${{matrix.target}}"
           path: tests/role
           cache: "false"
 
