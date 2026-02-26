@@ -47,6 +47,11 @@ runs:
         project-path: ${{ inputs.path }}
       if: ${{ inputs.install == 'true' }}
 
+    - name: Install dependencies from lockfile
+      run: devbox install --no-refresh
+      working-directory: ${{ inputs.path }}
+      shell: bash
+
     - name: Run devbox command
       run: devbox run -- ${{ inputs.run }}
       working-directory: ${{ inputs.path }}
