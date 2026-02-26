@@ -41,14 +41,14 @@ runs:
       if: ${{ inputs.pre != '' }}
 
     - name: Install devbox
-      uses: jetify-com/devbox-install-action@v0.15.0
+      uses: jetify-com/devbox-install-action@v0.14.0
       with:
         enable-cache: ${{ inputs.cache }}
         project-path: ${{ inputs.path }}
       if: ${{ inputs.install == 'true' }}
 
     - name: Install dependencies from lockfile
-      run: devbox install --no-refresh
+      run: devbox install
       working-directory: ${{ inputs.path }}
       shell: bash
 
