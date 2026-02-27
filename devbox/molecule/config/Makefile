@@ -125,6 +125,9 @@ ifeq (login,$(firstword $(MAKECMDGOALS)))
 endif
 
 test dependency create prepare converge idempotence side-effect verify destroy cleanup reset list login:
+		@if [ -d .venv ]; then \
+		  find ${PROJECT_ROOT}/.venv -type d -name ansible_collections | xargs -r -- rm -r; \
+		fi
 		@if [ -f "$(META_FILE)" ]; then \
 			SCENARIO_DIR="$$(pwd)/molecule/$(MOLECULE_SCENARIO)/"; \
 			if [ -d "$${SCENARIO_DIR}" ]; then \
