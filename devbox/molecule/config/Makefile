@@ -74,7 +74,7 @@ init overwrite:
 	fi
 
 sync install:
-	${UV} sync --only-dev --directory $(PYPROJECT)
+	${UV} $(PYPROJECT) sync --only-dev
 	@if [ -f ${GALAXY_FILE} ]; then \
 		${UV} run -- ansible-galaxy collection install --force-with-deps .; \
 	fi
