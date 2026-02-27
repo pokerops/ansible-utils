@@ -6,6 +6,7 @@ export
 SHELL := /bin/bash
 
 UV := uv --python-preference=only-managed
+PYPROJECT = $(shell if [ ! -f pyproject.toml ]; then echo "uv --python-preference=only-managed --directory {{.Virtenv}}"; fi)$
 MOLECULE_SCENARIO ?= default
 MOLECULE_LOGDIR ?= /tmp/logs
 UBUNTU_RELEASE ?= noble
@@ -73,7 +74,7 @@ init overwrite:
 	fi
 
 sync install:
-	${UV} sync --only-dev [ ! -f pyproject.toml] && "--directory {{.Virtenv}}"
+	${UV} sync --only-dev --directory $(PYPROJECT)
 	@if [ -f ${GALAXY_FILE} ]; then \
 		${UV} run -- ansible-galaxy collection install --force-with-deps .; \
 	fi
