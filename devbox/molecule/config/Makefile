@@ -6,7 +6,7 @@ export
 SHELL := /bin/bash
 
 UV := uv --python-preference=only-managed
-PYPROJECT = $(shell if [ ! -f pyproject.toml ]; then echo "uv --python-preference=only-managed --directory {{.Virtenv}}"; fi)$
+PYPROJECT = $(shell if [ ! -f pyproject.toml ]; then echo "--directory {{.Virtenv}}"; fi)$
 MOLECULE_SCENARIO ?= default
 MOLECULE_LOGDIR ?= /tmp/logs
 UBUNTU_RELEASE ?= noble
