@@ -3,6 +3,7 @@
 .ansible/
 .yamllint
 .venv/
+.vscode/
 
 tests/**/.venv/
 tests/collection/.github/
@@ -11,4 +12,3 @@ tests/role/.github/
 tests/role/.ansible/
 **/molecule/**/roles/
 **/*.tar.gz
-.devbox/

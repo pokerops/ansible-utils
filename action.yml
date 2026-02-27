@@ -25,7 +25,7 @@ inputs:
   cache:
     description: "Enable caching for Devbox installation"
     required: false
-    default: "false"
+    default: "true"
 runs:
   using: "composite"
   steps:
@@ -46,11 +46,6 @@ runs:
         enable-cache: ${{ inputs.cache }}
         project-path: ${{ inputs.path }}
       if: ${{ inputs.install == 'true' }}
-
-    - name: Install dependencies from lockfile
-      run: devbox install
-      working-directory: ${{ inputs.path }}
-      shell: bash
 
     - name: Run devbox command
       run: devbox run -- ${{ inputs.run }}
