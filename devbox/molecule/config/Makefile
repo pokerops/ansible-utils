@@ -5,7 +5,7 @@ export
 
 SHELL := /bin/bash
 
-UV := uv --python-preference=only-managed
+UV := $(shell if [ -f pyproject.toml ]; then echo uv --python-preference=only-managed; else echo "uv --python-preference=only-managed --directory {{.Virtenv}}"; fi)
 MOLECULE_SCENARIO ?= default
 MOLECULE_LOGDIR ?= /tmp/logs
 UBUNTU_RELEASE ?= noble
