@@ -30,7 +30,7 @@
       "if [ -f .venv/bin/activate ]; then . .venv/bin/activate; fi",
       "echo Run 'make (init|overwrite)' to initialize or update the testing environment",
       "alias make='\\make $( ([ -f Makefile ] || echo \"-f {{.Virtenv}}/Makefile\") )'",
-      "alias uv='\\uv $( ([ -f pyproject.toml ] || echo \"--project {{.Virtenv}}\") )'"
+      "alias uv='\\uv $( ([ -f pyproject.toml ] || echo \"--directory {{.Virtenv}}\") )'"
     ],
     "scripts": {
       "init": "\\make -f ${MAKEFILE} init"
