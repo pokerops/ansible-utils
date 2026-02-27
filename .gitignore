@@ -3,6 +3,7 @@
 .ansible/
 .yamllint
 .venv/
+.vscode/
 
 tests/**/.venv/
 tests/collection/.github/
