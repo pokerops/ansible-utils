@@ -128,10 +128,10 @@ build: requirements
 	fi
 
 deploy:
-	$(UV) run -- ansible-galaxy collection install --force-with-deps .
+	$(UV) $(UV_PROJECT) run -- ansible-galaxy collection install --force-with-deps .
 
 local:
-	$(UV) run -- ansible-galaxy collection install --force .
+	$(UV) $(UV_PROJECT) run -- ansible-galaxy collection install --force .
 
 ifeq (login,$(firstword $(MAKECMDGOALS)))
     LOGIN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -151,7 +151,7 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 				ln -sf $$(pwd) $${ROLE_LINK} ; \
 			fi; \
 		fi
-		$(UV) run -- molecule $@ -s ${MOLECULE_SCENARIO} $(LOGIN_ARGS);
+		$(UV) $(UV_PROJECT) run -- molecule $@ -s ${MOLECULE_SCENARIO} $(LOGIN_ARGS);
 		@if [ "$@" = "destroy" ] || [ "$@" = "cleanup" ] || [ "$@" = "reset" ]; then \
 			$(MAKE) clean; \
 		fi
