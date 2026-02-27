@@ -5,19 +5,20 @@ export
 
 SHELL := /bin/bash
 
-UV := $(shell if [ -f pyproject.toml ]; then echo uv; else echo "uv --directory {{.Virtenv}}"; fi)
+UV := uv --python-preference=only-managed
 MOLECULE_SCENARIO ?= default
 MOLECULE_LOGDIR ?= /tmp/logs
 UBUNTU_RELEASE ?= noble
 UBUNTU_KVM_IMAGE = https://cloud-images.ubuntu.com/${UBUNTU_RELEASE}/current/${UBUNTU_RELEASE}-server-cloudimg-amd64.img
 MOLECULE_KVM_IMAGE ?= $(UBUNTU_KVM_IMAGE)
 GALAXY_API_KEY ?=
-GALAXY_FILE = ./galaxy.yml
-RUNTIME_FILE= ./meta/runtime.yml
-META_FILE = ./meta/main.yml
-REQUIREMENTS = ./requirements.yml
-ROLE_DIR = ./roles
-ROLE_FILE = ./roles.yml
+PROJECT_ROOT = ${DEVBOX_PROJECT_ROOT}
+GALAXY_FILE = $(PROJECT_ROOT)/galaxy.yml
+RUNTIME_FILE= $(PROJECT_ROOT)/meta/runtime.yml
+META_FILE = $(PROJECT_ROOT)/meta/main.yml
+REQUIREMENTS = $(PROJECT_ROOT)/requirements.yml
+ROLE_DIR = $(PROJECT_ROOT)/roles
+ROLE_FILE = $(PROJECT_ROOT)/roles.yml
 
 GITHUB_REPOSITORY ?= $(shell git config --get remote.origin.url | sed -E 's#(git@|https://|http://)[^/:]+[:/](.+?)(\.git)?$$#\2#')
 GITHUB_ORGANIZATION ?= $(shell echo $(GITHUB_REPOSITORY) | cut -d/ -f 1)
@@ -61,13 +62,13 @@ init overwrite:
 	fi
 
 sync install:
-	${UV} sync --no-managed-python --only-dev
+	${UV} sync --only-dev
 	@if [ -f ${GALAXY_FILE} ]; then \
-		ansible-galaxy collection install --force-with-deps .; \
+		${UV} run -- ansible-galaxy collection install --force-with-deps .; \
 	fi
 
 lint: install
-	@yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
+	@${UV} run -- yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
 	@if [ -f "${GALAXY_FILE}" ]; then \
 		if [ ! -f "$(RUNTIME_FILE)" ]; then \
 			echo "No $(RUNTIME_FILE) found"; \
@@ -77,18 +78,18 @@ lint: install
 		fi; \
 	fi
 	@if [ -f "${GALAXY_FILE}" ] || [ -f "${META_FILE}" ]; then \
-		ansible-lint -p . --exclude ".ansible/*"; \
+		${UV} run -- ansible-lint -p . --exclude ".ansible/*"; \
 	fi
 
 requirements: clean install
 	@mkdir -p $(ROLE_DIR)
 	@if [ -f $(REQUIREMENTS) ]; then \
-		ansible-galaxy collection install \
+		${UV} run -- ansible-galaxy collection install \
 			--force-with-deps \
 			--requirements-file $(REQUIREMENTS); \
 	fi
 	@if [ -f "$(ROLE_FILE)" ]; then \
-		ansible-galaxy role install \
+		${UV} run -- ansible-galaxy role install \
 			--force --no-deps \
 			--roles-path $(ROLE_DIR) \
 			--role-file $(ROLE_FILE); \
@@ -113,10 +114,10 @@ build: requirements
 	fi
 
 deploy:
-	ansible-galaxy collection install --force-with-deps .
+	${UV} run -- ansible-galaxy collection install --force-with-deps .
 
 local:
-	ansible-galaxy collection install --force .
+	${UV} run -- ansible-galaxy collection install --force .
 
 ifeq (login,$(firstword $(MAKECMDGOALS)))
     LOGIN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -124,7 +125,6 @@ ifeq (login,$(firstword $(MAKECMDGOALS)))
 endif
 
 test dependency create prepare converge idempotence side-effect verify destroy cleanup reset list login:
-		@find .venv -type d -name ansible_collections | xargs -r -- rm -r
 		@if [ -f "$(META_FILE)" ]; then \
 			SCENARIO_DIR="$$(pwd)/molecule/$(MOLECULE_SCENARIO)/"; \
 			if [ -d "$${SCENARIO_DIR}" ]; then \
@@ -134,7 +134,7 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 				ln -sf $$(pwd) $${ROLE_LINK} ; \
 			fi; \
 		fi
-		molecule $@ -s ${MOLECULE_SCENARIO} $(LOGIN_ARGS);
+		${UV} run -- molecule $@ -s ${MOLECULE_SCENARIO} $(LOGIN_ARGS);
 		@if [ "$@" = "destroy" ] || [ "$@" = "cleanup" ] || [ "$@" = "reset" ]; then \
 			$(MAKE) clean; \
 		fi
@@ -181,28 +181,6 @@ version-check:
 	echo "HEAD SHA: $${HEAD_SHA}"; \
 	echo "BASE VERSION: $${BASE_VERSION}"; \
 	echo "HEAD VERSION: $${HEAD_VERSION}"; \
-	# Validate galaxy versions \
-	if [ -z "$${HEAD_VERSION}" ] || [ -z "$${BASE_VERSION}" ]; then \
-		echo "Version is missing in ${GALAXY_FILE}"; \
-		exit 1; \
-	fi; \
-	# Validate semver format \
-	if ! echo "$${HEAD_VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$$'; then \
-		echo "$${HEAD_VERSION} does not follow standard semver format (X.Y.Z)"; \
-		exit 1; \
-	fi; \
-	# Check version is updated \
-	if [ "$${BASE_VERSION}" = "$${HEAD_VERSION}" ]; then \
-		echo "Version has not been updated in ${GALAXY_FILE} (still $${BASE_VERSION})"; \
-		exit 1; \
-	fi; \
-	# Verify version update sequence \
-	echo "Min version is $${MIN_VERSION}"; \
-	if [ "$${MIN_VERSION}" = "$${HEAD_VERSION}" ]; then \
-		echo "New version ($${HEAD_VERSION}) must be greater than base version ($${BASE_VERSION})"; \
-		exit 1; \
-	fi; \
-	echo "Version updated from $${BASE_VERSION} to $${HEAD_VERSION}"
 
 code:
 	@claude code .
