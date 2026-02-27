@@ -12,13 +12,12 @@ UBUNTU_RELEASE ?= noble
 UBUNTU_KVM_IMAGE = https://cloud-images.ubuntu.com/${UBUNTU_RELEASE}/current/${UBUNTU_RELEASE}-server-cloudimg-amd64.img
 MOLECULE_KVM_IMAGE ?= $(UBUNTU_KVM_IMAGE)
 GALAXY_API_KEY ?=
-PROJECT_ROOT = ${DEVBOX_PROJECT_ROOT:-.}
-GALAXY_FILE = $(PROJECT_ROOT)/galaxy.yml
-RUNTIME_FILE= $(PROJECT_ROOT)/meta/runtime.yml
-META_FILE = $(PROJECT_ROOT)/meta/main.yml
-REQUIREMENTS = $(PROJECT_ROOT)/requirements.yml
-ROLE_DIR = $(PROJECT_ROOT)/roles
-ROLE_FILE = $(PROJECT_ROOT)/roles.yml
+GALAXY_FILE = ${DEVBOX_PROJECT_ROOT}/galaxy.yml
+RUNTIME_FILE= ${DEVBOX_PROJECT_ROOT}/meta/runtime.yml
+META_FILE = ${DEVBOX_PROJECT_ROOT}/meta/main.yml
+REQUIREMENTS = ${DEVBOX_PROJECT_ROOT}/requirements.yml
+ROLE_DIR = ${DEVBOX_PROJECT_ROOT}/roles
+ROLE_FILE = ${DEVBOX_PROJECT_ROOT}/roles.yml
 
 GITHUB_REPOSITORY ?= $(shell git config --get remote.origin.url | sed -E 's#(git@|https://|http://)[^/:]+[:/](.+?)(\.git)?$$#\2#')
 GITHUB_ORGANIZATION ?= $(shell echo $(GITHUB_REPOSITORY) | cut -d/ -f 1)
@@ -26,6 +25,18 @@ GITHUB_REPO ?= $(shell echo $(GITHUB_REPOSITORY) | cut -d/ -f 2)
 
 LOGIN_ARGS ?=
 VERSION_CHECK_ARGS ?=
+
+debug:
+	@echo "DEVBOX_PROJECT_ROOT=${DEVBOX_PROJECT_ROOT}"
+	@echo "GALAXY_FILE=$(GALAXY_FILE)"
+	@echo "RUNTIME_FILE=$(RUNTIME_FILE)"
+	@echo "META_FILE=$(META_FILE)"
+	@echo "REQUIREMENTS=$(REQUIREMENTS)"
+	@echo "ROLE_DIR=$(ROLE_DIR)"
+	@echo "ROLE_FILE=$(ROLE_FILE)"
+	@echo "GITHUB_REPOSITORY=$(GITHUB_REPOSITORY)"
+	@echo "GITHUB_ORGANIZATION=$(GITHUB_ORGANIZATION)"
+	@echo "GITHUB_REPO=$(GITHUB_REPO)"
 
 init overwrite:
 	@mkdir -p .github/workflows
