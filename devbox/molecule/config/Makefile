@@ -82,7 +82,7 @@ sync install:
 	fi
 
 lint: install
-	@$(UV) r$(UV_PROJECT)un -- yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
+	@$(UV) $(UV_PROJECT)un -- yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
 	@if [ -f "${GALAXY_FILE}" ]; then \
 		if [ ! -f "$(RUNTIME_FILE)" ]; then \
 			echo "No $(RUNTIME_FILE) found"; \
