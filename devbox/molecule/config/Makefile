@@ -77,8 +77,6 @@ init overwrite:
 			fi \
 		done; \
 	fi
-	
-upgrade:
 
 sync install:
 	$(UV_SYNC)
