@@ -122,7 +122,7 @@ build: requirements
 		grep -q '^0$$' || \
 		(echo "Uncommitted build detected, please run build stage and commit changes" && exit 1)
 	@if [ -f "$(GALAXY_FILE)" ]; then \
-		ansible-galaxy collection build --force .; \
+		$(UV_RUN) ansible-galaxy collection build --force .; \
 	else \
 		echo "No $(GALAXY_FILE) found, skipping ansible collection build"; \
 	fi
