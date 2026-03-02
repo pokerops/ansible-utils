@@ -154,7 +154,7 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 				ln -sf $$(pwd) $${ROLE_LINK} ; \
 			fi; \
 		fi
-		$(UV_RUN) molecule $@ -s ${MOLECULE_SCENARIO} $(LOGIN_ARGS);
+		$(UV_RUN) molecule "$@" -s "$(MOLECULE_SCENARIO)" "$(LOGIN_ARGS)";
 		@if [ "$@" = "destroy" ] || [ "$@" = "cleanup" ] || [ "$@" = "reset" ]; then \
 			$(MAKE) clean; \
 		fi
