@@ -8,6 +8,9 @@ SHELL := /bin/bash
 UV := \uv --python-preference=only-managed
 UV_DIRECTORY = $(shell if [ ! -f pyproject.toml ]; then echo "--directory {{.Virtenv}}"; else echo "--directory ."; fi)
 UV_PROJECT = $(shell if [ ! -f pyproject.toml ]; then echo "--project {{.Virtenv}}"; else echo "--project ."; fi)
+UV_RUN = $(UV) $(UV_PROJECT) run --
+UV_BUILD = $(UV) $(UV_DIRECTORY) build
+UV_SYNC = $(UV) $(UV_DIRECTORY) sync --only-dev
 
 MOLECULE_SCENARIO ?= default
 MOLECULE_LOGDIR ?= /tmp/logs
@@ -76,13 +79,13 @@ init overwrite:
 	fi
 
 sync install:
-	$(UV) $(UV_DIRECTORY) sync --only-dev
+	$(UV_SYNC)
 	@if [ -f ${GALAXY_FILE} ]; then \
-		$(UV) $(UV_PROJECT) run -- ansible-galaxy collection install --force-with-deps .; \
+		$(UV_RUN) ansible-galaxy collection install --force-with-deps .; \
 	fi
 
 lint: install
-	@$(UV) $(UV_PROJECT) run -- yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
+	@$(UV_RUN) yamllint . -c $$([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint');
 	@if [ -f "${GALAXY_FILE}" ]; then \
 		if [ ! -f "$(RUNTIME_FILE)" ]; then \
 			echo "No $(RUNTIME_FILE) found"; \
@@ -92,18 +95,18 @@ lint: install
 		fi; \
 	fi
 	@if [ -f "${GALAXY_FILE}" ] || [ -f "${META_FILE}" ]; then \
-		$(UV) $(UV_PROJECT) run -- ansible-lint -p . --exclude ".ansible/*"; \
+		$(UV_RUN) ansible-lint -p . --exclude ".ansible/*"; \
 	fi
 
 requirements: clean install
 	@mkdir -p $(ROLE_DIR)
 	@if [ -f $(REQUIREMENTS) ]; then \
-		$(UV) $(UV_PROJECT) run -- ansible-galaxy collection install \
+		$(UV_RUN) ansible-galaxy collection install \
 			--force-with-deps \
 			--requirements-file $(REQUIREMENTS); \
 	fi
 	@if [ -f "$(ROLE_FILE)" ]; then \
-		$(UV) $(UV_PROJECT) run -- ansible-galaxy role install \
+		$(UV_RUN) ansible-galaxy role install \
 			--force --no-deps \
 			--roles-path $(ROLE_DIR) \
 			--role-file $(ROLE_FILE); \
@@ -124,14 +127,14 @@ build: requirements
 		echo "No $(GALAXY_FILE) found, skipping ansible collection build"; \
 	fi
 	@if [ -f pyproject.toml ]; then \
-		$(UV) build; \
+		$(UV_BUILD); \
 	fi
 
 deploy:
-	$(UV) $(UV_PROJECT) run -- ansible-galaxy collection install --force-with-deps .
+	$(UV_RUN) ansible-galaxy collection install --force-with-deps .
 
 local:
-	$(UV) $(UV_PROJECT) run -- ansible-galaxy collection install --force .
+	$(UV_RUN) ansible-galaxy collection install --force .
 
 ifeq (login,$(firstword $(MAKECMDGOALS)))
     LOGIN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -151,7 +154,7 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 				ln -sf $$(pwd) $${ROLE_LINK} ; \
 			fi; \
 		fi
-		$(UV) $(UV_PROJECT) run -- molecule $@ -s ${MOLECULE_SCENARIO} $(LOGIN_ARGS);
+		$(UV_RUN) molecule $@ -s $(MOLECULE_SCENARIO) $(LOGIN_ARGS);
 		@if [ "$@" = "destroy" ] || [ "$@" = "cleanup" ] || [ "$@" = "reset" ]; then \
 			$(MAKE) clean; \
 		fi
