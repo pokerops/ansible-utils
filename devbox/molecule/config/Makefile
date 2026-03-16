@@ -204,7 +204,8 @@ version-check:
 	echo "BASE VERSION: $${BASE_VERSION}"; \
 	echo "HEAD VERSION: $${HEAD_VERSION}"; \
 	# Validate semver format
-	echo "$${HEAD_VERSION}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$$'
+	echo "$${HEAD_VERSION}" \
+	echo "$${HEAD_VERSION}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$$' \
 	if ! echo "$${HEAD_VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$$'; then \
 		echo "'$${HEAD_VERSION}' does not follow standard semver format (X.Y.Z)"; \
 		exit 1; \
