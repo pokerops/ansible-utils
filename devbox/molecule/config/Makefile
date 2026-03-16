@@ -199,7 +199,7 @@ version-check:
 	BASE_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${BASE_SHA}:$${GALAXY_FILE_REPO} | yq -r '.version // ""'; else echo ""; fi); \
 	HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${HEAD_SHA}:$${GALAXY_FILE_REPO} | yq -r '.version // ""'; else echo ""; fi); \
 	MIN_VERSION=$$(printf '%s\n' "$${BASE_VERSION}" "$${HEAD_VERSION}" | sort -V | head -n1); \
-	echo "Running version check for ${GALAXY_FILE_REPO}..."; \
+	echo "Running version check for $${GALAXY_FILE_REPO} ..."; \
 	echo "BASE SHA: $${BASE_SHA}"; \
 	echo "HEAD SHA: $${HEAD_SHA}"; \
 	echo "BASE VERSION: $${BASE_VERSION}"; \
