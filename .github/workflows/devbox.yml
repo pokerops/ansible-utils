@@ -121,11 +121,10 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: make version-check
+          run: make version-check GALAXY_FILE=tests/collection/galaxy.yml
           path: tests/collection
           cache: "false"
         env:
-          GALAXY_FILE: tests/collection/galaxy.yml
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 

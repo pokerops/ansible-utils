@@ -21,7 +21,7 @@ GALAXY_API_KEY ?=
 GALAXY_FILE = ${DEVBOX_PROJECT_ROOT}/galaxy.yml
 RUNTIME_FILE= ${DEVBOX_PROJECT_ROOT}/meta/runtime.yml
 META_FILE = ${DEVBOX_PROJECT_ROOT}/meta/main.yml
-REQUIREMENTS = ${DEVBOX_PROJECT_ROOT}/requirements.yml
+REQUIREMENTS_FILE = ${DEVBOX_PROJECT_ROOT}/requirements.yml
 ROLE_DIR = ${DEVBOX_PROJECT_ROOT}/roles
 ROLE_FILE = ${DEVBOX_PROJECT_ROOT}/roles.yml
 
@@ -37,7 +37,7 @@ debug:
 	@echo "GALAXY_FILE=$(GALAXY_FILE)"
 	@echo "RUNTIME_FILE=$(RUNTIME_FILE)"
 	@echo "META_FILE=$(META_FILE)"
-	@echo "REQUIREMENTS=$(REQUIREMENTS)"
+	@echo "REQUIREMENTS=$(REQUIREMENTS_FILE)"
 	@echo "ROLE_DIR=$(ROLE_DIR)"
 	@echo "ROLE_FILE=$(ROLE_FILE)"
 	@echo "GITHUB_REPOSITORY=$(GITHUB_REPOSITORY)"
@@ -100,10 +100,10 @@ lint: install
 
 requirements: clean install
 	@mkdir -p $(ROLE_DIR)
-	@if [ -f $(REQUIREMENTS) ]; then \
+	@if [ -f $(REQUIREMENTS_FILE) ]; then \
 		$(UV_RUN) ansible-galaxy collection install \
 			--force-with-deps \
-			--requirements-file $(REQUIREMENTS); \
+			--requirements-file $(REQUIREMENTS_FILE); \
 	fi
 	@if [ -f "$(ROLE_FILE)" ]; then \
 		$(UV_RUN) ansible-galaxy role install \
