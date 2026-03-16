@@ -195,8 +195,8 @@ version-check:
 		echo "No changes detected between base ($${BASE_SHA}) and head ($${HEAD_SHA})"; \
 		exit 0; \
 	fi; \
-	BASE_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${BASE_SHA}:$(GALAXY_PATH) | yq -r '.version // ""'; else echo ""; fi); \
-	HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${HEAD_SHA}:$(GALAXY_PATH) | yq -r '.version // ""'; else echo ""; fi); \
+	BASE_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${BASE_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
+	HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${HEAD_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
 	MIN_VERSION=$$(printf '%s\n' "$${BASE_VERSION}" "$${HEAD_VERSION}" | sort -V | head -n1); \
 	echo "Running version check for $${GALAXY_PATH} ..."; \
 	echo "BASE SHA: $${BASE_SHA}"; \
