@@ -202,6 +202,28 @@ version-check:
 	echo "HEAD SHA: $${HEAD_SHA}"; \
 	echo "BASE VERSION: $${BASE_VERSION}"; \
 	echo "HEAD VERSION: $${HEAD_VERSION}"; \
+	# Validate galaxy versions
+	if [ -z "$${HEAD_VERSION}" ] || [ -z "$${BASE_VERSION}" ]; then \
+		echo "Version is missing in ${GALAXY_FILE}"; \
+		exit 1; \
+	fi; \
+	# Validate semver format
+	if ! echo "$${HEAD_VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$$'; then \
+		echo "$${HEAD_VERSION} does not follow standard semver format (X.Y.Z)"; \
+		exit 1; \
+	fi; \
+	# Check version is updated
+	if [ "$${BASE_VERSION}" = "$${HEAD_VERSION}" ]; then \
+		echo "Version has not been updated in ${GALAXY_FILE} (still $${BASE_VERSION})"; \
+		exit 1; \
+	fi; \
+	# Verify version update sequence
+	echo "Min version is $${MIN_VERSION}"; \
+	if [ "$${MIN_VERSION}" = "$${HEAD_VERSION}" ]; then \
+		echo "New version ($${HEAD_VERSION}) must be greater than base version ($${BASE_VERSION})"; \
+		exit 1; \
+	fi; \
+	echo "Version updated from $${BASE_VERSION} to $${HEAD_VERSION}"
 
 code:
 	@claude code .
