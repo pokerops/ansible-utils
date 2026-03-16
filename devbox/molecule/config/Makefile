@@ -203,14 +203,13 @@ version-check:
 	echo "HEAD SHA: $${HEAD_SHA}"; \
 	echo "BASE VERSION: $${BASE_VERSION}"; \
 	echo "HEAD VERSION: $${HEAD_VERSION}"; \
-	# Validate galaxy versions
-	if [ -z "$${HEAD_VERSION}" ] || [ -z "$${BASE_VERSION}" ]; then \
-		echo "Version is missing in ${GALAXY_FILE}"; \
-		exit 1; \
-	fi; \
 	# Validate semver format
 	if ! echo "$${HEAD_VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$$'; then \
 		echo "$${HEAD_VERSION} does not follow standard semver format (X.Y.Z)"; \
+		exit 1; \
+	fi; \
+	if ! echo "$${BASE_VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$$'; then \
+		echo "$${BASE_VERSION} does not follow standard semver format (X.Y.Z)"; \
 		exit 1; \
 	fi; \
 	# Check version is updated
