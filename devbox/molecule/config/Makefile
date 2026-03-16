@@ -194,8 +194,8 @@ version-check:
 		echo "No changes detected between base ($${BASE_SHA}) and head ($${HEAD_SHA})"; \
 		exit 0; \
 	fi; \
-	GALAXY_FILE_FULL="$(GALAXY_FILE)" \
-	GALAXY_FILE_REPO="$${GALAXY_FILE_FULL#${DEVBOX_PROJECT_ROOT}/}" \
+	GALAXY_FILE_FULL="$(GALAXY_FILE)"; \
+	GALAXY_FILE_REPO="$${GALAXY_FILE_FULL#${DEVBOX_PROJECT_ROOT}/}"; \
 	BASE_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${BASE_SHA}:$${GALAXY_FILE_REPO} | yq -r '.version // ""'; else echo ""; fi); \
 	HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${HEAD_SHA}:$${GALAXY_FILE_REPO} | yq -r '.version // ""'; else echo ""; fi); \
 	MIN_VERSION=$$(printf '%s\n' "$${BASE_VERSION}" "$${HEAD_VERSION}" | sort -V | head -n1); \
