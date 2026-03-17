@@ -18,10 +18,11 @@ UBUNTU_RELEASE ?= noble
 UBUNTU_KVM_IMAGE = https://cloud-images.ubuntu.com/${UBUNTU_RELEASE}/current/${UBUNTU_RELEASE}-server-cloudimg-amd64.img
 MOLECULE_KVM_IMAGE ?= $(UBUNTU_KVM_IMAGE)
 GALAXY_API_KEY ?=
-GALAXY_FILE = ${DEVBOX_PROJECT_ROOT}/galaxy.yml
+GALAXY_PATH = galaxy.yml
+GALAXY_FILE = ${DEVBOX_PROJECT_ROOT}/$(GALAXY_PATH)
 RUNTIME_FILE= ${DEVBOX_PROJECT_ROOT}/meta/runtime.yml
 META_FILE = ${DEVBOX_PROJECT_ROOT}/meta/main.yml
-REQUIREMENTS = ${DEVBOX_PROJECT_ROOT}/requirements.yml
+REQUIREMENTS_FILE = ${DEVBOX_PROJECT_ROOT}/requirements.yml
 ROLE_DIR = ${DEVBOX_PROJECT_ROOT}/roles
 ROLE_FILE = ${DEVBOX_PROJECT_ROOT}/roles.yml
 
@@ -37,7 +38,7 @@ debug:
 	@echo "GALAXY_FILE=$(GALAXY_FILE)"
 	@echo "RUNTIME_FILE=$(RUNTIME_FILE)"
 	@echo "META_FILE=$(META_FILE)"
-	@echo "REQUIREMENTS=$(REQUIREMENTS)"
+	@echo "REQUIREMENTS=$(REQUIREMENTS_FILE)"
 	@echo "ROLE_DIR=$(ROLE_DIR)"
 	@echo "ROLE_FILE=$(ROLE_FILE)"
 	@echo "GITHUB_REPOSITORY=$(GITHUB_REPOSITORY)"
@@ -100,10 +101,10 @@ lint: install
 
 requirements: clean install
 	@mkdir -p $(ROLE_DIR)
-	@if [ -f $(REQUIREMENTS) ]; then \
+	@if [ -f $(REQUIREMENTS_FILE) ]; then \
 		$(UV_RUN) ansible-galaxy collection install \
 			--force-with-deps \
-			--requirements-file $(REQUIREMENTS); \
+			--requirements-file $(REQUIREMENTS_FILE); \
 	fi
 	@if [ -f "$(ROLE_FILE)" ]; then \
 		$(UV_RUN) ansible-galaxy role install \
@@ -194,14 +195,34 @@ version-check:
 		echo "No changes detected between base ($${BASE_SHA}) and head ($${HEAD_SHA})"; \
 		exit 0; \
 	fi; \
-	BASE_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${BASE_SHA}:$(GALAXY_FILE) | yq -r '.version // ""'; else echo ""; fi); \
-	HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${HEAD_SHA}:$(GALAXY_FILE) | yq -r '.version // ""'; else echo ""; fi); \
+	BASE_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${BASE_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
+	HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${HEAD_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
 	MIN_VERSION=$$(printf '%s\n' "$${BASE_VERSION}" "$${HEAD_VERSION}" | sort -V | head -n1); \
-	echo "Running version check for ${GALAXY_FILE}..."; \
+	echo "Running version check for $${GALAXY_PATH} ..."; \
 	echo "BASE SHA: $${BASE_SHA}"; \
 	echo "HEAD SHA: $${HEAD_SHA}"; \
 	echo "BASE VERSION: $${BASE_VERSION}"; \
 	echo "HEAD VERSION: $${HEAD_VERSION}"; \
+	echo "$${HEAD_VERSION}"; \
+	echo "$${HEAD_VERSION}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$$'; \
+	if ! echo "$${HEAD_VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$$'; then \
+		echo "'$${HEAD_VERSION}' does not follow standard semver format (X.Y.Z)"; \
+		exit 1; \
+	fi; \
+	if ! echo "$${BASE_VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$$'; then \
+		echo "'$${BASE_VERSION}' does not follow standard semver format (X.Y.Z)"; \
+		exit 1; \
+	fi; \
+	if [ "$${BASE_VERSION}" = "$${HEAD_VERSION}" ]; then \
+		echo "Version has not been updated in ${GALAXY_FILE} (still $${BASE_VERSION})"; \
+		exit 1; \
+	fi; \
+	echo "Min version is $${MIN_VERSION}"; \
+	if [ "$${MIN_VERSION}" = "$${HEAD_VERSION}" ]; then \
+		echo "New version ($${HEAD_VERSION}) must be greater than base version ($${BASE_VERSION})"; \
+		exit 1; \
+	fi; \
+	echo "Version updated from $${BASE_VERSION} to $${HEAD_VERSION}"
 
 code:
 	@claude code .
