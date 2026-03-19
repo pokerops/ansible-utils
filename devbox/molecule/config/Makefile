@@ -23,6 +23,7 @@ GALAXY_FILE = ${DEVBOX_PROJECT_ROOT}/$(GALAXY_PATH)
 RUNTIME_FILE= ${DEVBOX_PROJECT_ROOT}/meta/runtime.yml
 META_FILE = ${DEVBOX_PROJECT_ROOT}/meta/main.yml
 REQUIREMENTS_FILE = ${DEVBOX_PROJECT_ROOT}/requirements.yml
+VENV_DIR = ${DEVBOX_PROJECT_ROOT}/.venv
 ROLE_DIR = ${DEVBOX_PROJECT_ROOT}/roles
 ROLE_FILE = ${DEVBOX_PROJECT_ROOT}/roles.yml
 
@@ -34,7 +35,7 @@ LOGIN_ARGS ?=
 VERSION_CHECK_ARGS ?=
 
 debug:
-	@echo "DEVBOX_PROJECT_ROOT=${DEVBOX_PROJECT_ROOT}"
+	@echo "VENV_DIR=$(VENV_DIR)"
 	@echo "GALAXY_FILE=$(GALAXY_FILE)"
 	@echo "RUNTIME_FILE=$(RUNTIME_FILE)"
 	@echo "META_FILE=$(META_FILE)"
@@ -143,9 +144,9 @@ ifeq (login,$(firstword $(MAKECMDGOALS)))
     $(eval $(subst $(space),,$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))):;@:)
 endif
 
-test dependency create prepare converge idempotence side-effect verify destroy cleanup reset list login:
-		@if [ -d .venv ]; then \
-		  find ${PROJECT_ROOT}/.venv -type d -name ansible_collections | xargs -r -- rm -r; \
+scrub:
+		@if [ -d $(VENV_DIR) ]; then \
+		  find $(VENV_DIR) -type d -name ansible_collections | xargs -r -- rm -r; \
 		fi
 		@if [ -f "$(META_FILE)" ]; then \
 			SCENARIO_DIR="$$(pwd)/molecule/$(MOLECULE_SCENARIO)/"; \
@@ -156,10 +157,28 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 				ln -sf $$(pwd) $${ROLE_LINK} ; \
 			fi; \
 		fi
+
+test dependency create prepare converge idempotence side-effect verify destroy cleanup reset list login: scrub
 		$(UV_RUN) molecule $@ -s $(MOLECULE_SCENARIO) $(LOGIN_ARGS);
 		@if [ "$@" = "destroy" ] || [ "$@" = "cleanup" ] || [ "$@" = "reset" ]; then \
 			$(MAKE) clean; \
 		fi
+
+ifeq (molecule,$(firstword $(MAKECMDGOALS)))
+    MOLECULE_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+    $(eval $(subst $(space),,$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))):;@:)
+endif
+
+molecule:
+		$(UV_RUN) $@ -s $(MOLECULE_SCENARIO) $(MOLECULE_ARGS)
+
+ifeq (uv,$(firstword $(MAKECMDGOALS)))
+    UV_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+    $(eval $(subst $(space),,$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))):;@:)
+endif
+
+uv:
+	$(UV) $(UV_PROJECT) $(UV_ARGS)
 
 clean:
 		rm -rf $${HOME}/.ansible/{collections,roles}
