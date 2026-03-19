@@ -4,6 +4,7 @@
 .yamllint
 .venv/
 .vscode/
+.project
 
 tests/**/.venv/
 tests/collection/.github/

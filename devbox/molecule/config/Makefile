@@ -208,6 +208,9 @@ version-check:
 	echo "HEAD VERSION: $${HEAD_VERSION}"; \
 	echo "$${HEAD_VERSION}"; \
 	echo "$${HEAD_VERSION}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$$'; \
+	if [ -z "$$BASE_VERSION" ]; then \
+	  echo "galaxy.yml is new, skipping version check"; \
+	  exit 0;\
 	if ! echo "$${HEAD_VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$$'; then \
 		echo "'$${HEAD_VERSION}' does not follow standard semver format (X.Y.Z)"; \
 		exit 1; \
