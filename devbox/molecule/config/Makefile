@@ -23,6 +23,7 @@ GALAXY_FILE = ${DEVBOX_PROJECT_ROOT}/$(GALAXY_PATH)
 RUNTIME_FILE= ${DEVBOX_PROJECT_ROOT}/meta/runtime.yml
 META_FILE = ${DEVBOX_PROJECT_ROOT}/meta/main.yml
 REQUIREMENTS_FILE = ${DEVBOX_PROJECT_ROOT}/requirements.yml
+VENV_DIR = ${DEVBOX_PROJECT_ROOT}/.venv
 ROLE_DIR = ${DEVBOX_PROJECT_ROOT}/roles
 ROLE_FILE = ${DEVBOX_PROJECT_ROOT}/roles.yml
 
@@ -34,7 +35,7 @@ LOGIN_ARGS ?=
 VERSION_CHECK_ARGS ?=
 
 debug:
-	@echo "DEVBOX_PROJECT_ROOT=${DEVBOX_PROJECT_ROOT}"
+	@echo "VENV_DIR=$(VENV_DIR)"
 	@echo "GALAXY_FILE=$(GALAXY_FILE)"
 	@echo "RUNTIME_FILE=$(RUNTIME_FILE)"
 	@echo "META_FILE=$(META_FILE)"
@@ -144,8 +145,8 @@ ifeq (login,$(firstword $(MAKECMDGOALS)))
 endif
 
 scrub:
-		@if [ -d .venv ]; then \
-		  find ${PROJECT_ROOT}/.venv -type d -name ansible_collections | xargs -r -- rm -r; \
+		@if [ -d $(VENV_DIR) ]; then \
+		  find $(VENV_DIR) -type d -name ansible_collections | xargs -r -- rm -r; \
 		fi
 		@if [ -f "$(META_FILE)" ]; then \
 			SCENARIO_DIR="$$(pwd)/molecule/$(MOLECULE_SCENARIO)/"; \
