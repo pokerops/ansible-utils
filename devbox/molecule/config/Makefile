@@ -164,24 +164,16 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 			$(MAKE) clean; \
 		fi
 
-ifeq (molecule,$(firstword $(MAKECMDGOALS)))
-    MOLECULE_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-    $(eval $(subst $(space),,$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))):;@:)
-endif
-
-molecule:
-		$(UV_RUN) $@ -s $(MOLECULE_SCENARIO) $(MOLECULE_ARGS)
-
 ifeq (uv,$(firstword $(MAKECMDGOALS)))
     UV_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
     $(eval $(subst $(space),,$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))):;@:)
 endif
 
 uv:
-	$(UV) $(UV_PROJECT) $(UV_ARGS)
+	@$(UV) $(UV_PROJECT) $(UV_ARGS)
 
 clean:
-		rm -rf $${HOME}/.ansible/{collections,roles}
+		@rm -rf $${HOME}/.ansible/{collections,roles}
 
 publish: build
 	@if [ -z "${GALAXY_API_KEY}" ]; then \
