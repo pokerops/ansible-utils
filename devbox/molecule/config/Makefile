@@ -177,7 +177,7 @@ ifeq (uv,$(firstword $(MAKECMDGOALS)))
 endif
 
 uv:
-	$(UV_RUN) $@ $(UV_ARGS)
+	$(UV) $(UV_PROJECT) $(UV_ARGS)
 
 clean:
 		rm -rf $${HOME}/.ansible/{collections,roles}
