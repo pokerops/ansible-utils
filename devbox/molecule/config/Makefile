@@ -164,14 +164,6 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 			$(MAKE) clean; \
 		fi
 
-ifeq (uv,$(firstword $(MAKECMDGOALS)))
-    UV_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-    $(eval $(subst $(space),,$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))):;@:)
-endif
-
-uv:
-	@$(UV) $(UV_PROJECT) $(UV_ARGS)
-
 clean:
 		@rm -rf $${HOME}/.ansible/{collections,roles}
 
