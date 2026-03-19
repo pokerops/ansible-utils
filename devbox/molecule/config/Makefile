@@ -143,7 +143,7 @@ ifeq (login,$(firstword $(MAKECMDGOALS)))
     $(eval $(subst $(space),,$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))):;@:)
 endif
 
-test dependency create prepare converge idempotence side-effect verify destroy cleanup reset list login:
+scrub:
 		@if [ -d .venv ]; then \
 		  find ${PROJECT_ROOT}/.venv -type d -name ansible_collections | xargs -r -- rm -r; \
 		fi
@@ -156,10 +156,28 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 				ln -sf $$(pwd) $${ROLE_LINK} ; \
 			fi; \
 		fi
+
+test dependency create prepare converge idempotence side-effect verify destroy cleanup reset list login: scrub
 		$(UV_RUN) molecule $@ -s $(MOLECULE_SCENARIO) $(LOGIN_ARGS);
 		@if [ "$@" = "destroy" ] || [ "$@" = "cleanup" ] || [ "$@" = "reset" ]; then \
 			$(MAKE) clean; \
 		fi
+
+ifeq (molecule,$(firstword $(MAKECMDGOALS)))
+    MOLECULE_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+    $(eval $(subst $(space),,$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))):;@:)
+endif
+
+molecule:
+		$(UV_RUN) $@ -s $(MOLECULE_SCENARIO) $(MOLECULE_ARGS)
+
+ifeq (uv,$(firstword $(MAKECMDGOALS)))
+    UV_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+    $(eval $(subst $(space),,$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))):;@:)
+endif
+
+uv:
+	$(UV_RUN) $@ $(UV_ARGS)
 
 clean:
 		rm -rf $${HOME}/.ansible/{collections,roles}
