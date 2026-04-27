@@ -37,9 +37,7 @@ uv add --group dev package@latest  # Add to dev dependency group
 **Updating All Dependencies to Latest Versions:**
 
 ```bash
-make update              # Updates to latest versions and shows formatted output for pyproject.toml
-make sync                # Sync dependencies after manual pyproject.toml update
-make clean               # Clean up generated files
+just update              # Updates to latest versions and shows formatted output for pyproject.toml
 ```
 
 ### Core Development Commands
@@ -107,9 +105,9 @@ molecule test            # Run full test suite
 ### Configuration Files
 
 - `devbox.json` - Main devbox configuration, includes molecule plugin
-- `devbox/molecule/plugin.json` - Molecule-specific devbox environment with Python 3.13, uv, make, and testing tools
-- `.ansible-lint.yml` - Ansible-lint configuration (skips run-once[task] rule)
-- `actions/.yamllint` - YAML linting rules with 160 character line length
+- `devbox/molecule/plugin.json` - Molecule-specific devbox environment with Python, uv, make, and testing tools
+- `.ansible-lint.yml` - Ansible-lint configuration
+- `actions/.yamllint` - YAML linting rules
 
 ### Key Dependencies
 
