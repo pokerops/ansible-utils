@@ -34,13 +34,11 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Install just
-        run: sudo apt-get update && sudo apt-get install -y just yq
-
       - name: Run just configure
         run: just configure
-          GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
-          GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+        env:
+          GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
       - name: Run make requirements
         uses: ./
@@ -76,8 +74,9 @@ jobs:
 
       - name: Run just configure
         run: just configure
-          GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
-          GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+        env:
+          GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
       - name: Run make ${{matrix.target}}
         uses: ./
@@ -104,8 +103,9 @@ jobs:
 
       - name: Run just configure
         run: just configure
-          GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
-          GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+        env:
+          GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
       - name: Run make ${{matrix.target}}
         uses: ./
@@ -128,9 +128,10 @@ jobs:
         uses: ./
         with:
           run: just configure
-            GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
-            GIT_BRANCH=${{ github.head_ref || github.ref_name }}
           cache: "false"
+          env:
+            GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+            GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
       - name: Run make version-check
         uses: ./
@@ -156,9 +157,10 @@ jobs:
         uses: ./
         with:
           run: just configure
-            GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
-            GIT_BRANCH=${{ github.head_ref || github.ref_name }}
           cache: "false"
+          env:
+            GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+            GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
       - name: Run make version-check
         uses: ./
@@ -192,9 +194,10 @@ jobs:
         uses: ./
         with:
           run: just configure
-            GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
-            GIT_BRANCH=${{ github.head_ref || github.ref_name }}
           cache: "false"
+          env:
+            GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+            GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
       # HEAD_SHA is set to commit 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21, which is the last release before version 0.0.3.
       # This is used for downgrade testing to ensure version-check fails as expected.

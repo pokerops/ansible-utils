@@ -1,7 +1,12 @@
 set shell := ["bash", "-cu"]
 
-GIT_REPO := `git config --get remote.origin.url | sed -E 's#^git@github.com:##; s#\.git$##'`
-GIT_BRANCH := `printenv GIT_BRANCH 2>/dev/null || git rev-parse --abbrev-ref HEAD`
+GIT_REPO := env_var_or_default(
+  "GIT_REPO",
+  `git config --get remote.origin.url | sed -E 's#^git@github.com:##; s#\.git$##'`)
+GIT_BRANCH := env_var_or_default(
+  "GIT_BRANCH",
+  `printenv GIT_BRANCH 2>/dev/null || git rev-parse --abbrev-ref HEAD`)
+
 MAIN_DEPS := `tomlq -r '.project.dependencies[]' pyproject.toml | \
     grep -v '^git+' | \
     sed 's/@latest$//' | \
