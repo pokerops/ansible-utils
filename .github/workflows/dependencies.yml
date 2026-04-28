@@ -13,5 +13,8 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
+      - name: Install just
+        run: sudo apt-get update && sudo apt-get install -y just
+
       - name: Run just check deps
         run: just check-deps
