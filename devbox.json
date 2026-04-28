@@ -6,9 +6,6 @@
     "tomlq": "latest"
   },
   "shell": {
-    "scripts": {
-      "make": "just"
-    },
     "init_hook": ["alias make='just'"]
   }
 }

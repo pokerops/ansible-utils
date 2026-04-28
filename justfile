@@ -24,7 +24,7 @@ PINNED_DEPS := `tomlq -r '.project.dependencies[]' pyproject.toml | \
     tr '\n' ' '`
 
 # Update all dependencies to latest versions
-upgrade_deps:
+upgrade-deps:
     @echo "Updating dependencies to latest versions..."
     uv sync --upgrade
     @if uv sync --upgrade; then \
@@ -36,7 +36,7 @@ upgrade_deps:
     echo {{MAIN_DEPS}} | xargs -r uv remove || true
     echo {{MAIN_DEPS}} | xargs -r uv add
 
-update_deps:
+update-deps:
     @echo {{PINNED_DEPS}}
     @echo "Updating dependencies to latest versions..."
     echo {{MAIN_DEPS}} | xargs -r uv remove || true
@@ -44,7 +44,7 @@ update_deps:
     uv lock --upgrade || true
 
 # Check for unpinned dependencies
-check_deps:
+check-deps:
     #!/usr/bin/env bash
     set -euo pipefail
     echo "Checking for unpinned dependencies..."
@@ -77,8 +77,8 @@ lock:
         echo "No versions found to update"
     fi
 
-update: update_deps lock
-upgrade: upgrade_deps lock
+update: update-deps lock
+upgrade: upgrade-deps lock
 
 # Update workflow config files to use current branch
 configure:

@@ -18,11 +18,11 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make ${{matrix.target}}
+      - name: Run just ${{matrix.target}}
         uses: ./
         with:
           checkout: false
-          run: "make ${{matrix.target}}"
+          run: "just ${{matrix.target}}"
           cache: "false"
 
   build:
@@ -31,8 +31,8 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make configure
-        run: make configure
+      - name: Run just configure
+        run: just configure
           GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
           GIT_BRANCH=${{ github.head_ref || github.ref_name }}
 
@@ -65,8 +65,8 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make configure
-        run: make configure
+      - name: Run just configure
+        run: just configure
           GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
           GIT_BRANCH=${{ github.head_ref || github.ref_name }}
 
@@ -90,8 +90,8 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make configure
-        run: make configure
+      - name: Run just configure
+        run: just configure
           GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
           GIT_BRANCH=${{ github.head_ref || github.ref_name }}
 
@@ -109,10 +109,10 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make configure
+      - name: Run just configure
         uses: ./
         with:
-          run: make configure
+          run: just configure
             GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
             GIT_BRANCH=${{ github.head_ref || github.ref_name }}
           cache: "false"
@@ -134,10 +134,10 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make configure
+      - name: Run just configure
         uses: ./
         with:
-          run: make configure
+          run: just configure
             GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
             GIT_BRANCH=${{ github.head_ref || github.ref_name }}
           cache: "false"
@@ -167,10 +167,10 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make configure
+      - name: Run just configure
         uses: ./
         with:
-          run: make configure
+          run: just configure
             GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
             GIT_BRANCH=${{ github.head_ref || github.ref_name }}
           cache: "false"
