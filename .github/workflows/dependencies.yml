@@ -13,8 +13,5 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Install dasel
-        run: sudo apt-get update && sudo apt-get install -y dasel
-
       - name: Run just check deps
         run: just check-deps
