@@ -176,10 +176,10 @@ jobs:
         id: check_fail
 
       - name: Check version-check result
-        if: steps.check_fail.outcome == 'failure'
+        if: steps.check_fail.outcome == 'success'
         run: |
-          echo "Version check failed as expected because no version change was made."
-          exit 0
+          echo "Version check dit not signal failure on missing version change."
+          exit 1
 
   version-downgrade:
     runs-on: ubuntu-latest
@@ -215,7 +215,7 @@ jobs:
         id: check_fail
 
       - name: Check version-check result
-        if: steps.check_fail.outcome == 'failure'
+        if: steps.check_fail.outcome == 'success'
         run: |
-          echo "Version check failed as expected because version was downgraded."
-          exit 0
+          echo "Version check dit not signal failure on version downgrade."
+          exit 1
