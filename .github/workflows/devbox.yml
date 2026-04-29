@@ -165,7 +165,7 @@ jobs:
           GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
-      - name: Run make version-check
+      - name: Run make version-check on unchanged version
         uses: ./
         with:
           checkout: false
@@ -175,14 +175,7 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        continue-on-error: true
         id: check_fail
-
-      - name: Check version-check result
-        if: steps.check_fail.outcome == 'success'
-        run: |
-          echo "Version check dit not signal failure on missing version change."
-          exit 1
 
   version-downgrade:
     runs-on: ubuntu-latest
