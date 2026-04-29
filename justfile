@@ -87,6 +87,7 @@ upgrade: upgrade-deps lock
 
 # Update workflow config files to use current branch
 configure:
-    sed -i \
+    sed -i.bak \
         -e 's#"\(pokerops-ansible-utils@git+https://github.com\).*#"\1/{{GIT_REPO}}@{{GIT_BRANCH}}"#' \
         devbox/molecule/config/pyproject.toml
+    rm -f devbox/molecule/config/pyproject.toml.bak
