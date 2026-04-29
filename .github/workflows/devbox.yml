@@ -18,11 +18,14 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make ${{matrix.target}}
+      - name: Install just
+        run: sudo apt-get update && sudo apt-get install -y just yq
+
+      - name: Run just ${{matrix.target}}
         uses: ./
         with:
           checkout: false
-          run: "make ${{matrix.target}}"
+          run: "just ${{matrix.target}}"
           cache: "false"
 
   build:
@@ -31,10 +34,14 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make configure
-        run: make configure
-          GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
-          GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+      - name: Install just
+        run: sudo apt-get update && sudo apt-get install -y just yq
+
+      - name: Run just configure
+        run: just configure
+        env:
+          GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
       - name: Run make requirements
         uses: ./
@@ -65,10 +72,14 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make configure
-        run: make configure
-          GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
-          GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+      - name: Install just
+        run: sudo apt-get update && sudo apt-get install -y just yq
+
+      - name: Run just configure
+        run: just configure
+        env:
+          GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
       - name: Run make ${{matrix.target}}
         uses: ./
@@ -90,10 +101,14 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make configure
-        run: make configure
-          GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
-          GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+      - name: Install just
+        run: sudo apt-get update && sudo apt-get install -y just yq
+
+      - name: Run just configure
+        run: just configure
+        env:
+          GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
       - name: Run make ${{matrix.target}}
         uses: ./
@@ -109,13 +124,17 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make configure
+      - name: Install just
+        run: sudo apt-get update && sudo apt-get install -y just yq
+
+      - name: Run just configure
         uses: ./
         with:
-          run: make configure
-            GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
-            GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+          run: just configure
           cache: "false"
+        env:
+          GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
       - name: Run make version-check
         uses: ./
@@ -134,19 +153,23 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make configure
+      - name: Install just
+        run: sudo apt-get update && sudo apt-get install -y just yq
+
+      - name: Run just configure
         uses: ./
         with:
-          run: make configure
-            GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
-            GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+          run: just configure
           cache: "false"
+        env:
+          GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
-      - name: Run make version-check
+      - name: Run make version-check on unchanged version
         uses: ./
         with:
           checkout: false
-          run: make version-check
+          run: make version-check GALAXY_FILE=galaxy.yml GALAXY_PATH=tests/collection/galaxy.yml
           path: tests/collection
           cache: "false"
         env:
@@ -155,11 +178,11 @@ jobs:
         continue-on-error: true
         id: check_fail
 
-      - name: Check version-check result
-        if: steps.check_fail.outcome == 'failure'
+      - name: Validate version-check result
+        if: steps.check_fail.outcome == 'success'
         run: |
-          echo "Version check failed as expected because no version change was made."
-          exit 0
+          echo "Version check dit not signal failure on missing version update."
+          exit 1
 
   version-downgrade:
     runs-on: ubuntu-latest
@@ -167,13 +190,17 @@ jobs:
       - name: Check out the codebase
         uses: actions/checkout@v5
 
-      - name: Run make configure
+      - name: Install just
+        run: sudo apt-get update && sudo apt-get install -y just yq
+
+      - name: Run just configure
         uses: ./
         with:
-          run: make configure
-            GIT_REPO=${{ github.event.pull_request.head.repo.full_name }}
-            GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+          run: just configure
           cache: "false"
+        env:
+          GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
       # HEAD_SHA is set to commit 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21, which is the last release before version 0.0.3.
       # This is used for downgrade testing to ensure version-check fails as expected.
@@ -181,7 +208,7 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: make version-check
+          run: make version-check GALAXY_FILE=galaxy.yml GALAXY_PATH=tests/collection/galaxy.yml
           path: tests/collection
           cache: "false"
         env:
@@ -190,8 +217,8 @@ jobs:
         continue-on-error: true
         id: check_fail
 
-      - name: Check version-check result
-        if: steps.check_fail.outcome == 'failure'
+      - name: Validate version-check result
+        if: steps.check_fail.outcome == 'success'
         run: |
-          echo "Version check failed as expected because version was downgraded."
-          exit 0
+          echo "Version check dit not signal failure on version downgrade."
+          exit 1

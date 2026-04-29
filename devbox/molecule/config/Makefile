@@ -18,9 +18,9 @@ UBUNTU_RELEASE ?= noble
 UBUNTU_KVM_IMAGE = https://cloud-images.ubuntu.com/${UBUNTU_RELEASE}/current/${UBUNTU_RELEASE}-server-cloudimg-amd64.img
 MOLECULE_KVM_IMAGE ?= $(UBUNTU_KVM_IMAGE)
 GALAXY_API_KEY ?=
-GALAXY_PATH = galaxy.yml
-GALAXY_FILE = ${DEVBOX_PROJECT_ROOT}/$(GALAXY_PATH)
-RUNTIME_FILE= ${DEVBOX_PROJECT_ROOT}/meta/runtime.yml
+GALAXY_PATH ?= galaxy.yml
+GALAXY_FILE ?= ${DEVBOX_PROJECT_ROOT}/$(GALAXY_PATH)
+RUNTIME_FILE = ${DEVBOX_PROJECT_ROOT}/meta/runtime.yml
 META_FILE = ${DEVBOX_PROJECT_ROOT}/meta/main.yml
 REQUIREMENTS_FILE = ${DEVBOX_PROJECT_ROOT}/requirements.yml
 VENV_DIR = ${DEVBOX_PROJECT_ROOT}/.venv
@@ -36,6 +36,7 @@ VERSION_CHECK_ARGS ?=
 
 debug:
 	@echo "VENV_DIR=$(VENV_DIR)"
+	@echo "GALAXY_PATH=$(GALAXY_PATH)"
 	@echo "GALAXY_FILE=$(GALAXY_FILE)"
 	@echo "RUNTIME_FILE=$(RUNTIME_FILE)"
 	@echo "META_FILE=$(META_FILE)"
@@ -190,26 +191,24 @@ publish: build
 	fi
 
 version-check:
-	if [ -z "$${BASE_SHA}" ] || [ -z "$${HEAD_SHA}" ]; then \
-	  BASE_SHA=$$(git rev-parse master); \
-		HEAD_SHA=$$(git rev-parse HEAD); \
-	fi; \
-	if [ "$${BASE_SHA}" = "$${HEAD_SHA}" ]; then \
-		echo "No changes detected between base ($${BASE_SHA}) and head ($${HEAD_SHA})"; \
-		exit 0; \
+	if [ -z "$${BASE_SHA}" ] ; then \
+	  BASE_SHA=$$(git rev-parse origin/HEAD); \
 	fi; \
 	BASE_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${BASE_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
-	HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${HEAD_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
+	if [ -z "$${HEAD_SHA}" ]; then \
+	  HEAD_SHA=$$(git rev-parse HEAD); \
+		HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then yq -r '.version // ""' < $(GALAXY_FILE); else echo ""; fi); \
+	else \
+		HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${HEAD_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
+	fi; \
 	MIN_VERSION=$$(printf '%s\n' "$${BASE_VERSION}" "$${HEAD_VERSION}" | sort -V | head -n1); \
 	echo "Running version check for $${GALAXY_PATH} ..."; \
 	echo "BASE SHA: $${BASE_SHA}"; \
 	echo "HEAD SHA: $${HEAD_SHA}"; \
 	echo "BASE VERSION: $${BASE_VERSION}"; \
 	echo "HEAD VERSION: $${HEAD_VERSION}"; \
-	echo "$${HEAD_VERSION}"; \
-	echo "$${HEAD_VERSION}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$$'; \
 	if [ -z "$$BASE_VERSION" ]; then \
-	  echo "Skip version check when new collection is detected"; \
+	  echo "Skipping version check for new collection"; \
 	  exit 0; \
 	fi; \
 	if ! echo "$${HEAD_VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$$'; then \
@@ -224,7 +223,6 @@ version-check:
 		echo "Version has not been updated in ${GALAXY_FILE} (still $${BASE_VERSION})"; \
 		exit 1; \
 	fi; \
-	echo "Min version is $${MIN_VERSION}"; \
 	if [ "$${MIN_VERSION}" = "$${HEAD_VERSION}" ]; then \
 		echo "New version ($${HEAD_VERSION}) must be greater than base version ($${BASE_VERSION})"; \
 		exit 1; \
