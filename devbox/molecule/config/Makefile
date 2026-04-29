@@ -192,11 +192,11 @@ publish: build
 version-check:
 	if [ -z "$${BASE_SHA}" ] ; then
 	  BASE_SHA=$$(git rev-parse --abbrev-ref origin/HEAD); \
-	fi
+	fi; \
 	BASE_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${BASE_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
 	if [ -z "$${HEAD_SHA}" ]; then \
 		HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then yq -r '.version // ""' < $(GALAXY_FILE); else echo ""; fi); \
-	else
+	else \
 		HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${HEAD_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
 	else \
 	fi; \
