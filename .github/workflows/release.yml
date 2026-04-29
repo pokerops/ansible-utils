@@ -20,5 +20,5 @@ jobs:
       - name: Set up repository
         uses: pokerops/ansible-utils@master
         with:
-          run: "make publish"
+          run: "just publish"
           cache: "false"

@@ -13,5 +13,5 @@ jobs:
       - name: Lint repository
         uses: pokerops/ansible-utils@master
         with:
-          run: "make lint"
+          run: "just lint"
           cache: "false"
