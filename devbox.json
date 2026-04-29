@@ -3,7 +3,8 @@
   "include": ["path:./devbox/molecule"],
   "packages": {
     "just": "latest",
-    "tomlq": "latest"
+    "tomlq": "latest",
+    "jq": "latest"
   },
   "shell": {
     "init_hook": ["alias make='just'"]

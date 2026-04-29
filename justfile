@@ -32,11 +32,6 @@ PINNED_DEPS := `tomlq -r '.project.dependencies[]' pyproject.toml | \
 upgrade-deps:
     @echo "Updating dependencies to latest versions..."
     uv sync --upgrade
-    @if uv sync --upgrade; then \
-        echo "Dependencies updated successfully"; \
-    else \
-        exit 1; \
-    fi
     uv lock --upgrade || true
     echo {{MAIN_DEPS}} | xargs -r uv remove || true
     echo {{MAIN_DEPS}} | xargs -r uv add
