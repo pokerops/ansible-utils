@@ -146,6 +146,8 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GALAXY_PATH: tests/collection/galaxy.yml
+          GALAXY_FILE: ${{ github.workspace }}/galaxy.yml
 
   version-unchanged:
     runs-on: ubuntu-latest
@@ -175,7 +177,14 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        id: check_fail
+          GALAXY_PATH: tests/collection/galaxy.yml
+          GALAXY_FILE: ${{ github.workspace }}/galaxy.yml
+
+      - name: Validate version-check result
+        if: steps.check_fail.outcome == 'success'
+        run: |
+          echo "Version check dit not signal failure on missing version update."
+          exit 1
 
   version-downgrade:
     runs-on: ubuntu-latest
@@ -210,7 +219,7 @@ jobs:
         continue-on-error: true
         id: check_fail
 
-      - name: Check version-check result
+      - name: Validate version-check result
         if: steps.check_fail.outcome == 'success'
         run: |
           echo "Version check dit not signal failure on version downgrade."
