@@ -196,7 +196,6 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        continue-on-error: true
         id: check_fail
 
       - name: Validate ${{matrix.build}} version-check result
