@@ -18,8 +18,8 @@ MAIN_DEPS := `tomlq -r '.project.dependencies[]' pyproject.toml | \
     cut -d'=' -f1 | \
     cut -d'@' -f1 | \
     cut -d' ' -f1 | \
-    tr '\n' ' ' | \
-    uniq`
+    sort -u | \
+    paste -sd' ' -`
 PINNED_DEPS := `tomlq -r '.project.dependencies[]' pyproject.toml | \
     grep -v '^git+' | \
     cut -d' ' -f1 | \
