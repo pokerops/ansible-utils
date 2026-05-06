@@ -25,23 +25,19 @@ ROLE_DIR := DEVBOX_PROJECT_ROOT + "/roles"
 ROLE_FILE := DEVBOX_PROJECT_ROOT + "/roles.yml"
 
 GITHUB_REPOSITORY := env_var_or_default("GITHUB_REPOSITORY", `git config --get remote.origin.url | sed -E 's#(git@|https://|http://)[^/:]+[:/](.+?)(\.git)?$#\2#'`)
-GITHUB_ORGANIZATION := env_var_or_default("GITHUB_ORGANIZATION", `echo "{{GITHUB_REPOSITORY}}" | cut -d/ -f1`)
-GITHUB_REPO := env_var_or_default("GITHUB_REPO", `echo "{{GITHUB_REPOSITORY}}" | cut -d/ -f2`)
 
 VERSION_CHECK_ARGS := env_var_or_default("VERSION_CHECK_ARGS", "")
 
 debug:
-    @echo "VENV_DIR={{VENV_DIR}}"
-    @echo "GALAXY_PATH={{GALAXY_PATH}}"
-    @echo "GALAXY_FILE={{GALAXY_FILE}}"
-    @echo "RUNTIME_FILE={{RUNTIME_FILE}}"
-    @echo "META_FILE={{META_FILE}}"
-    @echo "REQUIREMENTS={{REQUIREMENTS_FILE}}"
-    @echo "ROLE_DIR={{ROLE_DIR}}"
-    @echo "ROLE_FILE={{ROLE_FILE}}"
-    @echo "GITHUB_REPOSITORY={{GITHUB_REPOSITORY}}"
-    @echo "GITHUB_ORGANIZATION={{GITHUB_ORGANIZATION}}"
-    @echo "GITHUB_REPO={{GITHUB_REPO}}"
+    @echo "VENV_DIR=${VENV_DIR}"
+    @echo "GALAXY_PATH=${GALAXY_PATH}"
+    @echo "GALAXY_FILE=${GALAXY_FILE}"
+    @echo "RUNTIME_FILE=${RUNTIME_FILE}"
+    @echo "META_FILE=${META_FILE}"
+    @echo "REQUIREMENTS=${REQUIREMENTS_FILE}"
+    @echo "ROLE_DIR=${ROLE_DIR}"
+    @echo "ROLE_FILE=${ROLE_FILE}"
+    @echo "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}"
 
 [private]
 _install-actions force:
@@ -52,28 +48,28 @@ _install-actions force:
     for action in {{.Virtenv}}/action_all_*.yml; do
         ACTION_SOURCE=$(basename "${action}")
         ACTION_PATH=".github/workflows/${ACTION_SOURCE#action_all_}"
-        if [ "{{force}}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
+        if [ "\{\{force\}\}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
             echo "Installing action to ${ACTION_PATH}"
             cp -a "${action}" "${ACTION_PATH}" || true
         fi
     done
-    if [ -f "{{GALAXY_FILE}}" ]; then
+    if [ -f "${GALAXY_FILE}" ]; then
         echo "Processing collection actions"
         for action in {{.Virtenv}}/action_collection_*.yml; do
             ACTION_SOURCE=$(basename "${action}")
             ACTION_PATH=".github/workflows/${ACTION_SOURCE#action_collection_}"
-            if [ "{{force}}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
+            if [ "\{\{force\}\}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
                 echo "Installing action to ${ACTION_PATH}"
                 cp -a "${action}" "${ACTION_PATH}" || true
             fi
         done
     fi
-    if [ -f "{{META_FILE}}" ]; then
+    if [ -f "${META_FILE}" ]; then
         echo "Processing role actions"
         for action in {{.Virtenv}}/action_role_*.yml; do
             ACTION_SOURCE=$(basename "${action}")
             ACTION_PATH=".github/workflows/${ACTION_SOURCE#action_role_}"
-            if [ "{{force}}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
+            if [ "\{\{force\}\}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
                 echo "Installing action to ${ACTION_PATH}"
                 cp -a "${action}" "${ACTION_PATH}" || true
             fi
@@ -86,9 +82,9 @@ overwrite: (_install-actions "true")
 sync:
     #!/usr/bin/env bash
     set -euo pipefail
-    {{UV_SYNC}}
-    if [ -f "{{GALAXY_FILE}}" ]; then
-        {{UV_RUN}} ansible-galaxy collection install --force-with-deps .
+    ${UV_SYNC}
+    if [ -f "${GALAXY_FILE}" ]; then
+        ${UV_RUN} ansible-galaxy collection install --force-with-deps .
     fi
 
 alias install := sync
@@ -96,33 +92,33 @@ alias install := sync
 lint: install
     #!/usr/bin/env bash
     set -euo pipefail
-    {{UV_RUN}} yamllint . -c $([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint')
-    if [ -f "{{GALAXY_FILE}}" ]; then
-        if [ ! -f "{{RUNTIME_FILE}}" ]; then
-            echo "No {{RUNTIME_FILE}} found"
-        elif [ "$(yq < {{RUNTIME_FILE}} '.requires_ansible' -r)" = "null" ]; then
-            echo "No 'requires_ansible' field found in {{RUNTIME_FILE}}"
+    ${UV_RUN} yamllint . -c $([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint')
+    if [ -f "${GALAXY_FILE}" ]; then
+        if [ ! -f "${RUNTIME_FILE}" ]; then
+            echo "No ${RUNTIME_FILE} found"
+        elif [ "$(yq < ${RUNTIME_FILE} '.requires_ansible' -r)" = "null" ]; then
+            echo "No 'requires_ansible' field found in ${RUNTIME_FILE}"
             exit 1
         fi
     fi
-    if [ -f "{{GALAXY_FILE}}" ] || [ -f "{{META_FILE}}" ]; then
-        {{UV_RUN}} ansible-lint -p . --exclude ".ansible/*"
+    if [ -f "${GALAXY_FILE}" ] || [ -f "${META_FILE}" ]; then
+        ${UV_RUN} ansible-lint -p . --exclude ".ansible/*"
     fi
 
 requirements: clean install
     #!/usr/bin/env bash
     set -euo pipefail
-    mkdir -p {{ROLE_DIR}}
-    if [ -f "{{REQUIREMENTS_FILE}}" ]; then
-        {{UV_RUN}} ansible-galaxy collection install \
+    mkdir -p ${ROLE_DIR}
+    if [ -f "${REQUIREMENTS_FILE}" ]; then
+        ${UV_RUN} ansible-galaxy collection install \
             --force-with-deps \
-            --requirements-file {{REQUIREMENTS_FILE}}
+            --requirements-file ${REQUIREMENTS_FILE}
     fi
-    if [ -f "{{ROLE_FILE}}" ]; then
-        {{UV_RUN}} ansible-galaxy role install \
+    if [ -f "${ROLE_FILE}" ]; then
+        ${UV_RUN} ansible-galaxy role install \
             --force --no-deps \
-            --roles-path {{ROLE_DIR}} \
-            --role-file {{ROLE_FILE}}
+            --roles-path ${ROLE_DIR} \
+            --role-file ${ROLE_FILE}
     fi
     find ./ -name "*.ymle*" -delete
 
@@ -138,33 +134,33 @@ build: requirements
         echo "Uncommitted build detected, please run build stage and commit changes"
         exit 1
     fi
-    if [ -f "{{GALAXY_FILE}}" ]; then
-        {{UV_RUN}} ansible-galaxy collection build --force .
+    if [ -f "${GALAXY_FILE}" ]; then
+        ${UV_RUN} ansible-galaxy collection build --force .
     else
-        echo "No {{GALAXY_FILE}} found, skipping ansible collection build"
+        echo "No ${GALAXY_FILE} found, skipping ansible collection build"
     fi
     if [ -f pyproject.toml ]; then
         echo "Building python package..."
-        {{UV_BUILD}}
+        ${UV_BUILD}
     fi
 
 deploy:
-    {{UV_RUN}} ansible-galaxy collection install --force-with-deps .
+    ${UV_RUN} ansible-galaxy collection install --force-with-deps .
 
 local:
-    {{UV_RUN}} ansible-galaxy collection install --force .
+    ${UV_RUN} ansible-galaxy collection install --force .
 
 scrub:
     #!/usr/bin/env bash
     set -euo pipefail
-    if [ -d "{{VENV_DIR}}" ]; then
-        find "{{VENV_DIR}}" -type d -name ansible_collections | xargs -r -- rm -r
+    if [ -d "${VENV_DIR}" ]; then
+        find "${VENV_DIR}" -type d -name ansible_collections | xargs -r -- rm -r
     fi
-    if [ -f "{{META_FILE}}" ]; then
-        SCENARIO_DIR="$(pwd)/molecule/{{MOLECULE_SCENARIO}}/"
+    if [ -f "${META_FILE}" ]; then
+        SCENARIO_DIR="$(pwd)/molecule/${MOLECULE_SCENARIO}/"
         if [ -d "${SCENARIO_DIR}" ]; then
             mkdir -p "${SCENARIO_DIR}/roles"
-            ROLE_LINK="${SCENARIO_DIR}/roles/$(yq -r '.galaxy_info.author' {{META_FILE}}).$(yq -r '.galaxy_info.role_name' {{META_FILE}})"
+            ROLE_LINK="${SCENARIO_DIR}/roles/$(yq -r '.galaxy_info.author' ${META_FILE}).$(yq -r '.galaxy_info.role_name' ${META_FILE})"
             rm -f "${ROLE_LINK}"
             ln -sf "$(pwd)" "${ROLE_LINK}"
         fi
@@ -172,7 +168,7 @@ scrub:
 
 [private]
 _molecule cmd *args: scrub
-    {{UV_RUN}} molecule {{cmd}} -s {{MOLECULE_SCENARIO}} {{args}}
+    ${UV_RUN} molecule \{\{cmd\}\} -s ${MOLECULE_SCENARIO} \{\{args\}\}
 
 test: (_molecule "test")
 dependency: (_molecule "dependency")
@@ -185,18 +181,18 @@ verify: (_molecule "verify")
 list: (_molecule "list")
 
 login *args: scrub
-    {{UV_RUN}} molecule login -s {{MOLECULE_SCENARIO}} {{args}}
+    ${UV_RUN} molecule login -s ${MOLECULE_SCENARIO} \{\{args\}\}
 
 destroy: scrub
-    {{UV_RUN}} molecule destroy -s {{MOLECULE_SCENARIO}}
+    ${UV_RUN} molecule destroy -s ${MOLECULE_SCENARIO}
     just clean
 
 cleanup: scrub
-    {{UV_RUN}} molecule cleanup -s {{MOLECULE_SCENARIO}}
+    ${UV_RUN} molecule cleanup -s ${MOLECULE_SCENARIO}
     just clean
 
 reset: scrub
-    {{UV_RUN}} molecule reset -s {{MOLECULE_SCENARIO}}
+    ${UV_RUN} molecule reset -s ${MOLECULE_SCENARIO}
     just clean
 
 clean:
@@ -205,25 +201,27 @@ clean:
 publish: build
     #!/usr/bin/env bash
     set -euo pipefail
-    if [ -z "{{GALAXY_API_KEY}}" ]; then
+    if [ -z "${GALAXY_API_KEY}" ]; then
         echo "GALAXY_API_KEY is not set"
         exit 1
     fi
-    if [ -f "{{GALAXY_FILE}}" ]; then
-        COLLECTION_NAMESPACE=$(yq -r '.namespace' {{GALAXY_FILE}})
-        COLLECTION_NAME=$(yq -r '.name' {{GALAXY_FILE}})
-        COLLECTION_VERSION=$(yq -r '.version' {{GALAXY_FILE}})
+    if [ -f "${GALAXY_FILE}" ]; then
+        COLLECTION_NAMESPACE=$(yq -r '.namespace' ${GALAXY_FILE})
+        COLLECTION_NAME=$(yq -r '.name' ${GALAXY_FILE})
+        COLLECTION_VERSION=$(yq -r '.version' ${GALAXY_FILE})
         echo "COLLECTION_NAMESPACE=${COLLECTION_NAMESPACE}"
         echo "COLLECTION_NAME=${COLLECTION_NAME}"
         echo "COLLECTION_VERSION=${COLLECTION_VERSION}"
-        ansible-galaxy collection publish --api-key "{{GALAXY_API_KEY}}" \
+        ansible-galaxy collection publish --api-key "${GALAXY_API_KEY}" \
             "${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-${COLLECTION_VERSION}.tar.gz"
     else
-        echo "GITHUB_REPOSITORY={{GITHUB_REPOSITORY}}"
-        echo "GITHUB_ORGANIZATION={{GITHUB_ORGANIZATION}}"
-        echo "GITHUB_REPO={{GITHUB_REPO}}"
+        GITHUB_ORGANIZATION=$(echo "${GITHUB_REPOSITORY}" | cut -d/ -f1)
+        GITHUB_REPO=$(echo "${GITHUB_REPOSITORY}" | cut -d/ -f2)
+        echo "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}"
+        echo "GITHUB_ORGANIZATION=${GITHUB_ORGANIZATION}"
+        echo "GITHUB_REPO=${GITHUB_REPO}"
         ansible-galaxy role import \
-            --api-key "{{GALAXY_API_KEY}}" {{GITHUB_ORGANIZATION}} {{GITHUB_REPO}}
+            --api-key "${GALAXY_API_KEY}" ${GITHUB_ORGANIZATION} ${GITHUB_REPO}
     fi
 
 version-check:
@@ -232,15 +230,15 @@ version-check:
     if [ -z "${BASE_SHA:-}" ]; then
         BASE_SHA=$(git rev-parse origin/HEAD)
     fi
-    BASE_VERSION=$(if [ -f "{{GALAXY_FILE}}" ]; then git show "${BASE_SHA}:{{GALAXY_PATH}}" | yq -r '.version // ""'; else echo ""; fi)
+    BASE_VERSION=$(if [ -f "${GALAXY_FILE}" ]; then git show "${BASE_SHA}:${GALAXY_PATH}" | yq -r '.version // ""'; else echo ""; fi)
     if [ -z "${HEAD_SHA:-}" ]; then
         HEAD_SHA=$(git rev-parse HEAD)
-        HEAD_VERSION=$(if [ -f "{{GALAXY_FILE}}" ]; then yq -r '.version // ""' < "{{GALAXY_FILE}}"; else echo ""; fi)
+        HEAD_VERSION=$(if [ -f "${GALAXY_FILE}" ]; then yq -r '.version // ""' < "${GALAXY_FILE}"; else echo ""; fi)
     else
-        HEAD_VERSION=$(if [ -f "{{GALAXY_FILE}}" ]; then git show "${HEAD_SHA}:{{GALAXY_PATH}}" | yq -r '.version // ""'; else echo ""; fi)
+        HEAD_VERSION=$(if [ -f "${GALAXY_FILE}" ]; then git show "${HEAD_SHA}:${GALAXY_PATH}" | yq -r '.version // ""'; else echo ""; fi)
     fi
     MIN_VERSION=$(printf '%s\n' "${BASE_VERSION}" "${HEAD_VERSION}" | sort -V | head -n1)
-    echo "Running version check for {{GALAXY_PATH}} ..."
+    echo "Running version check for ${GALAXY_PATH} ..."
     echo "BASE SHA: ${BASE_SHA}"
     echo "HEAD SHA: ${HEAD_SHA}"
     echo "BASE VERSION: ${BASE_VERSION}"
@@ -258,7 +256,7 @@ version-check:
         exit 1
     fi
     if [ "${BASE_VERSION}" = "${HEAD_VERSION}" ]; then
-        echo "Version has not been updated in {{GALAXY_FILE}} (still ${BASE_VERSION})"
+        echo "Version has not been updated in ${GALAXY_FILE} (still ${BASE_VERSION})"
         exit 1
     fi
     if [ "${MIN_VERSION}" = "${HEAD_VERSION}" ]; then
