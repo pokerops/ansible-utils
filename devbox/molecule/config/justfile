@@ -89,7 +89,7 @@ sync:
 
 alias install := sync
 
-lint: install
+lint: sync
     #!/usr/bin/env bash
     set -euo pipefail
     ${UV_RUN} yamllint . -c $([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint')
@@ -105,7 +105,7 @@ lint: install
         ${UV_RUN} ansible-lint -p . --exclude ".ansible/*"
     fi
 
-requirements: clean install
+requirements: clean sync
     #!/usr/bin/env bash
     set -euo pipefail
     mkdir -p ${ROLE_DIR}
