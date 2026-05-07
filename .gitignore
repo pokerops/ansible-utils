@@ -1,7 +1,6 @@
 *.egg-info/
 
 .ansible/
-.yamllint
 .venv/
 .vscode/
 .project
