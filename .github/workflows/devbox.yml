@@ -116,7 +116,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y just yq
 
       - name: Run ${{matrix.build}} configure target
-        run: "${{matrix.build}} configure"
+        run: just configure
         env:
           GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
@@ -144,10 +144,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y just yq
 
       - name: Run ${{matrix.build}} configure target
-        uses: ./
-        with:
-          run: "${{matrix.build}} configure"
-          cache: "false"
+        run: just configure
         env:
           GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
@@ -180,10 +177,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y just yq
 
       - name: Run just configure
-        uses: ./
-        with:
-          run: just configure
-          cache: "false"
+        run: just configure
         env:
           GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
@@ -228,10 +222,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y just yq
 
       - name: Run just configure
-        uses: ./
-        with:
-          run: just configure
-          cache: "false"
+        run: just configure
         env:
           GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
