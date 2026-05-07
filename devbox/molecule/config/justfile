@@ -127,12 +127,9 @@ build: requirements
     #!/usr/bin/env bash
     set -euo pipefail
     echo "Checking for uncommitted build changes..."
-    git status --porcelain
-    if ! git status --porcelain | \
-        grep -v "devbox/molecule/config/pyproject.toml$" | \
-        wc -l | \
-        grep -q '^0$'; then
-        echo "Uncommitted build detected, please run build stage and commit changes"
+    CHANGES=$(git status --porcelain | grep -v "devbox/molecule/config/pyproject.toml$" | wc -l)
+    if [ "${CHANGES}" -ne 0 ]; then
+        echo "Uncommitted build detected with ${CHANGES} changes, please run build stage and commit changes"
         exit 1
     fi
     if [ -f "${GALAXY_FILE}" ]; then
