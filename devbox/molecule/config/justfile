@@ -19,6 +19,7 @@ GALAXY_FILE := env_var_or_default("GALAXY_FILE", DEVBOX_PROJECT_ROOT + "/" + GAL
 RUNTIME_FILE := DEVBOX_PROJECT_ROOT + "/meta/runtime.yml"
 META_FILE := DEVBOX_PROJECT_ROOT + "/meta/main.yml"
 REQUIREMENTS_FILE := DEVBOX_PROJECT_ROOT + "/requirements.yml"
+YAMLLINT_FILE := DEVBOX_PROJECT_ROOT + "/.yamllint"
 VENV_DIR := DEVBOX_PROJECT_ROOT + "/.venv"
 ROLE_DIR := DEVBOX_PROJECT_ROOT + "/roles"
 ROLE_FILE := DEVBOX_PROJECT_ROOT + "/roles.yml"
@@ -49,7 +50,7 @@ _install-actions force:
     for action in {{.Virtenv}}/action_all_*.yml; do
         ACTION_SOURCE=$(basename "${action}")
         ACTION_PATH=".github/workflows/${ACTION_SOURCE#action_all_}"
-        if [ "{{ '{{' }}force{{ '}}' }}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
+        if [ "\{\{force\}\}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
             echo "Installing action to ${ACTION_PATH}"
             cp -a "${action}" "${ACTION_PATH}" || true
         fi
@@ -59,7 +60,7 @@ _install-actions force:
         for action in {{.Virtenv}}/action_collection_*.yml; do
             ACTION_SOURCE=$(basename "${action}")
             ACTION_PATH=".github/workflows/${ACTION_SOURCE#action_collection_}"
-            if [ "{{ '{{' }}force{{ '}}' }}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
+            if [ {{ "{{force}}" }} = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
                 echo "Installing action to ${ACTION_PATH}"
                 cp -a "${action}" "${ACTION_PATH}" || true
             fi
@@ -70,7 +71,7 @@ _install-actions force:
         for action in {{.Virtenv}}/action_role_*.yml; do
             ACTION_SOURCE=$(basename "${action}")
             ACTION_PATH=".github/workflows/${ACTION_SOURCE#action_role_}"
-            if [ "{{ '{{' }}force{{ '}}' }}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
+            if [ {{ "{{force}}" }} = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
                 echo "Installing action to ${ACTION_PATH}"
                 cp -a "${action}" "${ACTION_PATH}" || true
             fi
@@ -93,7 +94,7 @@ alias install := sync
 lint: sync
     #!/usr/bin/env bash
     set -euo pipefail
-    ${UV_RUN} yamllint . -c $([ -f .yamllint ] && echo .yamllint || echo '{{.Virtenv}}/.yamllint')
+    ${UV_RUN} yamllint . -c $([ -f ${YAMLLINT_FILE} ] && echo ${YAMLLINT_FILE} || echo '{{.Virtenv}}/.yamllint')
     if [ -f "${GALAXY_FILE}" ]; then
         if [ ! -f "${RUNTIME_FILE}" ]; then
             echo "No ${RUNTIME_FILE} found"
@@ -166,7 +167,7 @@ scrub:
 
 [private]
 _molecule cmd *args: scrub
-    CMD="${UV_RUN} molecule {{ '{{' }}cmd{{ '}}' }} -s ${MOLECULE_SCENARIO} {{ '{{' }}args{{ '}}' }}"
+    CMD={{ "${UV_RUN} molecule {{cmd}} -s ${MOLECULE_SCENARIO} {{args}}" }}
     echo ${CMD}
     ${CMD}
 
@@ -181,7 +182,7 @@ verify: (_molecule "verify")
 list: (_molecule "list")
 
 login *args: scrub
-    ${UV_RUN} molecule login -s ${MOLECULE_SCENARIO} {{ '{{' }}args{{ '}}' }}
+    ${UV_RUN} molecule login -s ${MOLECULE_SCENARIO} {{ "{{args}}" }}
 
 destroy: scrub
     ${UV_RUN} molecule destroy -s ${MOLECULE_SCENARIO}
