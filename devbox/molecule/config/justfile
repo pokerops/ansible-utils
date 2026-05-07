@@ -49,7 +49,7 @@ _install-actions force:
     for action in {{.Virtenv}}/action_all_*.yml; do
         ACTION_SOURCE=$(basename "${action}")
         ACTION_PATH=".github/workflows/${ACTION_SOURCE#action_all_}"
-        if [ "\{\{force\}\}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
+        if [ "{{ '{{' }}force{{ '}}' }}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
             echo "Installing action to ${ACTION_PATH}"
             cp -a "${action}" "${ACTION_PATH}" || true
         fi
@@ -59,7 +59,7 @@ _install-actions force:
         for action in {{.Virtenv}}/action_collection_*.yml; do
             ACTION_SOURCE=$(basename "${action}")
             ACTION_PATH=".github/workflows/${ACTION_SOURCE#action_collection_}"
-            if [ "\{\{force\}\}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
+            if [ "{{ '{{' }}force{{ '}}' }}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
                 echo "Installing action to ${ACTION_PATH}"
                 cp -a "${action}" "${ACTION_PATH}" || true
             fi
@@ -70,7 +70,7 @@ _install-actions force:
         for action in {{.Virtenv}}/action_role_*.yml; do
             ACTION_SOURCE=$(basename "${action}")
             ACTION_PATH=".github/workflows/${ACTION_SOURCE#action_role_}"
-            if [ "\{\{force\}\}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
+            if [ "{{ '{{' }}force{{ '}}' }}" = "true" ] || [ ! -f "${ACTION_PATH}" ]; then
                 echo "Installing action to ${ACTION_PATH}"
                 cp -a "${action}" "${ACTION_PATH}" || true
             fi
@@ -166,7 +166,9 @@ scrub:
 
 [private]
 _molecule cmd *args: scrub
-    ${UV_RUN} molecule \{\{cmd\}\} -s ${MOLECULE_SCENARIO} \{\{args\}\}
+    CMD="${UV_RUN} molecule {{ '{{' }}cmd{{ '}}' }} -s ${MOLECULE_SCENARIO} {{ '{{' }}args{{ '}}' }}"
+    echo ${CMD}
+    ${CMD}
 
 test: (_molecule "test")
 dependency: (_molecule "dependency")
@@ -179,7 +181,7 @@ verify: (_molecule "verify")
 list: (_molecule "list")
 
 login *args: scrub
-    ${UV_RUN} molecule login -s ${MOLECULE_SCENARIO} \{\{args\}\}
+    ${UV_RUN} molecule login -s ${MOLECULE_SCENARIO} {{ '{{' }}args{{ '}}' }}
 
 destroy: scrub
     ${UV_RUN} molecule destroy -s ${MOLECULE_SCENARIO}
