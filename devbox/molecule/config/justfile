@@ -1,9 +1,9 @@
 set shell := ["bash", "-cu"]
 set export := true
 
-UV := "uv --python-preference=only-managed"
-UV_DIRECTORY := `if [ ! -f pyproject.toml ]; then echo "--directory {{.Virtenv}}"; else echo "--directory ."; fi`
-UV_PROJECT := `if [ ! -f pyproject.toml ]; then echo "--project {{.Virtenv}}"; else echo "--project ."; fi`
+UV := "command uv --python-preference=only-managed"
+UV_DIRECTORY := `if [ ! -f pyproject.toml ]; then echo "--directory {{.Virtenv}}"; else echo "--directory ${DEVBOX_PROJECT_ROOT}"; fi`
+UV_PROJECT := `if [ ! -f pyproject.toml ]; then echo "--project {{.Virtenv}}"; else echo "--project ${DEVBOX_PROJECT_ROOT}"; fi`
 UV_RUN := UV + " " + UV_PROJECT + " run --"
 UV_BUILD := UV + " build ."
 UV_SYNC := UV + " " + UV_DIRECTORY + " sync --only-dev"
@@ -38,6 +38,8 @@ debug:
     @echo "ROLE_DIR=${ROLE_DIR}"
     @echo "ROLE_FILE=${ROLE_FILE}"
     @echo "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}"
+    @echo "UV_RUN=${UV_RUN}"
+    @echo "UV_SYNC=${UV_SYNC}"
 
 [private]
 _install-actions force:
@@ -84,7 +86,7 @@ sync:
     set -euo pipefail
     ${UV_SYNC}
     if [ -f "${GALAXY_FILE}" ]; then
-        ${UV_RUN} ansible-galaxy collection install --force-with-deps .
+        ${UV_RUN} ansible-galaxy collection install --force-with-deps ${DEVBOX_PROJECT_ROOT}
     fi
 
 alias install := sync
@@ -105,14 +107,14 @@ lint: sync
         ${UV_RUN} ansible-lint -p . --exclude ".ansible/*"
     fi
 
-requirements: clean sync
+requirements: debug clean sync
     #!/usr/bin/env bash
     set -euo pipefail
     mkdir -p ${ROLE_DIR}
     if [ -f "${REQUIREMENTS_FILE}" ]; then
-        ${UV_RUN} ansible-galaxy collection install \
-            --force-with-deps \
-            --requirements-file ${REQUIREMENTS_FILE}
+        CMD="${UV_RUN} ansible-galaxy collection install --force-with-deps --requirements-file requirements.yml"
+        echo ${CMD}
+        ${CMD}
     fi
     if [ -f "${ROLE_FILE}" ]; then
         ${UV_RUN} ansible-galaxy role install \
