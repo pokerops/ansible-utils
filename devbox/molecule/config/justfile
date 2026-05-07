@@ -3,8 +3,7 @@ set export := true
 
 UV := "command uv --python-preference=only-managed"
 UV_DIRECTORY := `if [ ! -f pyproject.toml ]; then echo "--directory {{.Virtenv}}"; else echo "--directory ${DEVBOX_PROJECT_ROOT}"; fi`
-UV_PROJECT := `if [ ! -f pyproject.toml ]; then echo "--project {{.Virtenv}}"; else echo "--project ${DEVBOX_PROJECT_ROOT}"; fi`
-UV_RUN := UV + " " + UV_PROJECT + " run --"
+UV_RUN := UV + " " + UV_DIRECTORY + " run --"
 UV_BUILD := UV + " build ."
 UV_SYNC := UV + " " + UV_DIRECTORY + " sync --only-dev"
 
