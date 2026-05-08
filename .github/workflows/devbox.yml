@@ -30,6 +30,11 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build:
+          - make
+          - just
     steps:
       - name: Check out the codebase
         uses: actions/checkout@v5
@@ -43,20 +48,20 @@ jobs:
           GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
-      - name: Run make requirements
+      - name: Run ${{matrix.build}} requirements target
         uses: ./
         with:
           checkout: false
-          run: "make requirements"
+          run: "${{matrix.build}} requirements"
           path: tests/collection
           cache: "false"
 
-      - name: Run make build
+      - name: Run ${{matrix.build}} build target
         uses: ./
         with:
           checkout: false
           install: false
-          run: "make install build"
+          run: "${{matrix.build}} install build"
           path: tests/collection
           cache: "false"
 
@@ -64,6 +69,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        build:
+          - make
+          - just
         target:
           - lint
           - test
@@ -81,11 +89,11 @@ jobs:
           GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
-      - name: Run make ${{matrix.target}}
+      - name: Run ${{matrix.build}} ${{matrix.target}} target
         uses: ./
         with:
           checkout: false
-          run: "make install ${{matrix.target}}"
+          run: "${{matrix.build}} install ${{matrix.target}}"
           path: tests/collection
           cache: "false"
 
@@ -93,6 +101,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        build:
+          - make
+          - just
         target:
           - lint
           - test
@@ -104,43 +115,60 @@ jobs:
       - name: Install just
         run: sudo apt-get update && sudo apt-get install -y just yq
 
-      - name: Run just configure
+      - name: Run ${{matrix.build}} configure target
         run: just configure
         env:
           GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
-      - name: Run make ${{matrix.target}}
+      - name: Run ${{matrix.build}} ${{matrix.target}}
         uses: ./
         with:
           checkout: false
-          run: "make install ${{matrix.target}}"
+          run: "${{matrix.build}} install ${{matrix.target}}"
           path: tests/role
           cache: "false"
 
   version-update:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build:
+          - make
+          - just
     steps:
       - name: Check out the codebase
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Install just
         run: sudo apt-get update && sudo apt-get install -y just yq
 
-      - name: Run just configure
-        uses: ./
-        with:
-          run: just configure
-          cache: "false"
+      - name: Run ${{matrix.build}} configure target
+        run: just configure
         env:
           GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
-      - name: Run make version-check
+      - name: Run ${{matrix.build}} version-check target
+        if: matrix.build == 'make'
         uses: ./
         with:
           checkout: false
-          run: make version-check GALAXY_FILE=galaxy.yml GALAXY_PATH=tests/collection/galaxy.yml
+          run: "${{matrix.build}} version-check GALAXY_FILE=galaxy.yml GALAXY_PATH=tests/collection/galaxy.yml"
+          path: tests/collection
+          cache: "false"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+      - name: Run ${{matrix.build}} version-check target
+        if: matrix.build == 'just'
+        uses: ./
+        with:
+          checkout: false
+          run: "${{matrix.build}} --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml version-check"
           path: tests/collection
           cache: "false"
         env:
@@ -149,76 +177,126 @@ jobs:
 
   version-unchanged:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build:
+          - make
+          - just
     steps:
       - name: Check out the codebase
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Install just
         run: sudo apt-get update && sudo apt-get install -y just yq
 
       - name: Run just configure
-        uses: ./
-        with:
-          run: just configure
-          cache: "false"
+        run: just configure
         env:
           GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
-      - name: Run make version-check on unchanged version
+      - name: Run ${{matrix.build}} version-check on unchanged version
+        if: matrix.build == 'make'
         uses: ./
         with:
           checkout: false
-          run: make version-check GALAXY_FILE=galaxy.yml GALAXY_PATH=tests/collection/galaxy.yml
+          run: "${{matrix.build}} version-check GALAXY_FILE=galaxy.yml GALAXY_PATH=tests/collection/galaxy.yml"
           path: tests/collection
           cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         continue-on-error: true
-        id: check_fail
+        id: check_fail_make
 
-      - name: Validate version-check result
-        if: steps.check_fail.outcome == 'success'
+      - name: Validate ${{matrix.build}} version-check result
+        if: matrix.build == 'make' && steps.check_fail_make.outcome == 'success'
+        run: |
+          echo "Version check dit not signal failure on missing version update."
+          exit 1
+
+      - name: Run ${{matrix.build}} version-check on unchanged version
+        if: matrix.build == 'just'
+        uses: ./
+        with:
+          checkout: false
+          run: "${{matrix.build}} --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml version-check"
+          path: tests/collection
+          cache: "false"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        continue-on-error: true
+        id: check_fail_just
+
+      - name: Validate ${{matrix.build}} version-check result
+        if: matrix.build == 'just' && steps.check_fail_just.outcome == 'success'
         run: |
           echo "Version check dit not signal failure on missing version update."
           exit 1
 
   version-downgrade:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build:
+          - make
+          - just
     steps:
       - name: Check out the codebase
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Install just
         run: sudo apt-get update && sudo apt-get install -y just yq
 
       - name: Run just configure
-        uses: ./
-        with:
-          run: just configure
-          cache: "false"
+        run: just configure
         env:
           GIT_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
 
       # HEAD_SHA is set to commit 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21, which is the last release before version 0.0.3.
       # This is used for downgrade testing to ensure version-check fails as expected.
-      - name: Run make version-check
+      - name: Run ${{matrix.build}} version-check
+        if: matrix.build == 'make'
         uses: ./
         with:
           checkout: false
-          run: make version-check GALAXY_FILE=galaxy.yml GALAXY_PATH=tests/collection/galaxy.yml
+          run: "${{matrix.build}} version-check GALAXY_FILE=galaxy.yml GALAXY_PATH=tests/collection/galaxy.yml"
           path: tests/collection
           cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21
         continue-on-error: true
-        id: check_fail
+        id: check_fail_make
 
-      - name: Validate version-check result
-        if: steps.check_fail.outcome == 'success'
+      - name: Validate ${{matrix.build}} version-check result
+        if: matrix.build == 'make' && steps.check_fail_make.outcome == 'success'
+        run: |
+          echo "Version check dit not signal failure on version downgrade."
+          exit 1
+
+      - name: Run ${{matrix.build}} version-check
+        if: matrix.build == 'just'
+        uses: ./
+        with:
+          checkout: false
+          run: "${{matrix.build}} --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml version-check"
+          path: tests/collection
+          cache: "false"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_SHA: 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21
+        continue-on-error: true
+        id: check_fail_just
+
+      - name: Validate ${{matrix.build}} version-check result
+        if: matrix.build == 'just' && steps.check_fail_just.outcome == 'success'
         run: |
           echo "Version check dit not signal failure on version downgrade."
           exit 1

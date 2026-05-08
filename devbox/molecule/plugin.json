@@ -14,10 +14,12 @@
   "env": {
     "VIRTENV": "{{.Virtenv}}",
     "PYPROJECT": "{{.Virtenv}}",
-    "MAKEFILE": "{{.Virtenv}}/Makefile"
+    "MAKEFILE": "{{.Virtenv}}/Makefile",
+    "JUSTFILE": "{{.Virtenv}}/justfile"
   },
   "create_files": {
     "{{.Virtenv}}/Makefile": "config/Makefile",
+    "{{.Virtenv}}/justfile": "config/justfile",
     "{{.Virtenv}}/pyproject.toml": "config/pyproject.toml",
     "{{.Virtenv}}/.yamllint": "config/.yamllint",
     "{{.Virtenv}}/action_all_lint.yml": "config/lint.yml",
@@ -30,6 +32,7 @@
     "init_hook": [
       "if [ -f .venv/bin/activate ]; then . .venv/bin/activate; fi",
       "echo Run 'make (init|overwrite)' to initialize or update the testing environment",
+      "alias just='\\just $( ([ -f justfile ] || echo \"--justfile {{.Virtenv}}/justfile --working-directory .\") )'",
       "alias make='\\make $( ([ -f Makefile ] || echo \"-f {{.Virtenv}}/Makefile\") )'",
       "alias uv='\\uv --python-preference=only-managed $( ([ -f pyproject.toml ] || echo \"--directory {{.Virtenv}}\") )'"
     ],

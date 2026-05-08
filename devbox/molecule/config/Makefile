@@ -220,7 +220,7 @@ version-check:
 		exit 1; \
 	fi; \
 	if [ "$${BASE_VERSION}" = "$${HEAD_VERSION}" ]; then \
-		echo "Version has not been updated in ${GALAXY_FILE} (still $${BASE_VERSION})"; \
+		echo "Version has not been updated in $(GALAXY_FILE) (still $${BASE_VERSION})"; \
 		exit 1; \
 	fi; \
 	if [ "$${MIN_VERSION}" = "$${HEAD_VERSION}" ]; then \
