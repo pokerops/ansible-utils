@@ -168,14 +168,12 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: "${{matrix.build}} version-check"
+          run: "${{matrix.build}} --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml version-check"
           path: tests/collection
           cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          GALAXY_FILE: galaxy.yml
-          GALAXY_PATH: tests/collection/galaxy.yml
 
   version-unchanged:
     runs-on: ubuntu-latest
@@ -224,14 +222,12 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: "${{matrix.build}} version-check"
+          run: "${{matrix.build}} --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml version-check"
           path: tests/collection
           cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          GALAXY_FILE: galaxy.yml
-          GALAXY_PATH: tests/collection/galaxy.yml
         continue-on-error: true
         id: check_fail_just
 
@@ -290,14 +286,12 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: "${{matrix.build}} version-check"
+          run: "${{matrix.build}} --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml version-check"
           path: tests/collection
           cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21
-          GALAXY_FILE: galaxy.yml
-          GALAXY_PATH: tests/collection/galaxy.yml
         continue-on-error: true
         id: check_fail_just
 
