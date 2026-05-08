@@ -166,7 +166,7 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: "${{matrix.build}} version-check --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml"
+          run: "${{matrix.build}} --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml version-check"
           path: tests/collection
           cache: "false"
         env:
@@ -218,7 +218,7 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: "${{matrix.build}} version-check --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml"
+          run: "${{matrix.build}} --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml version-check"
           path: tests/collection
           cache: "false"
         env:
@@ -280,7 +280,7 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: "${{matrix.build}} version-check --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml"
+          run: "${{matrix.build}} --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml version-check"
           path: tests/collection
           cache: "false"
         env:
