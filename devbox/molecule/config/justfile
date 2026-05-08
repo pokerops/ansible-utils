@@ -167,9 +167,7 @@ scrub:
 
 [private]
 _molecule cmd *args: scrub
-    CMD={{ "${UV_RUN} molecule {{cmd}} -s ${MOLECULE_SCENARIO} {{args}}" }}
-    echo ${CMD}
-    ${CMD}
+    {{ "${UV_RUN} molecule {{cmd}} -s ${MOLECULE_SCENARIO} {{args}}" }}
 
 test: (_molecule "test")
 dependency: (_molecule "dependency")
