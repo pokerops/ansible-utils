@@ -4,10 +4,10 @@ set export := true
 DEVBOX_PROJECT_ROOT := env_var_or_default("DEVBOX_PROJECT_ROOT", ".")
 
 UV := "command uv --python-preference=only-managed"
-UV_DIRECTORY := `if [ ! -f pyproject.toml ]; then echo "--directory {{.Virtenv}}"; else echo "--directory ${DEVBOX_PROJECT_ROOT}"; fi`
-UV_RUN := UV + " " + UV_DIRECTORY + " run --"
+UV_PROJECT := `if [ ! -f pyproject.toml ]; then echo "--project {{.Virtenv}}"; fi`
+UV_RUN := UV + " " + UV_PROJECT + " run --"
 UV_BUILD := UV + " build ."
-UV_SYNC := UV + " " + UV_DIRECTORY + " sync --only-dev"
+UV_SYNC := UV + " " + UV_PROJECT + " sync --only-dev"
 
 MOLECULE_SCENARIO := env_var_or_default("MOLECULE_SCENARIO", "default")
 MOLECULE_LOGDIR := env_var_or_default("MOLECULE_LOGDIR", "/tmp/logs")
@@ -15,7 +15,7 @@ UBUNTU_RELEASE := env_var_or_default("UBUNTU_RELEASE", "noble")
 UBUNTU_KVM_IMAGE := "https://cloud-images.ubuntu.com/" + UBUNTU_RELEASE + "/current/" + UBUNTU_RELEASE + "-server-cloudimg-amd64.img"
 MOLECULE_KVM_IMAGE := env_var_or_default("MOLECULE_KVM_IMAGE", UBUNTU_KVM_IMAGE)
 GALAXY_API_KEY := env_var_or_default("GALAXY_API_KEY", "")
-GALAXY_PATH := env_var_or_default("GALAXY_PATH", DEVBOX_PROJECT_ROOT + "/galaxy.yml")
+GALAXY_PATH := env_var_or_default("GALAXY_PATH", "galaxy.yml")
 GALAXY_FILE := env_var_or_default("GALAXY_FILE", DEVBOX_PROJECT_ROOT + "/" + GALAXY_PATH)
 RUNTIME_FILE := DEVBOX_PROJECT_ROOT + "/meta/runtime.yml"
 META_FILE := DEVBOX_PROJECT_ROOT + "/meta/main.yml"
