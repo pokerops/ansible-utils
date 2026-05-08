@@ -205,7 +205,13 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         continue-on-error: true
-        id: check_fail
+        id: check_fail_make
+
+      - name: Validate ${{matrix.build}} version-check result
+        if: matrix.build == 'make' && steps.check_fail_make.outcome == 'success'
+        run: |
+          echo "Version check dit not signal failure on missing version update."
+          exit 1
 
       - name: Run ${{matrix.build}} version-check on unchanged version
         if: matrix.build == 'just'
@@ -219,10 +225,10 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         continue-on-error: true
-        id: check_fail
+        id: check_fail_just
 
-      - name: Validate version-check result
-        if: steps.check_fail.outcome == 'success'
+      - name: Validate ${{matrix.build}} version-check result
+        if: matrix.build == 'just' && steps.check_fail_just.outcome == 'success'
         run: |
           echo "Version check dit not signal failure on missing version update."
           exit 1
@@ -261,7 +267,13 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21
         continue-on-error: true
-        id: check_fail
+        id: check_fail_make
+
+      - name: Validate ${{matrix.build}} version-check result
+        if: matrix.build == 'make' && steps.check_fail_make.outcome == 'success'
+        run: |
+          echo "Version check dit not signal failure on version downgrade."
+          exit 1
 
       - name: Run ${{matrix.build}} version-check
         if: matrix.build == 'just'
@@ -275,10 +287,10 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21
         continue-on-error: true
-        id: check_fail
+        id: check_fail_just
 
       - name: Validate ${{matrix.build}} version-check result
-        if: steps.check_fail.outcome == 'success'
+        if: matrix.build == 'just' && steps.check_fail_just.outcome == 'success'
         run: |
           echo "Version check dit not signal failure on version downgrade."
           exit 1
