@@ -32,7 +32,7 @@
     "init_hook": [
       "if [ -f .venv/bin/activate ]; then . .venv/bin/activate; fi",
       "echo Run 'make (init|overwrite)' to initialize or update the testing environment",
-      "alias just='\\just $( ([ -f justfile ] || echo \"-f {{.Virtenv}}/justfile\") )'",
+      "alias just='\\just $( ([ -f justfile ] || echo \"--justfile {{.Virtenv}}/justfile --working-directory .\") )'",
       "alias make='\\make $( ([ -f Makefile ] || echo \"-f {{.Virtenv}}/Makefile\") )'",
       "alias uv='\\uv --python-preference=only-managed $( ([ -f pyproject.toml ] || echo \"--directory {{.Virtenv}}\") )'"
     ],
