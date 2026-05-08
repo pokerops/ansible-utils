@@ -153,14 +153,25 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: "${{matrix.build}} version-check"
+          run: "${{matrix.build}} version-check GALAXY_FILE=galaxy.yml GALAXY_PATH=tests/collection/galaxy.yml"
           path: tests/collection
           cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          GALAXY_FILE: galaxy.yml
-          GALAXY_PATH: tests/collection/galaxy.yml
+        if: matrix.build == "make"
+
+      - name: Run ${{matrix.build}} version-check target
+        uses: ./
+        with:
+          checkout: false
+          run: "${{matrix.build}} version-check --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml"
+          path: tests/collection
+          cache: "false"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        if: matrix.build == "just"
 
   version-unchanged:
     runs-on: ubuntu-latest
@@ -186,24 +197,31 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: "${{matrix.build}} version-check"
+          run: "${{matrix.build}} version-check GALAXY_FILE=galaxy.yml GALAXY_PATH=tests/collection/galaxy.yml"
           path: tests/collection
           cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          GALAXY_FILE: galaxy.yml
-          GALAXY_PATH: tests/collection/galaxy.yml
         continue-on-error: true
         id: check_fail
+        if: matrix.build == "make"
+
+      - name: Run ${{matrix.build}} version-check on unchanged version
+        uses: ./
+        with:
+          checkout: false
+          run: "${{matrix.build}} version-check --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml"
+          path: tests/collection
+          cache: "false"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        continue-on-error: true
+        id: check_fail
+        if: matrix.build == "just"
 
       - name: Validate version-check result
-        if: steps.check_fail.outcome == 'success'
-        run: |
-          echo "Version check dit not signal failure on missing version update."
-          exit 1
-
-      - name: Validate ${{matrix.build}} version-check result
         if: steps.check_fail.outcome == 'success'
         run: |
           echo "Version check dit not signal failure on missing version update."
@@ -235,16 +253,29 @@ jobs:
         uses: ./
         with:
           checkout: false
-          run: "${{matrix.build}} version-check"
+          run: "${{matrix.build}} version-check GALAXY_FILE=galaxy.yml GALAXY_PATH=tests/collection/galaxy.yml"
           path: tests/collection
           cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_SHA: 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21
-          GALAXY_FILE: galaxy.yml
-          GALAXY_PATH: tests/collection/galaxy.yml
         continue-on-error: true
         id: check_fail
+        when: matrix.build == "make"
+
+      - name: Run ${{matrix.build}} version-check
+        uses: ./
+        with:
+          checkout: false
+          run: "${{matrix.build}} version-check --set GALAXY_FILE galaxy.yml --set GALAXY_PATH tests/collection/galaxy.yml"
+          path: tests/collection
+          cache: "false"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_SHA: 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21
+        continue-on-error: true
+        id: check_fail
+        when: matrix.build == "just"
 
       - name: Validate ${{matrix.build}} version-check result
         if: steps.check_fail.outcome == 'success'
