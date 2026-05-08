@@ -261,7 +261,7 @@ jobs:
           HEAD_SHA: 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21
         continue-on-error: true
         id: check_fail
-        when: matrix.build == "make"
+        if: matrix.build == "make"
 
       - name: Run ${{matrix.build}} version-check
         uses: ./
@@ -275,7 +275,7 @@ jobs:
           HEAD_SHA: 3609fc62d3af0c1ba8cbca940abf28e2e82a6f21
         continue-on-error: true
         id: check_fail
-        when: matrix.build == "just"
+        if: matrix.build == "just"
 
       - name: Validate ${{matrix.build}} version-check result
         if: steps.check_fail.outcome == 'success'
