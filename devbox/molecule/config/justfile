@@ -130,7 +130,7 @@ build: requirements
     set -euo pipefail
     echo "Checking for uncommitted build changes..."
     CHANGES=$(git status --porcelain | grep -c -v "devbox/molecule/config/pyproject.toml$" || echo 0)
-    if [ "${CHANGES}" -ne 0 ]; then
+    if [ ${CHANGES} -ne 0 ]; then
         echo "Uncommitted build detected with ${CHANGES} changes, please run build stage and commit changes"
         exit 1
     fi
