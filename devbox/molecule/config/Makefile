@@ -194,12 +194,12 @@ version-check:
 	if [ -z "$${BASE_SHA}" ] ; then \
 	  BASE_SHA=$$(git rev-parse origin/HEAD); \
 	fi; \
-	BASE_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${BASE_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
+	BASE_VERSION=$$(if [ -f $${GALAXY_FILE} ]; then git show $${BASE_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
 	if [ -z "$${HEAD_SHA}" ]; then \
 	  HEAD_SHA=$$(git rev-parse HEAD); \
-		HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then yq -r '.version // ""' < $(GALAXY_FILE); else echo ""; fi); \
+		HEAD_VERSION=$$(if [ -f $${GALAXY_FILE} ]; then yq -r '.version // ""' < $${GALAXY_FILE}; else echo ""; fi); \
 	else \
-		HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${HEAD_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
+		HEAD_VERSION=$$(if [ -f $${GALAXY_FILE} ]; then git show $${HEAD_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
 	fi; \
 	MIN_VERSION=$$(printf '%s\n' "$${BASE_VERSION}" "$${HEAD_VERSION}" | sort -V | head -n1); \
 	echo "Running version check for $${GALAXY_PATH} ..."; \
@@ -220,7 +220,7 @@ version-check:
 		exit 1; \
 	fi; \
 	if [ "$${BASE_VERSION}" = "$${HEAD_VERSION}" ]; then \
-		echo "Version has not been updated in ${GALAXY_FILE} (still $${BASE_VERSION})"; \
+		echo "Version has not been updated in $${GALAXY_FILE} (still $${BASE_VERSION})"; \
 		exit 1; \
 	fi; \
 	if [ "$${MIN_VERSION}" = "$${HEAD_VERSION}" ]; then \
