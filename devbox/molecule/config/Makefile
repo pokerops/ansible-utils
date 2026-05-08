@@ -194,7 +194,7 @@ version-check:
 	if [ -z "$${BASE_SHA}" ] ; then \
 	  BASE_SHA=$$(git rev-parse origin/HEAD); \
 	fi; \
-	BASE_VERSION=$$(if [ -f $$(GALAXY_FILE) ]; then git show $${BASE_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
+	BASE_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then git show $${BASE_SHA}:$${GALAXY_PATH} | yq -r '.version // ""'; else echo ""; fi); \
 	if [ -z "$${HEAD_SHA}" ]; then \
 	  HEAD_SHA=$$(git rev-parse HEAD); \
 		HEAD_VERSION=$$(if [ -f $(GALAXY_FILE) ]; then yq -r '.version // ""' < $(GALAXY_FILE); else echo ""; fi); \

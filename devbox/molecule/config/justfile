@@ -182,17 +182,14 @@ list: (_molecule "list")
 login *args: scrub
     ${UV_RUN} molecule login -s ${MOLECULE_SCENARIO} {{ "{{args}}" }}
 
-destroy: scrub
+destroy: scrub && clean
     ${UV_RUN} molecule destroy -s ${MOLECULE_SCENARIO}
-    just clean
 
-cleanup: scrub
+cleanup: scrub && clean
     ${UV_RUN} molecule cleanup -s ${MOLECULE_SCENARIO}
-    just clean
 
-reset: scrub
+reset: scrub && clean
     ${UV_RUN} molecule reset -s ${MOLECULE_SCENARIO}
-    just clean
 
 clean:
     @rm -rf "${HOME}/.ansible/{collections,roles}"
