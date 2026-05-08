@@ -112,7 +112,7 @@ requirements: debug clean sync
     set -euo pipefail
     mkdir -p ${ROLE_DIR}
     if [ -f "${REQUIREMENTS_FILE}" ]; then
-        CMD="${UV_RUN} ansible-galaxy collection install --force-with-deps --requirements-file requirements.yml"
+        CMD="${UV_RUN} ansible-galaxy collection install --force-with-deps --requirements-file ${REQUIREMENTS_FILE}"
         echo ${CMD}
         ${CMD}
     fi
