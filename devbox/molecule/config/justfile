@@ -146,6 +146,7 @@ local:
     ${UV_RUN} ansible-galaxy collection install --force .
 
 scrub:
+    #!/usr/bin/env bash
     if [ -d "${VENV_DIR}" ]; then
         find "${VENV_DIR}" -type d -name ansible_collections | xargs -r -- rm -r
     fi
