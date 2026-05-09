@@ -45,7 +45,6 @@ debug:
 [private]
 _install-actions force:
     #!/usr/bin/env bash
-    set -euo pipefail
     mkdir -p .github/workflows
     echo "Processing common actions"
     for action in {{.Virtenv}}/action_all_*.yml; do
@@ -84,7 +83,6 @@ overwrite: (_install-actions "true")
 
 sync:
     #!/usr/bin/env bash
-    set -euo pipefail
     ${UV_SYNC}
     if [ -f "${GALAXY_FILE}" ]; then
         ${UV_RUN} ansible-galaxy collection install --force-with-deps ${DEVBOX_PROJECT_ROOT}
@@ -94,7 +92,6 @@ alias install := sync
 
 lint: sync
     #!/usr/bin/env bash
-    set -euo pipefail
     ${UV_RUN} yamllint . -c $([ -f ${YAMLLINT_FILE} ] && echo ${YAMLLINT_FILE} || echo '{{.Virtenv}}/.yamllint')
     if [ -f "${GALAXY_FILE}" ]; then
         if [ ! -f "${RUNTIME_FILE}" ]; then
@@ -110,7 +107,6 @@ lint: sync
 
 requirements: debug clean sync
     #!/usr/bin/env bash
-    set -euo pipefail
     mkdir -p ${ROLE_DIR}
     if [ -f "${REQUIREMENTS_FILE}" ]; then
         CMD="${UV_RUN} ansible-galaxy collection install --force-with-deps --requirements-file ${REQUIREMENTS_FILE}"
@@ -127,7 +123,6 @@ requirements: debug clean sync
 
 build: requirements
     #!/usr/bin/env bash
-    set -euo pipefail
     echo "Checking for uncommitted build changes..."
     CHANGES=$(git status --porcelain | grep -c -v "devbox/molecule/config/pyproject.toml$" || true)
     if [[ -n ${CHANGES} ]] && (( CHANGES > 0 )); then
@@ -152,52 +147,40 @@ local:
 
 scrub:
     #!/usr/bin/env bash
-    set -euo pipefail
     if [ -d "${VENV_DIR}" ]; then
         find "${VENV_DIR}" -type d -name ansible_collections | xargs -r -- rm -r
     fi
-    if [ -f "${META_FILE}" ]; then
-        SCENARIO_DIR="$(pwd)/molecule/${MOLECULE_SCENARIO}/"
-        if [ -d "${SCENARIO_DIR}" ]; then
-            mkdir -p "${SCENARIO_DIR}/roles"
-            ROLE_LINK="${SCENARIO_DIR}/roles/$(yq -r '.galaxy_info.author' ${META_FILE}).$(yq -r '.galaxy_info.role_name' ${META_FILE})"
-            rm -f "${ROLE_LINK}"
-            ln -sf "$(pwd)" "${ROLE_LINK}"
-        fi
-    fi
 
-[private]
-_molecule cmd *args: scrub
+molecule cmd *args: scrub
     {{ "${UV_RUN} molecule {{cmd}} -s ${MOLECULE_SCENARIO} {{args}}" }}
 
-test: (_molecule "test")
-dependency: (_molecule "dependency")
-create: (_molecule "create")
-prepare: (_molecule "prepare")
-converge: (_molecule "converge")
-idempotence: (_molecule "idempotence")
-side-effect: (_molecule "side-effect")
-verify: (_molecule "verify")
-list: (_molecule "list")
+test: (molecule "test")
+dependency: (molecule "dependency")
+create: (molecule "create")
+prepare: (molecule "prepare")
+converge: (molecule "converge")
+idempotence: (molecule "idempotence")
+side-effect: (molecule "side-effect")
+verify: (molecule "verify")
+list: (molecule "list")
 
-login *args: scrub
+login *args:
     ${UV_RUN} molecule login -s ${MOLECULE_SCENARIO} {{ "{{args}}" }}
 
-destroy: scrub && clean
+destroy: && clean
     ${UV_RUN} molecule destroy -s ${MOLECULE_SCENARIO}
 
-cleanup: scrub && clean
+cleanup: && clean
     ${UV_RUN} molecule cleanup -s ${MOLECULE_SCENARIO}
 
-reset: scrub && clean
+reset: && clean
     ${UV_RUN} molecule reset -s ${MOLECULE_SCENARIO}
 
-clean:
-    @rm -rf "${HOME}/.ansible/{collections,roles}"
+clean: scrub
+    rm -rf "${HOME}/.ansible/{collections,roles}"
 
 publish: build
     #!/usr/bin/env bash
-    set -euo pipefail
     if [ -z "${GALAXY_API_KEY}" ]; then
         echo "GALAXY_API_KEY is not set"
         exit 1
@@ -223,7 +206,6 @@ publish: build
 
 version-check:
     #!/usr/bin/env bash
-    set -euo pipefail
     if [ -z "${BASE_SHA:-}" ]; then
         BASE_SHA=$(git rev-parse origin/HEAD)
     fi
