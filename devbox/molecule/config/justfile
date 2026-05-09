@@ -166,19 +166,18 @@ scrub:
         fi
     fi
 
-[private]
-_molecule cmd *args: scrub
+molecule cmd *args:
     {{ "${UV_RUN} molecule {{cmd}} -s ${MOLECULE_SCENARIO} {{args}}" }}
 
-test: (_molecule "test")
-dependency: (_molecule "dependency")
-create: (_molecule "create")
-prepare: (_molecule "prepare")
-converge: (_molecule "converge")
-idempotence: (_molecule "idempotence")
-side-effect: (_molecule "side-effect")
-verify: (_molecule "verify")
-list: (_molecule "list")
+test: (molecule "test")
+dependency: (molecule "dependency")
+create: (molecule "create")
+prepare: (molecule "prepare")
+converge: (molecule "converge")
+idempotence: (molecule "idempotence")
+side-effect: (molecule "side-effect")
+verify: (molecule "verify")
+list: (molecule "list")
 
 login *args: scrub
     ${UV_RUN} molecule login -s ${MOLECULE_SCENARIO} {{ "{{args}}" }}
