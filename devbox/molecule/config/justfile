@@ -4,10 +4,10 @@ set export := true
 DEVBOX_PROJECT_ROOT := env_var_or_default("DEVBOX_PROJECT_ROOT", ".")
 
 UV := "command uv --python-preference=only-managed"
-UV_PROJECT := `if [ ! -f pyproject.toml ]; then echo "--project {{.Virtenv}}"; fi`
-UV_RUN := UV + " " + UV_PROJECT + " run --"
+UV_OPTION_PROJECT := `if [ ! -f pyproject.toml ]; then echo "--project {{.Virtenv}}"; fi`
+UV_RUN := UV + " " + UV_OPTION_PROJECT + " run --"
 UV_BUILD := UV + " build ."
-UV_SYNC := UV + " " + UV_PROJECT + " sync --only-dev"
+UV_SYNC := UV + " " + UV_OPTION_PROJECT + " sync --only-dev"
 
 MOLECULE_SCENARIO := env_var_or_default("MOLECULE_SCENARIO", "default")
 MOLECULE_LOGDIR := env_var_or_default("MOLECULE_LOGDIR", "/tmp/logs")
