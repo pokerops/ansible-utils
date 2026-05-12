@@ -82,7 +82,7 @@ init: (_install-actions "false")
 overwrite: (_install-actions "true")
 
 sync:
-    ${UV_SYNC}
+    @${UV_SYNC}
 
 alias install := sync
 
@@ -136,10 +136,10 @@ build: requirements
     fi
 
 deploy:
-    ${UV_RUN} ansible-galaxy collection install --force-with-deps .
+    @${UV_RUN} ansible-galaxy collection install --force-with-deps .
 
 local:
-    ${UV_RUN} ansible-galaxy collection install --force .
+    @${UV_RUN} ansible-galaxy collection install --force .
 
 scrub:
     #!/usr/bin/env bash
@@ -148,7 +148,7 @@ scrub:
     fi
 
 molecule cmd *args: scrub
-    {{ "${UV_RUN} molecule {{cmd}} -s ${MOLECULE_SCENARIO} {{args}}" }}
+    @{{ "${UV_RUN} molecule {{cmd}} -s ${MOLECULE_SCENARIO} {{args}}" }}
 
 test: (molecule "test")
 dependency: (molecule "dependency")
@@ -161,19 +161,19 @@ verify: (molecule "verify")
 list: (molecule "list")
 
 login *args:
-    ${UV_RUN} molecule login -s ${MOLECULE_SCENARIO} {{ "{{args}}" }}
+    @${UV_RUN} molecule login -s ${MOLECULE_SCENARIO} {{ "{{args}}" }}
 
 destroy: && clean
-    ${UV_RUN} molecule destroy -s ${MOLECULE_SCENARIO}
+    @${UV_RUN} molecule destroy -s ${MOLECULE_SCENARIO}
 
 cleanup: && clean
-    ${UV_RUN} molecule cleanup -s ${MOLECULE_SCENARIO}
+    @${UV_RUN} molecule cleanup -s ${MOLECULE_SCENARIO}
 
 reset: && clean
-    ${UV_RUN} molecule reset -s ${MOLECULE_SCENARIO}
+    @${UV_RUN} molecule reset -s ${MOLECULE_SCENARIO}
 
 clean: scrub
-    rm -rf "${HOME}/.ansible/{collections,roles}"
+    @rm -rf "${HOME}/.ansible/{collections,roles}"
 
 publish: build
     #!/usr/bin/env bash
