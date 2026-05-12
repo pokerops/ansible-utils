@@ -82,11 +82,7 @@ init: (_install-actions "false")
 overwrite: (_install-actions "true")
 
 sync:
-    #!/usr/bin/env bash
     ${UV_SYNC}
-    if [ -f "${GALAXY_FILE}" ]; then
-        ${UV_RUN} ansible-galaxy collection install --force-with-deps ${DEVBOX_PROJECT_ROOT}
-    fi
 
 alias install := sync
 
