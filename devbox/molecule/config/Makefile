@@ -9,7 +9,6 @@ UV := \uv --python-preference=only-managed
 UV_DIRECTORY = $(shell if [ ! -f pyproject.toml ]; then echo "--directory {{.Virtenv}}"; else echo "--directory ."; fi)
 UV_PROJECT = $(shell if [ ! -f pyproject.toml ]; then echo "--project {{.Virtenv}}"; else echo "--project ."; fi)
 UV_RUN = $(UV) $(UV_PROJECT) run --
-UV_BUILD = $(UV) build .
 UV_SYNC = $(UV) $(UV_DIRECTORY) sync --only-dev
 
 MOLECULE_SCENARIO ?= default
@@ -128,10 +127,6 @@ build: requirements
 		$(UV_RUN) ansible-galaxy collection build --force .; \
 	else \
 		echo "No $(GALAXY_FILE) found, skipping ansible collection build"; \
-	fi
-	@if [ -f pyproject.toml ]; then \
-		echo "Building python package..."; \
-		$(UV_BUILD); \
 	fi
 
 deploy:
