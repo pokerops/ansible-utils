@@ -6,10 +6,9 @@ export
 SHELL := /bin/bash
 
 UV := \uv --python-preference=only-managed
-UV_DIRECTORY = $(shell if [ ! -f pyproject.toml ]; then echo "--directory {{.Virtenv}}"; else echo "--directory ."; fi)
 UV_PROJECT = $(shell if [ ! -f pyproject.toml ]; then echo "--project {{.Virtenv}}"; else echo "--project ."; fi)
 UV_RUN = $(UV) $(UV_PROJECT) run --
-UV_SYNC = $(UV) $(UV_DIRECTORY) sync --only-dev
+UV_SYNC = $(UV) $(UV_PROJECT) sync --only-dev
 
 MOLECULE_SCENARIO ?= default
 MOLECULE_LOGDIR ?= /tmp/logs
