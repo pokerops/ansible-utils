@@ -2,4 +2,4 @@
 skip_list:
   - run-once[task]
 exclude_paths:
-  - tests
+  - tests/
