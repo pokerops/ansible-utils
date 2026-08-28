@@ -80,7 +80,8 @@ make publish             # Publish collection to Ansible Galaxy (requires GALAXY
   - `version.yml` - Version validation workflow for PRs
 - `devbox/` - Devbox configuration and utilities
   - `molecule/` - Molecule testing configuration
-    - `config/` - Makefile and pyproject.toml templates
+    - `config/` - Makefile, justfile, pyproject.toml, workflow and skill templates
+    - `config/skill.md` - Claude Code skill installed into consuming repositories
     - `plugin.json` - Devbox plugin definition for molecule
 - `tests/` - Testing resources
   - `collection/` - Minimal test collection for verifying devbox molecule plugin
@@ -101,6 +102,18 @@ devbox shell             # Enter devbox environment
 molecule init            # Initialize molecule testing
 molecule test            # Run full test suite
 ```
+
+### Agent Skill Injection
+
+`make init` / `make overwrite` (equivalently `just init` / `just overwrite`) installs
+`devbox/molecule/config/skill.md` into the consuming repository at
+`.claude/skills/pokerops-ansible/SKILL.md`, alongside the generated workflow files. The
+plugin writes a self-ignoring `.gitignore` next to it, so the skill is never committed
+downstream and is refreshed from this repository on every `init`.
+
+When changing the targets, conventions, or CI gates that consuming repositories rely on,
+update `devbox/molecule/config/skill.md` in the same change. Both `config/justfile` and
+`config/Makefile` install skills — keep the two in sync.
 
 ### Configuration Files
 
