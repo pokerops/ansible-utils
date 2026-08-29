@@ -21,7 +21,6 @@ GALAXY_FILE ?= ${DEVBOX_PROJECT_ROOT}/$(GALAXY_PATH)
 RUNTIME_FILE = ${DEVBOX_PROJECT_ROOT}/meta/runtime.yml
 META_FILE = ${DEVBOX_PROJECT_ROOT}/meta/main.yml
 REQUIREMENTS_FILE = ${DEVBOX_PROJECT_ROOT}/requirements.yml
-ANSIBLELINT_FILES = .ansible-lint .ansible-lint.yml .ansible-lint.yaml .config/ansible-lint.yml .config/ansible-lint.yaml
 VENV_DIR = ${DEVBOX_PROJECT_ROOT}/.venv
 ROLE_DIR = ${DEVBOX_PROJECT_ROOT}/roles
 ROLE_FILE = ${DEVBOX_PROJECT_ROOT}/roles.yml
@@ -96,15 +95,8 @@ lint: install
 			exit 1; \
 		fi; \
 	fi
-	@ANSIBLELINT_CONFIG="-c {{.Virtenv}}/.ansible-lint.yml --project-dir $(DEVBOX_PROJECT_ROOT)"; \
-	for candidate in $(ANSIBLELINT_FILES); do \
-		if [ -f "$(DEVBOX_PROJECT_ROOT)/$${candidate}" ]; then \
-			ANSIBLELINT_CONFIG=""; \
-			break; \
-		fi; \
-	done; \
-	if [ -f "${GALAXY_FILE}" ] || [ -f "${META_FILE}" ]; then \
-		$(UV_RUN) ansible-lint $${ANSIBLELINT_CONFIG} -p . --exclude ".ansible/*"; \
+	@if [ -f "${GALAXY_FILE}" ] || [ -f "${META_FILE}" ]; then \
+		$(UV_RUN) ansible-lint -p . --exclude ".ansible/*"; \
 	fi
 
 requirements: clean install

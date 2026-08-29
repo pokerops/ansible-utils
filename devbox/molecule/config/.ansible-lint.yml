@@ -1,11 +1,3 @@
 ---
-# Default ansible-lint configuration for repositories using the pokerops
-# molecule devbox plugin. Used only when the repository has none of its own
-# (see CONFIG_FILENAMES in ansible-lint); define any of those to take over
-# completely, in which case this file is ignored.
 kinds:
-  # Molecule scenario inventories are not playbooks. Without this, the built-in
-  # `**/molecule/*/*.{yaml,yml}` -> playbook rule claims them and syntax-check
-  # fails with "A playbook must be a list of plays". Entries here are prepended
-  # to the built-in kinds, so this wins over the default.
   - inventory: "**/molecule/*/inventory.{yml,yaml}"
