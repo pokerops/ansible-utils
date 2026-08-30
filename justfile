@@ -7,40 +7,35 @@ GIT_BRANCH := env_var_or_default(
   "GIT_BRANCH",
   `printenv GIT_BRANCH 2>/dev/null || git rev-parse --abbrev-ref HEAD`)
 
+# Dependency names, one per line, environment markers and specifiers stripped
 MAIN_DEPS := `tomlq -r '.project.dependencies[]' pyproject.toml | \
     grep -v '^git+' | \
-    sed 's/@latest$//' | \
-    sed 's/>=/>/' | \
-    sed 's/<=/</' | \
-    cut -d'~' -f1 | \
-    cut -d'>' -f1 | \
-    cut -d'<' -f1 | \
-    cut -d'=' -f1 | \
-    cut -d'@' -f1 | \
-    cut -d' ' -f1 | \
-    sort -u | \
-    paste -sd' ' -`
+    sed -E 's/[[:space:]]*;.*$//' | \
+    sed -E 's/[<>=~!@].*$//' | \
+    sed -E 's/[[:space:]]+$//' | \
+    sort -u`
+# Dependency specs pinned to minor version, one per line, markers preserved
 PINNED_DEPS := `tomlq -r '.project.dependencies[]' pyproject.toml | \
     grep -v '^git+' | \
-    cut -d' ' -f1 | \
-    cut -d'@' -f1 | \
-    cut -d'.' -f 1-2 | \
-    sed 's/[><=]=/~=/' | \
-    tr '\n' ' '`
+    sed -E 's/^([A-Za-z0-9._-]+)[<>=~!]=([0-9]+\.[0-9]+)[^ ;]*/\1~=\2/'`
+
+# Entries may carry environment markers, which contain spaces, so they are always
+# handed to uv NUL delimited; word splitting would break them apart
+NUL_SPLIT := "tr '\\n' '\\0' | xargs -0 -r"
 
 # Update all dependencies to latest versions
 upgrade-deps:
     @echo "Updating dependencies to latest versions..."
     uv sync --upgrade
     uv lock --upgrade || true
-    echo {{MAIN_DEPS}} | xargs -r uv remove || true
-    echo {{MAIN_DEPS}} | xargs -r uv add
+    printf '%s\n' "{{MAIN_DEPS}}" | {{NUL_SPLIT}} uv remove || true
+    printf '%s\n' "{{MAIN_DEPS}}" | {{NUL_SPLIT}} uv add
 
 update-deps:
-    @echo {{PINNED_DEPS}}
+    @printf '%s\n' "{{PINNED_DEPS}}"
     @echo "Updating dependencies to latest versions..."
-    echo {{MAIN_DEPS}} | xargs -r uv remove || true
-    echo {{PINNED_DEPS}} | xargs -r uv add
+    printf '%s\n' "{{MAIN_DEPS}}" | {{NUL_SPLIT}} uv remove || true
+    printf '%s\n' "{{PINNED_DEPS}}" | {{NUL_SPLIT}} uv add
     uv lock --upgrade || true
 
 # Check for unpinned dependencies
@@ -62,7 +57,7 @@ lock:
     #!/usr/bin/env bash
     set -euo pipefail
     echo "Updating dependencies to latest versions..."
-    DEPS_REGEX=$(echo "{{MAIN_DEPS}}" | tr ' ' '|' | sort -r)
+    DEPS_REGEX=$(printf '%s\n' "{{MAIN_DEPS}}" | paste -sd'|' -)
     echo "$DEPS_REGEX"
     VERSIONS=$(uv export --format requirements-txt --no-hashes | grep -E "^($DEPS_REGEX)==" | sort)
     if [ -n "$VERSIONS" ]; then

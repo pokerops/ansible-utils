@@ -3,12 +3,12 @@
   hosts: localhost
   tasks:
     - name: Stat test file
-      stat:
+      ansible.builtin.stat:
         path: /tmp/test-collection-file
       register: test_file_stat
 
     - name: Assert test file was created
-      assert:
+      ansible.builtin.assert:
         that:
           - test_file_stat.stat.exists
         fail_msg: "Test file was not created"

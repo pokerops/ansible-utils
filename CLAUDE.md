@@ -108,6 +108,14 @@ molecule test            # Run full test suite
 - `devbox/molecule/plugin.json` - Molecule-specific devbox environment with Python, uv, make, and testing tools
 - `.ansible-lint.yml` - Ansible-lint configuration
 - `actions/.yamllint` - YAML linting rules
+- `devbox/molecule/config/.yamllint` - Default yamllint rules for consuming repositories
+- `devbox/molecule/config/.ansible-lint.yml` - Default ansible-lint config for consuming repositories
+
+Both defaults are rendered into the plugin virtenv and used by the `lint` target only
+when the consuming repository defines none of its own. For ansible-lint the target
+also passes `--project-dir`, because ansible-lint derives its project root from the
+config file location — without it the root would land in the virtenv and file
+discovery would collapse to a single lintable.
 
 ### Key Dependencies
 

@@ -22,6 +22,7 @@
     "{{.Virtenv}}/justfile": "config/justfile",
     "{{.Virtenv}}/pyproject.toml": "config/pyproject.toml",
     "{{.Virtenv}}/.yamllint": "config/.yamllint",
+    "{{.Virtenv}}/.ansible-lint.yml": "config/.ansible-lint.yml",
     "{{.Virtenv}}/action_all_lint.yml": "config/lint.yml",
     "{{.Virtenv}}/action_all_release.yml": "config/release.yml",
     "{{.Virtenv}}/action_collection_build.yml": "config/build.yml",
