@@ -107,6 +107,24 @@ sync:
 
 alias install := sync
 
+# Seed a repository-local pyproject.toml for repository-specific packages
+pyproject:
+    #!/usr/bin/env bash
+    # Repository-specific python packages need a repository-local pyproject.toml:
+    # without one the uv alias carries "--directory {{.Virtenv}}", so "uv add"
+    # writes to the plugin copy that devbox regenerates. UV_OPTION_PROJECT picks
+    # up the seeded file on the next invocation, so sync here rather than
+    # deferring to a "sync" that already resolved the project for this run.
+    if [ -f pyproject.toml ]; then
+        echo "pyproject.toml already present, leaving it alone"
+    else
+        PROJECT_NAME=$(basename "$(cd "${DEVBOX_PROJECT_ROOT}" && pwd)")
+        echo "Seeding pyproject.toml from {{.Virtenv}}/pyproject.toml"
+        sed -e "s|^name = .*|name = \"${PROJECT_NAME}\"|" "{{.Virtenv}}/pyproject.toml" > pyproject.toml
+    fi
+    echo "Declare packages with 'uv add --group dev <package>'"
+    ${UV} --project . sync --only-dev
+
 lint: sync
     #!/usr/bin/env bash
     ${UV_RUN} yamllint . -c $([ -f ${YAMLLINT_FILE} ] && echo ${YAMLLINT_FILE} || echo '{{.Virtenv}}/.yamllint')

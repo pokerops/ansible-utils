@@ -13,7 +13,7 @@ inputs:
   run:
     description: "Devbox command to run"
     required: false
-    default: "make test"
+    default: "just test"
   checkout:
     description: "Checkout the codebase"
     required: false
