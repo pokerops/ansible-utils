@@ -57,6 +57,22 @@ make test
 
 - `molecule/` - Molecule testing configuration with Python 3.13, uv, make, and testing tools
 - `plugin.json` - Devbox plugin definition for molecule environments
+- `molecule/config/skill.md` - Claude Code skill installed into consuming repositories
+
+### Agent Skill
+
+`make init` / `make overwrite` installs `devbox/molecule/config/skill.md` into the
+consuming repository as `.claude/skills/pokerops-ansible/SKILL.md`. It teaches coding
+agents which `just`/`make` targets exist, which ones are expensive, and which repository
+conventions break CI.
+
+The installed copy is self-ignoring (the plugin drops a `.gitignore` alongside it), so it
+is never committed downstream and every `make init` picks up the latest version from this
+repository. Edit `devbox/molecule/config/skill.md` here — never the installed copy.
+
+Additional skills can be added by dropping a `config/skill_<name>.md`-style entry into
+`plugin.json`; any `skill_<name>.md` in the virtenv is installed to
+`.claude/skills/<name>/SKILL.md`.
 
 ## Usage
 

@@ -79,6 +79,21 @@ init overwrite:
 			fi \
 		done; \
 	fi
+	@echo "Processing agent skills"
+	@for skill in {{.Virtenv}}/skill_*.md; do \
+		SKILL_SOURCE=$$(basename $${skill} .md); \
+		SKILL_NAME=$${SKILL_SOURCE#skill_}; \
+		SKILL_PATH=".claude/skills/$${SKILL_NAME//_/-}"; \
+		echo "Installing skill to $${SKILL_PATH}/SKILL.md"; \
+		mkdir -p "$${SKILL_PATH}"; \
+		rm -f "$${SKILL_PATH}/SKILL.md"; \
+		cp $${skill} "$${SKILL_PATH}/SKILL.md"; \
+		chmod u+w "$${SKILL_PATH}/SKILL.md"; \
+		printf '%s\n' \
+			"# Installed by the pokerops/ansible-utils devbox plugin" \
+			"# Refresh with 'make init'; edit upstream, not here" \
+			"*" > "$${SKILL_PATH}/.gitignore"; \
+	done;
 
 sync install:
 	$(UV_SYNC)
