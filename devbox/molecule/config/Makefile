@@ -91,7 +91,7 @@ init overwrite:
 		chmod u+w "$${SKILL_PATH}/SKILL.md"; \
 		printf '%s\n' \
 			"# Installed by the pokerops/ansible-utils devbox plugin" \
-			"# Refresh with 'make init'; edit upstream, not here" \
+			"# Refresh with 'just init'; edit upstream, not here" \
 			"*" > "$${SKILL_PATH}/.gitignore"; \
 	done;
 

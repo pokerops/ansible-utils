@@ -14,5 +14,5 @@ jobs:
       - name: Build collection
         uses: pokerops/ansible-utils@master
         with:
-          run: make requirements build
+          run: just requirements build
           cache: "false"

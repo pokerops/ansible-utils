@@ -30,10 +30,10 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     if: needs.context.outputs.is_pr == 'true'
     steps:
-      - name: Run make ${{matrix.target}}
+      - name: Run just ${{matrix.target}}
         uses: pokerops/ansible-utils@master
         with:
-          run: "make version-check"
+          run: "just version-check"
           cache: "false"
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
