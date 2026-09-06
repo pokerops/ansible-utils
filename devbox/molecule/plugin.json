@@ -15,9 +15,12 @@
     "VIRTENV": "{{.Virtenv}}",
     "PYPROJECT": "{{.Virtenv}}",
     "MAKEFILE": "{{.Virtenv}}/Makefile",
-    "JUSTFILE": "{{.Virtenv}}/justfile"
+    "JUSTFILE": "{{.Virtenv}}/justfile",
+    "PATH": "{{.Virtenv}}/bin:$PATH",
+    "ANSIBLE_HOME": "$DEVBOX_PROJECT_ROOT/.ansible"
   },
   "create_files": {
+    "{{.Virtenv}}/bin/just": "config/bin/just",
     "{{.Virtenv}}/Makefile": "config/Makefile",
     "{{.Virtenv}}/justfile": "config/justfile",
     "{{.Virtenv}}/pyproject.toml": "config/pyproject.toml",
@@ -34,12 +37,11 @@
     "init_hook": [
       "if [ -f .venv/bin/activate ]; then . .venv/bin/activate; fi",
       "echo Run 'just (init|overwrite)' to initialize or update the testing environment",
-      "alias just='\\just $( ([ -f justfile ] || echo \"--justfile {{.Virtenv}}/justfile --working-directory .\") )'",
       "alias make='\\make $( ([ -f Makefile ] || echo \"-f {{.Virtenv}}/Makefile\") )'",
       "alias uv='\\uv --python-preference=only-managed $( ([ -f pyproject.toml ] || echo \"--directory {{.Virtenv}}\") )'"
     ],
     "scripts": {
-      "init": "\\just --justfile ${JUSTFILE} --working-directory . init"
+      "init": "just --justfile ${JUSTFILE} --working-directory . init"
     }
   }
 }

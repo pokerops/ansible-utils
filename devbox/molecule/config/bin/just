@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Wrapper installed on PATH by the pokerops/ansible-utils devbox plugin.
+#
+# It replaces the shell alias this plugin used to define. An alias only exists
+# where devbox sources its init hook, which excludes every nested invocation --
+# a `devbox run` inside `devbox shell`, a `devbox run` inside another
+# `devbox run`, or any context carrying __DEVBOX_SKIP_INIT_HOOK_*. In those
+# paths bare `just` reached the raw binary, which searches parent directories
+# and so either failed outright or silently ran an unrelated ancestor justfile.
+# A real executable on PATH is part of the environment rather than the init
+# hook, so it applies to every invocation path: devbox shell, devbox run, CI
+# and scripts alike.
+#
+# Semantics are the alias's, unchanged: a repository justfile wins, and the
+# plugin copy is used only when the repository has none.
+set -u
+
+VIRTENV="{{.Virtenv}}"
+
+# Resolve the real binary by walking PATH, skipping this wrapper's own
+# directory so we never re-enter ourselves.
+JUST=""
+IFS=':' read -r -a PATH_DIRS <<< "${PATH}"
+for dir in "${PATH_DIRS[@]}"; do
+    [ -n "${dir}" ] || continue
+    [ "${dir}" = "${VIRTENV}/bin" ] && continue
+    if [ -x "${dir}/just" ]; then
+        JUST="${dir}/just"
+        break
+    fi
+done
+
+if [ -z "${JUST}" ]; then
+    echo "just: no just binary found on PATH outside ${VIRTENV}/bin" >&2
+    exit 127
+fi
+
+# Leave an explicit justfile or working-directory selection alone, whether it
+# arrives as a flag or through just's own environment variable.
+for arg in "$@"; do
+    case "${arg}" in
+        --)
+            break
+            ;;
+        -f | -f=* | --justfile | --justfile=* | --justfile-name | --justfile-name=* | \
+        -g | --global-justfile | -d | -d=* | --working-directory | --working-directory=*)
+            exec "${JUST}" "$@"
+            ;;
+    esac
+done
+
+if [ -f justfile ] || [ -n "${JUST_JUSTFILE:-}" ]; then
+    exec "${JUST}" "$@"
+fi
+
+# --working-directory is required alongside --justfile: without it just runs
+# recipes from the justfile's own directory, which would put every relative
+# path (yamllint's ".", ansible-lint's discovery root) inside the virtenv.
+exec "${JUST}" --justfile "${VIRTENV}/justfile" --working-directory . "$@"

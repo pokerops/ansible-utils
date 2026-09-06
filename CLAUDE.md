@@ -98,7 +98,7 @@ This is an **Ansible actions repository** providing reusable GitHub Actions work
 
 `tests/collection/` (a `pokerops.test` collection) and `tests/role/` are standalone
 devbox projects that include the plugin and define no `justfile` or `pyproject.toml`,
-so the full alias fallback applies. They are where the plugin's own
+so the full wrapper fallback applies. They are where the plugin's own
 recipes get exercised:
 
 ```bash
@@ -147,6 +147,68 @@ repo adds packages alongside that entry and never pins ansible/molecule/lint its
 
 A root `pyproject.toml` downstream is supported: the justfile branches on it
 (`UV_OPTION_PROJECT`) to point `uv` at the repository.
+
+### The `just` Wrapper
+
+`just` is wrapped by a real script, `devbox/molecule/config/bin/just`, rendered into
+`{{.Virtenv}}/bin/just` and put ahead of the raw binary by the plugin's `PATH` entry.
+It falls back to `$JUSTFILE` only when the repository has no root `justfile`.
+
+It must stay a `PATH` executable rather than the shell alias it replaced. Devbox
+sources its init hook — and therefore any alias — only on the outermost entry into the
+environment; a `devbox run` nested inside `devbox shell` or another `devbox run`
+carries `__DEVBOX_SKIP_INIT_HOOK_*` and skips it. In those paths bare `just` reached
+the raw binary, which searches *parent* directories: a consuming repo failed with "no
+justfile found", and a repo nested under another one silently ran the ancestor's
+justfile instead. Environment `PATH` has no such gap.
+
+Two invariants the wrapper encodes:
+
+- `--working-directory .` must accompany `--justfile`. Without it just runs recipes
+  from the justfile's own directory, putting every relative path — `yamllint .`,
+  ansible-lint's discovery root — inside the virtenv, where `lint` passes having
+  examined almost nothing.
+- Never export `JUST_JUSTFILE` to reach the plugin copy. It *outranks* a repository's
+  own `justfile` instead of yielding to it, so it silently disables the override
+  documented below. The wrapper only honours it when something else set it.
+
+### Editing `config/` Requires a Forced Re-Render
+
+Files under `devbox/molecule/config/` are `create_files` **sources**. What runs is the
+rendered copy in `.devbox/virtenv/molecule/`, and devbox keys re-rendering off the
+config hash in `.devbox/state.json` — **not** off the content of the source files.
+Editing `config/justfile` or `config/Makefile` and re-running `devbox install` leaves
+the old rendered copy in place, and deleting the rendered file does not bring it back.
+
+So testing an edit against a consumer project requires:
+
+```bash
+cd tests/collection                       # or tests/role
+rm -f .devbox/state.json && devbox install
+```
+
+Verify the rendered copy actually changed before trusting a result. Testing a `config/`
+edit without this step exercises the previous version and reports it as the new one —
+and for a destructive recipe that means running the old command believing it is the
+fixed one.
+
+### Project-Scoped Ansible Content
+
+The plugin sets `ANSIBLE_HOME` to `$DEVBOX_PROJECT_ROOT/.ansible`, which relocates both
+`COLLECTIONS_PATHS` and `DEFAULT_ROLES_PATH` into the project. `~/.ansible` leaves the
+search path entirely rather than being deprioritized — it had been *winning* over the
+venv's own bundled collections, so a stale global `community.general` shadowed the
+pinned one and `lint` ran against versions nobody selected.
+
+`clean` therefore removes `${ANSIBLE_HOME}/{collections,roles}` and never touches
+machine-global state, which matters because it is a dependency of `requirements`,
+`build`, `publish`, `destroy`, `cleanup`, and `reset`. Write the braces unquoted —
+`"${DIR}/{collections,roles}"` is a literal path that never exists, which is exactly
+how this recipe silently did nothing for as long as it did.
+
+`.ansible/` is already gitignored, and `lint` already passes `--exclude ".ansible/*"`.
+A consuming repo whose CI caches `~/.ansible` must move that cache key to
+`<project>/.ansible`.
 
 ### Downstream Wrapper Overrides
 
