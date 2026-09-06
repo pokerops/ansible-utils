@@ -183,7 +183,7 @@ test dependency create prepare converge idempotence side-effect verify destroy c
 		fi
 
 clean:
-		@rm -rf $${HOME}/.ansible/{collections,roles}
+		@rm -rf "$${ANSIBLE_HOME:?refusing to clean with an empty ANSIBLE_HOME}"/{collections,roles}
 
 publish: build
 	@if [ -z "${GALAXY_API_KEY}" ]; then \

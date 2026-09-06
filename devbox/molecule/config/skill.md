@@ -30,22 +30,37 @@ than guessing a target name and eating a failed run.
 
 ## How the toolchain is wired
 
-The devbox shell aliases `just` and `uv` so they fall back to plugin-owned files under
-`$VIRTENV` whenever the repo has none of its own:
+`just` and `uv` fall back to plugin-owned files under `$VIRTENV` whenever the repo has
+none of its own:
 
 - recipes — `$JUSTFILE`
 - python deps — `$PYPROJECT/pyproject.toml`, installed into `.venv/` by `uv`
 - yamllint config — `$VIRTENV/.yamllint`, used unless the repo has its own `.yamllint`
 
+`just` is a real wrapper script at `$VIRTENV/bin/just`, placed ahead of the raw binary
+on `PATH`, so the fallback holds in every invocation path — `devbox shell`,
+`devbox run`, nested `devbox run`, CI and scripts alike. `uv` is still a shell alias
+and therefore only wrapped inside `devbox shell`; the recipes never rely on it, because
+they pass `--project`/`--directory` themselves.
+
 Two consequences that cost real time when missed:
 
-1. **Everything runs inside the devbox shell.** From outside, use
+1. **Everything runs inside the devbox environment.** From outside, use
    `devbox run -- just <target>`. Bare `molecule`, `ansible-lint`, `yamllint`, and
    `ansible-playbook` are not on `PATH` and will not resolve the right config.
-2. **A root `justfile` must re-import the plugin's.** The alias falls back to the
+2. **A root `justfile` must re-import the plugin's.** The wrapper falls back to the
    plugin copy _only_ while that file is absent, so a _standalone_ root justfile
    silently drops every target below. One that imports keeps them all — see
    [Extending the wrappers](#extending-the-wrappers).
+
+Never export `JUST_JUSTFILE` to force the plugin copy. It outranks the repo's own
+`justfile` rather than falling back to it, so it silently disables every root-justfile
+override.
+
+Ansible content is scoped to the repo too: `ANSIBLE_HOME` is `<repo>/.ansible`, so
+`ansible-galaxy` installs and every collection lookup stay inside this project.
+`~/.ansible` is out of the search path entirely — do not expect anything installed
+there to be visible, and do not install there to make something visible here.
 
 A root `pyproject.toml` is **not** covered by that rule and is not a workaround. The
 fallback is per-file, and the justfile already branches on this one
@@ -84,7 +99,7 @@ perform silently.
 | `just sync` (`install`)                                                           | `uv sync --only-dev` into `.venv/`                                                     | seconds after first run |
 | `just pyproject`                                                                  | seed a repo-local `pyproject.toml`, then sync                                          | seconds                 |
 | `just lint`                                                                       | yamllint over the repo, then ansible-lint if `galaxy.yml` or `meta/main.yml` exists    | seconds                 |
-| `just requirements`                                                               | wipe `~/.ansible/{collections,roles}`, reinstall from `requirements.yml` / `roles.yml` | slow, network           |
+| `just requirements`                                                               | wipe `$ANSIBLE_HOME/{collections,roles}`, reinstall from `requirements.yml` / `roles.yml` | slow, network         |
 | `just create` / `converge` / `verify` / `idempotence` / `side-effect` / `destroy` | one molecule step                                                                      | varies by driver        |
 | `just test`                                                                       | full molecule sequence for the scenario                                                | slowest                 |
 | `just login`                                                                      | shell into a running molecule instance                                                 | —                       |
@@ -104,10 +119,11 @@ perform silently.
   dependency resolution, and is for a final check or CI parity only.
 - **Use `just idempotence`** for the real second-run check instead of eyeballing a
   repeated converge.
-- **Leave `~/.ansible` alone unless requirements changed.** `just requirements`,
+- **Leave `$ANSIBLE_HOME` alone unless requirements changed.** `just requirements`,
   `just clean`, `just destroy`, `just cleanup`, and `just reset` all delete
-  `~/.ansible/collections` and `~/.ansible/roles`, forcing a full re-download. Only
-  run `just requirements` after `requirements.yml` or `roles.yml` actually changed.
+  `$ANSIBLE_HOME/collections` and `$ANSIBLE_HOME/roles`, forcing a full re-download.
+  Only run `just requirements` after `requirements.yml` or `roles.yml` actually
+  changed. The cost is confined to this repo — see below — but it is still minutes.
 - **Select a scenario through the environment, not by editing files:**
   `MOLECULE_SCENARIO=<name> just converge`.
 - **Add dependencies with `just pyproject` then `uv add --group dev <pkg>`** — see
@@ -153,8 +169,8 @@ refuses a dirty tree.
 ## Extending the wrappers
 
 Repo-specific recipes are fine, and a root `justfile` is where they go. The requirement
-is that it re-import the plugin's, because the alias fallback stops the moment that file
-exists.
+is that it re-import the plugin's, because the wrapper fallback stops the moment that
+file exists.
 
 ```just
 import? '.devbox/virtenv/molecule/justfile'
@@ -170,8 +186,8 @@ Details that bite:
   before `devbox install`), and that kills every recipe, not just the plugin's.
 - **The path must be a literal.** Imports resolve before variables exist, so
   `import '$JUSTFILE'` fails; hardcode `.devbox/virtenv/molecule/justfile`.
-- **Name the file exactly `justfile`.** The alias tests `[ -f justfile ]`, so a
-  `Justfile` leaves the alias pointing at the virtenv copy and the repo's file is never
+- **Name the file exactly `justfile`.** The wrapper tests `[ -f justfile ]`, so a
+  `Justfile` leaves it pointing at the virtenv copy and the repo's file is never
   read.
 - **Do not repeat the plugin's settings.** The imported justfile already declares
   `set shell := ["bash", "-cu"]` and `set export := true`, and a root file repeating
@@ -200,7 +216,7 @@ Details that bite:
 
 `just publish` (pushes to Ansible Galaxy, needs `GALAXY_API_KEY`), `just deploy` and
 `just local` (overwrite the user's globally installed collections), `just clean` and
-`just reset` (discard the shared ansible cache).
+`just reset` (discard this repo's ansible cache, forcing a slow re-download).
 
 ## Environment knobs
 

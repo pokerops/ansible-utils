@@ -4,7 +4,12 @@ set export := true
 DEVBOX_PROJECT_ROOT := env_var_or_default("DEVBOX_PROJECT_ROOT", ".")
 
 UV := "command uv --python-preference=only-managed"
-UV_OPTION_PROJECT := `if [ ! -f pyproject.toml ]; then echo "--project {{.Virtenv}}"; fi`
+# Anchored to DEVBOX_PROJECT_ROOT like every other path here, and never to the
+# working directory. A bare "pyproject.toml" test resolves wherever just happens
+# to be running: from a subdirectory it misses the repo's own file and hands uv
+# the plugin's project instead. Both branches name a project explicitly rather
+# than leaving uv to discover one from the current directory, for the same reason.
+UV_OPTION_PROJECT := `if [ -f "${DEVBOX_PROJECT_ROOT:-.}/pyproject.toml" ]; then echo "--project ${DEVBOX_PROJECT_ROOT:-.}"; else echo "--project {{.Virtenv}}"; fi`
 UV_RUN := UV + " " + UV_OPTION_PROJECT + " run --"
 UV_SYNC := UV + " " + UV_OPTION_PROJECT + " sync --only-dev"
 
@@ -32,6 +37,9 @@ GITHUB_REPOSITORY := env_var_or_default("GITHUB_REPOSITORY", `git config --get r
 VERSION_CHECK_ARGS := env_var_or_default("VERSION_CHECK_ARGS", "")
 
 debug:
+    @echo "JUST_WRAPPER=$(command -v just)"
+    @echo "JUSTFILE=${JUSTFILE}"
+    @echo "ANSIBLE_HOME=${ANSIBLE_HOME}"
     @echo "VENV_DIR=${VENV_DIR}"
     @echo "GALAXY_PATH=${GALAXY_PATH}"
     @echo "GALAXY_FILE=${GALAXY_FILE}"
@@ -219,8 +227,12 @@ cleanup: && clean
 reset: && clean
     @${UV_RUN} molecule reset -s ${MOLECULE_SCENARIO}
 
+# ANSIBLE_HOME is scoped to the project by the plugin, so this is the whole of
+# ansible's content path and never touches machine-global state. The braces are
+# expanded here rather than quoted: "${DIR}/{collections,roles}" is a literal
+# path that never exists, which is what this recipe used to remove.
 clean: scrub
-    @rm -rf "${HOME}/.ansible/{collections,roles}"
+    @rm -rf "${ANSIBLE_HOME:?refusing to clean with an empty ANSIBLE_HOME}"/{collections,roles}
 
 publish: build
     #!/usr/bin/env bash
