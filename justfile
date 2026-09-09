@@ -81,3 +81,6 @@ configure:
         -e 's#"\(pokerops-ansible-utils@git+https://github.com\).*#"\1/{{GIT_REPO}}@{{GIT_BRANCH}}"#' \
         devbox/molecule/config/pyproject.toml
     rm -f devbox/molecule/config/pyproject.toml.bak
+
+actionlint:
+  actionlint

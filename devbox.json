@@ -4,7 +4,8 @@
   "packages": {
     "just": "latest",
     "tomlq": "latest",
-    "jq": "latest"
+    "jq": "latest",
+    "actionlint": "latest"
   },
   "shell": {
     "init_hook": ["alias make='just'"]

@@ -5,6 +5,10 @@ permissions:
 on:
   pull_request:
     branches: ["main", "master"]
+    paths-ignore:
+      - ".github/**"
+      - "**.md"
+      - "**.MD"
 jobs:
   version:
     uses: pokerops/ansible-utils/.github/workflows/version.yml@master

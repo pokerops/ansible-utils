@@ -89,6 +89,20 @@ _install-actions force:
     fi
 
 [private]
+_install-configs force:
+    #!/usr/bin/env bash
+    mkdir -p .github
+    echo "Processing common configs"
+    for config in {{.Virtenv}}/config_all_*.yml; do
+        CONFIG_SOURCE=$(basename "${config}")
+        CONFIG_PATH=".github/${CONFIG_SOURCE#config_all_}"
+        if [ {{ "{{force}}" }} = "true" ] || [ ! -f "${CONFIG_PATH}" ]; then
+            echo "Installing config to ${CONFIG_PATH}"
+            cp -a "${config}" "${CONFIG_PATH}" || true
+        fi
+    done
+
+[private]
 _install-skills:
     #!/usr/bin/env bash
     echo "Processing agent skills"
@@ -107,8 +121,8 @@ _install-skills:
             "*" > "${SKILL_PATH}/.gitignore"
     done
 
-init: (_install-actions "false") _install-skills
-overwrite: (_install-actions "true") _install-skills
+init: (_install-actions "false") (_install-configs "false") _install-skills
+overwrite: (_install-actions "true") (_install-configs "true") _install-skills
 
 sync:
     @${UV_SYNC}
@@ -157,8 +171,9 @@ lint: sync
                 break
             fi
         done
-        ${UV_RUN} ansible-lint ${ANSIBLELINT_CONFIG} -p . --exclude ".ansible/*"
+        ${UV_RUN} ansible-lint ${ANSIBLELINT_CONFIG} --format=pep8 . --exclude ".ansible/*"
     fi
+    actionlint
 
 requirements: debug clean sync
     #!/usr/bin/env bash

@@ -105,8 +105,8 @@ perform silently.
 | `just login`                                                                      | shell into a running molecule instance                                                 | —                       |
 | `just molecule <cmd> [args]`                                                      | escape hatch for any molecule subcommand                                               | —                       |
 | `just build`                                                                      | `requirements`, then `ansible-galaxy collection build`                                 | slow                    |
-| `just init` | install *missing* `.github/workflows/*`; always refresh `.claude/skills/*` | free |
-| `just overwrite` | same, but also replace workflow files that already exist | free |
+| `just init` | install *missing* `.github/workflows/*` and `.github/dependabot.yml`; always refresh `.claude/skills/*` | free |
+| `just overwrite` | same, but also replace workflow and dependabot files that already exist | free |
 | `just version-check`                                                              | compare `galaxy.yml` version against the PR base                                       | free                    |
 
 ## Working efficiently
@@ -130,7 +130,8 @@ perform silently.
   below. Never `pip install`, never hand-build a venv, never edit `.venv/`.
 - **Read generated workflow files, do not patch them.** Everything in
   `.github/workflows/` comes from `pokerops/ansible-utils` and is erased by the next
-  `just overwrite`. Fix them upstream.
+  `just overwrite`. Fix them upstream. `.github/dependabot.yml` is generated the same
+  way — it raises weekly action-version PRs, which are reviewed and merged by hand.
 
 ## Adding a python dependency
 
@@ -204,7 +205,9 @@ Details that bite:
 
 - **Collections must bump `version:` in `galaxy.yml` on every PR.** The `version`
   workflow compares against the base commit and requires a strictly greater semver
-  `X.Y.Z`. Bump it as part of the change, not as an afterthought.
+  `X.Y.Z`. Bump it as part of the change, not as an afterthought. It does not run at
+  all on a PR that only touches `.github/**` or markdown files, so CI-only and
+  docs-only changes need no bump.
 - **Collections need `meta/runtime.yml` with a `requires_ansible` key** — `just lint`
   fails without it.
 - **`just build` refuses to run on a dirty tree.** Commit first, or it exits with

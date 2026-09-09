@@ -2,12 +2,12 @@
 name: devbox
 on:
   pull_request:
-    branches: [main, master]
+    branches: [master]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  make:
+  just:
     runs-on: ubuntu-latest
     strategy:
       matrix:
