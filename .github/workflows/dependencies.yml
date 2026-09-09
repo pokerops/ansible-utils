@@ -2,7 +2,7 @@
 name: dependencies
 on:
   pull_request:
-    branches: [main, master]
+    branches: [master]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -16,5 +16,5 @@ jobs:
       - name: Install just
         run: sudo apt-get update && sudo apt-get install -y just yq
 
-      - name: Run just check deps
+      - name: Run just check-deps
         run: just check-deps

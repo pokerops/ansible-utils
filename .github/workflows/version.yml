@@ -1,6 +1,5 @@
 ---
 name: version
-description: Version validation and comparison workflow
 on:
   workflow_call:
 concurrency:
@@ -16,10 +15,10 @@ jobs:
         id: check
         run: |
           if [ -n "${{ github.event.pull_request.number }}" ]; then
-            echo "is_pr=true" >> $GITHUB_OUTPUT
+            echo "is_pr=true" >> "$GITHUB_OUTPUT"
             echo "Running in PR #${{ github.event.pull_request.number }}"
           else
-            echo "is_pr=false" >> $GITHUB_OUTPUT
+            echo "is_pr=false" >> "$GITHUB_OUTPUT"
             echo "Not running in a PR context. Skipping version check."
           fi
 
@@ -30,7 +29,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     if: needs.context.outputs.is_pr == 'true'
     steps:
-      - name: Run just ${{matrix.target}}
+      - name: Run just version-check
         uses: pokerops/ansible-utils@master
         with:
           run: "just version-check"

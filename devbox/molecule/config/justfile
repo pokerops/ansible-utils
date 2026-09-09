@@ -159,6 +159,7 @@ lint: sync
         done
         ${UV_RUN} ansible-lint ${ANSIBLELINT_CONFIG} --format=pep8 . --exclude ".ansible/*"
     fi
+    actionlint
 
 requirements: debug clean sync
     #!/usr/bin/env bash

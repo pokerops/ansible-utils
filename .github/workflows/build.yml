@@ -1,6 +1,5 @@
 ---
 name: build
-description: Build workflow
 on:
   workflow_call:
 concurrency:

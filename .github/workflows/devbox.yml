@@ -2,18 +2,19 @@
 name: devbox
 on:
   pull_request:
-    branches: [main, master]
+    branches: [master]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  make:
+  just:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         target:
           - update
           - upgrade
+          - actionlint
     steps:
       - name: Check out the codebase
         uses: actions/checkout@v5
