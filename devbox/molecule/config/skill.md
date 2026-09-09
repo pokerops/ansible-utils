@@ -84,9 +84,13 @@ for**, then carry on:
 3. A root `Makefile` becomes a root `justfile` — see
    [Extending the wrappers](#extending-the-wrappers). Delete the `Makefile`; leaving
    both means the `make` alias keeps resolving to it.
-4. Workflow files under `.github/workflows/` are generated. Do not hand-edit them —
-   run `just overwrite`, **not `just init`**: `init` only fills in files that are
-   missing, so it will leave a `make`-based workflow in place untouched.
+4. Workflow files split two ways — see
+   [CI workflows](#ci-workflows-generated-vs-repo-owned). The generated ones (`lint`,
+   `build`, `version`, `release`) are fixed by `just overwrite`, **not `just init`**:
+   `init` only fills in files that are missing, so it leaves a `make`-based workflow in
+   place untouched. A repo-owned one — `molecule.yml` and its siblings — is a hand
+   edit: rewrite its `run:` line and leave the rest of the job alone. `overwrite` would
+   reset its matrix and everything else the repo has put there.
 
 Mention the migration in your summary; it is a real change to the repo, not cleanup to
 perform silently.
@@ -106,7 +110,7 @@ perform silently.
 | `just molecule <cmd> [args]`                                                      | escape hatch for any molecule subcommand                                               | —                       |
 | `just build`                                                                      | `requirements`, then `ansible-galaxy collection build`                                 | slow                    |
 | `just init` | install *missing* `.github/workflows/*` and `.github/dependabot.yml`; always refresh `.claude/skills/*` | free |
-| `just overwrite` | same, but also replace workflow and dependabot files that already exist | free |
+| `just overwrite` | same, but replace files that already exist — **including a customised `molecule.yml`** | free |
 | `just version-check`                                                              | compare `galaxy.yml` version against the PR base                                       | free                    |
 
 ## Working efficiently
@@ -128,10 +132,11 @@ perform silently.
   `MOLECULE_SCENARIO=<name> just converge`.
 - **Add dependencies with `just pyproject` then `uv add --group dev <pkg>`** — see
   below. Never `pip install`, never hand-build a venv, never edit `.venv/`.
-- **Read generated workflow files, do not patch them.** Everything in
-  `.github/workflows/` comes from `pokerops/ansible-utils` and is erased by the next
-  `just overwrite`. Fix them upstream. `.github/dependabot.yml` is generated the same
-  way — it raises weekly action-version PRs, which are reviewed and merged by hand.
+- **Check who owns a workflow file before editing it.** Some of
+  `.github/workflows/` is generated upstream and must not be patched here; the molecule
+  workflows are this repo's own and are meant to be edited. See
+  [CI workflows](#ci-workflows-generated-vs-repo-owned) — guessing wrong either wastes
+  an edit that `just overwrite` erases, or sends a repo-specific test matrix upstream.
 
 ## Adding a python dependency
 
@@ -166,6 +171,59 @@ the shared toolchain.
 
 `uv sync` writes a root `uv.lock`. Commit it, along with `pyproject.toml` — `just build`
 refuses a dirty tree.
+
+## CI workflows: generated vs. repo-owned
+
+`.github/workflows/` mixes files this plugin owns with files the repository owns. The
+job body tells them apart, not the filename:
+
+| Job body                                                                   | Owner     | Editing it  |
+| -------------------------------------------------------------------------- | --------- | ----------- |
+| one `uses: pokerops/ansible-utils/.github/workflows/<name>.yml@master` line | upstream  | never       |
+| `runs-on:` + `steps:` calling `uses: pokerops/ansible-utils@master`        | this repo | edit freely |
+
+**Generated — `lint.yml`, `build.yml`, `version.yml`, `release.yml`, and
+`.github/dependabot.yml`.** Each is a thin caller of a reusable workflow, so the
+behaviour is not in this repo to change: a local edit fixes nothing real and is erased
+by the next `just overwrite`. Change these in `pokerops/ansible-utils` instead.
+Dependabot raises weekly action-version PRs against them, reviewed and merged by hand.
+
+**Repo-owned — `molecule.yml`, plus any further molecule workflow this repo adds.**
+`just init` seeds a *role* repo's `molecule.yml` with a one-scenario matrix; a
+*collection* gets no molecule workflow at all and writes its own. The seed is a
+starting point, and growing away from it is the normal outcome, not drift to correct:
+which scenarios exist, which of them are shared, what they need to run on, and what has
+to happen after the test are things only this repository knows. Edit it directly and
+commit it:
+
+- the `scenario` matrix — every scenario CI should run, which is rarely just `default`
+- an image matrix, threaded through `just --set MOLECULE_DOCKER_IMAGE` /
+  `MOLECULE_DOCKER_COMMAND` / `MOLECULE_KVM_IMAGE` / `UBUNTU_RELEASE`
+- `runs-on:` — a KVM scenario needs a libvirt runner, not `ubuntu-latest`
+- `max-parallel`, `paths` / `paths-ignore`, job `env:`, secrets
+- steps after the test step — log and artifact upload, cleanup
+- a split into one workflow per scenario or scenario group, when their runners,
+  secrets, or triggers differ
+
+What must survive every edit is the step itself — `uses: pokerops/ansible-utils@master`
+running a `just` command through `run:`. That step is what enters devbox; everything a
+scenario needs is passed on its `run:` line or in the job `env:`:
+
+```yaml
+run: just --set MOLECULE_SCENARIO {{ "${{ matrix.scenario }}" }} test
+```
+
+**`just overwrite` ignores this split.** It replaces every workflow it has a template
+for, repo-owned ones included, so it resets a real molecule workflow to the one-scenario
+seed. Default to `just init`, which only fills in what is missing. When a generated
+workflow genuinely changed upstream and `overwrite` is the way to pick it up, run it and
+then restore the repo-owned files from git:
+
+```bash
+just overwrite
+git diff --stat .github/                       # see what it flattened
+git checkout -- .github/workflows/molecule.yml # molecule back; keep the generated updates
+```
 
 ## Extending the wrappers
 
