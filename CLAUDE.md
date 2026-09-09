@@ -144,6 +144,29 @@ entry in `plugin.json` under the right prefix:
 one level above `workflows/`. Only skills are force-refreshed; actions and configs are
 installed on `init` only when absent, and replaced on `overwrite`.
 
+Downstream the templates fall into two tiers, and `config/skill.md` documents the split
+so agents in consuming repositories stop treating them alike:
+
+- **Upstream-owned** — `lint.yml`, `build.yml`, `version.yml`, `release.yml`,
+  `dependabot.yml`. Each is a single `uses:` line pointing at a reusable workflow here,
+  so behaviour changes belong in `.github/workflows/` of this repository, never in the
+  installed copy.
+- **Seeds** — `molecule.yml`. The consuming repository owns its runner, image matrix,
+  secrets, and log-upload steps, so `overwrite` flattens real work; the skill sends
+  downstream agents to `init` by default and to `git checkout --` afterwards.
+
+Keep the seed minimal and expect it to diverge downstream. A consuming repository knows
+things this template cannot: which scenarios exist and which of them are shared, which
+need a libvirt runner or secrets, and what has to run after `just ... test` —
+`pokerops.rke2` uploads molecule logs, splits scenarios across workflows, and pins
+`max-parallel`. Machinery that tries to infer any of that upstream — discovering
+scenarios, adding template inputs — buys regeneration and costs the ability to express
+the real case. A seed only has to be a plausible starting point; `config/skill.md` tells
+downstream agents the file is theirs to edit.
+
+Adding a template means deciding which tier it belongs to and saying so in
+`config/skill.md`.
+
 ### Configuration Files
 
 - `devbox.json` - Main devbox configuration, includes molecule plugin
@@ -213,6 +236,14 @@ Verify the rendered copy actually changed before trusting a result. Testing a `c
 edit without this step exercises the previous version and reports it as the new one —
 and for a destructive recipe that means running the old command believing it is the
 fixed one.
+
+Rendering is Go `text/template`, so a GitHub Actions expression in a workflow template
+must be escaped as `{{ "${{ matrix.scenario }}" }}`. An unescaped one fails with
+`function "matrix" not defined` — and `devbox install` prints that and still **exits
+0**, leaving the stale rendered copy behind. On a fresh checkout there is no stale copy,
+so the file is simply absent and `_install-actions` installs nothing for that prefix,
+also without failing. Read the render output after touching a template that contains
+`${{ ... }}`; the exit code will not tell you.
 
 Re-rendering only _writes_ files; it never prunes. Deleting a `create_files` entry
 leaves its rendered copy in `.devbox/virtenv/molecule/` even after
