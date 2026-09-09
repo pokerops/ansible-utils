@@ -22,8 +22,4 @@ jobs:
       - name: Run molecule test
         uses: pokerops/ansible-utils@master
         with:
-          run: "just install requirements test"
-        env:
-          PY_COLORS: "1"
-          ANSIBLE_FORCE_COLOR: "1"
-          MOLECULE_SCENARIO: {{ "${{ matrix.scenario }}" }}
+          run: just --set MOLECULE_SCENARIO ${{ matrix.scenario }} test
