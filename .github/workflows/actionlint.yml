@@ -1,20 +1,17 @@
 ---
-name: lint
+name: actionlint
 on:
-  workflow_call:
+  pull_request:
+    branches: [master]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  lint:
-    name: lint
+  actionlint:
     runs-on: ubuntu-latest
     steps:
-      - name: Lint repository
-        uses: pokerops/ansible-utils@master
-        with:
-          run: "just lint"
-          cache: "false"
+      - name: Check out the codebase
+        uses: actions/checkout@v5
 
       - name: Lint action definitions
         uses: raven-actions/actionlint@v2

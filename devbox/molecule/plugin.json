@@ -31,6 +31,7 @@
     "{{.Virtenv}}/action_collection_build.yml": "config/build.yml",
     "{{.Virtenv}}/action_collection_version.yml": "config/version.yml",
     "{{.Virtenv}}/action_role_molecule.yml": "config/molecule.yml",
+    "{{.Virtenv}}/config_all_dependabot.yml": "config/dependabot.yml",
     "{{.Virtenv}}/skill_pokerops_ansible.md": "config/skill.md"
   },
   "shell": {

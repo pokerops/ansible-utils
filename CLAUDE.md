@@ -71,14 +71,18 @@ toolchain. Exercise those recipes in the consumer projects under `tests/` instea
 - `action.yml` - Composite action that runs `devbox run -- <run>` in a target
   repository, defaulting to `just test`
 - `.github/workflows/` - Reusable workflows consumed downstream via `workflow_call`
-  (`build.yml`, `lint.yml`, `release.yml`, `version.yml`), plus this repository's own
-  CI (`devbox.yml`, `dependencies.yml`)
+  (`build.yml`, `lint.yml`, `release.yml`, `version.yml`, `automerge.yml`), plus this
+  repository's own CI (`devbox.yml`, `dependencies.yml`)
+- `.github/dependabot.yml` - Weekly `github-actions` version bumps for this repository,
+  covering `.github/workflows/*` and the root composite `action.yml`
 - `devbox/` - Devbox configuration and utilities
   - `molecule/` - Molecule testing configuration
     - `config/` - justfile, pyproject.toml, workflow and skill templates (plus a
       deprecated `Makefile`)
-    - `config/{build,lint,release,version,molecule}.yml` - Workflow templates installed
-      into consuming repositories as `.github/workflows/*`
+    - `config/{build,lint,release,version,molecule,automerge}.yml` - Workflow templates
+      installed into consuming repositories as `.github/workflows/*`
+    - `config/dependabot.yml` - Dependabot config installed into consuming repositories
+      as `.github/dependabot.yml`
     - `config/skill.md` - Claude Code skill installed into consuming repositories
     - `plugin.json` - Devbox plugin definition for molecule
 - `tests/` - Consumer projects that exercise the devbox molecule plugin
@@ -122,6 +126,24 @@ downstream and is refreshed from this repository on every `init`.
 When changing the targets, conventions, or CI gates that consuming repositories rely on,
 update `devbox/molecule/config/skill.md` in the same change.
 
+### Install Destinations Are Encoded in the Rendered Filename
+
+`init` / `overwrite` dispatch on the prefix of the rendered virtenv filename, not on a
+list of paths in the recipe. Adding a downstream file means adding a `create_files`
+entry in `plugin.json` under the right prefix:
+
+| Rendered name              | Installed to               | Gated on         |
+| -------------------------- | -------------------------- | ---------------- |
+| `action_all_<n>.yml`       | `.github/workflows/<n>`    | always           |
+| `action_collection_<n>.yml`| `.github/workflows/<n>`    | `galaxy.yml`     |
+| `action_role_<n>.yml`      | `.github/workflows/<n>`    | `meta/main.yml`  |
+| `config_all_<n>.yml`       | `.github/<n>`              | always           |
+| `skill_<n>.md`             | `.claude/skills/<n>/SKILL.md` | always        |
+
+`config_all_*` exists because dependabot config must sit at `.github/dependabot.yml`,
+one level above `workflows/`. Only skills are force-refreshed; actions and configs are
+installed on `init` only when absent, and replaced on `overwrite`.
+
 ### Configuration Files
 
 - `devbox.json` - Main devbox configuration, includes molecule plugin
@@ -158,7 +180,7 @@ It must stay a `PATH` executable rather than the shell alias it replaced. Devbox
 sources its init hook — and therefore any alias — only on the outermost entry into the
 environment; a `devbox run` nested inside `devbox shell` or another `devbox run`
 carries `__DEVBOX_SKIP_INIT_HOOK_*` and skips it. In those paths bare `just` reached
-the raw binary, which searches *parent* directories: a consuming repo failed with "no
+the raw binary, which searches _parent_ directories: a consuming repo failed with "no
 justfile found", and a repo nested under another one silently ran the ancestor's
 justfile instead. Environment `PATH` has no such gap.
 
@@ -168,7 +190,7 @@ Two invariants the wrapper encodes:
   from the justfile's own directory, putting every relative path — `yamllint .`,
   ansible-lint's discovery root — inside the virtenv, where `lint` passes having
   examined almost nothing.
-- Never export `JUST_JUSTFILE` to reach the plugin copy. It *outranks* a repository's
+- Never export `JUST_JUSTFILE` to reach the plugin copy. It _outranks_ a repository's
   own `justfile` instead of yielding to it, so it silently disables the override
   documented below. The wrapper only honours it when something else set it.
 
@@ -196,7 +218,7 @@ fixed one.
 
 The plugin sets `ANSIBLE_HOME` to `$DEVBOX_PROJECT_ROOT/.ansible`, which relocates both
 `COLLECTIONS_PATHS` and `DEFAULT_ROLES_PATH` into the project. `~/.ansible` leaves the
-search path entirely rather than being deprioritized — it had been *winning* over the
+search path entirely rather than being deprioritized — it had been _winning_ over the
 venv's own bundled collections, so a stale global `community.general` shadowed the
 pinned one and `lint` ran against versions nobody selected.
 
