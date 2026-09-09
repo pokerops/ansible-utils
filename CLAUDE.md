@@ -71,16 +71,16 @@ toolchain. Exercise those recipes in the consumer projects under `tests/` instea
 - `action.yml` - Composite action that runs `devbox run -- <run>` in a target
   repository, defaulting to `just test`
 - `.github/workflows/` - Reusable workflows consumed downstream via `workflow_call`
-  (`build.yml`, `lint.yml`, `release.yml`, `version.yml`, `automerge.yml`), plus this
-  repository's own CI (`devbox.yml`, `dependencies.yml`)
+  (`build.yml`, `lint.yml`, `release.yml`, `version.yml`), plus this repository's own
+  CI (`devbox.yml`, `dependencies.yml`)
 - `.github/dependabot.yml` - Weekly `github-actions` version bumps for this repository,
   covering `.github/workflows/*` and the root composite `action.yml`
 - `devbox/` - Devbox configuration and utilities
   - `molecule/` - Molecule testing configuration
     - `config/` - justfile, pyproject.toml, workflow and skill templates (plus a
       deprecated `Makefile`)
-    - `config/{build,lint,release,version,molecule,automerge}.yml` - Workflow templates
-      installed into consuming repositories as `.github/workflows/*`
+    - `config/{build,lint,release,version,molecule}.yml` - Workflow templates installed
+      into consuming repositories as `.github/workflows/*`
     - `config/dependabot.yml` - Dependabot config installed into consuming repositories
       as `.github/dependabot.yml`
     - `config/skill.md` - Claude Code skill installed into consuming repositories
@@ -213,6 +213,16 @@ Verify the rendered copy actually changed before trusting a result. Testing a `c
 edit without this step exercises the previous version and reports it as the new one —
 and for a destructive recipe that means running the old command believing it is the
 fixed one.
+
+Re-rendering only *writes* files; it never prunes. Deleting a `create_files` entry
+leaves its rendered copy in `.devbox/virtenv/molecule/` even after
+`rm .devbox/state.json && devbox install`, and because `_install-actions` /
+`_install-configs` glob by prefix, that orphan keeps installing downstream as though
+the template still existed. Removing a template means deleting the rendered file too:
+
+```bash
+find . -name "action_all_<name>.yml" -delete   # or rm -rf .devbox/virtenv/molecule
+```
 
 ### Project-Scoped Ansible Content
 

@@ -131,8 +131,7 @@ perform silently.
 - **Read generated workflow files, do not patch them.** Everything in
   `.github/workflows/` comes from `pokerops/ansible-utils` and is erased by the next
   `just overwrite`. Fix them upstream. `.github/dependabot.yml` is generated the same
-  way — dependabot raises weekly action-version PRs, and the `automerge` workflow puts
-  them on GitHub auto-merge, so they land on their own once required checks pass.
+  way — it raises weekly action-version PRs, which are reviewed and merged by hand.
 
 ## Adding a python dependency
 
