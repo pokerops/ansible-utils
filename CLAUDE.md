@@ -132,13 +132,13 @@ update `devbox/molecule/config/skill.md` in the same change.
 list of paths in the recipe. Adding a downstream file means adding a `create_files`
 entry in `plugin.json` under the right prefix:
 
-| Rendered name              | Installed to               | Gated on         |
-| -------------------------- | -------------------------- | ---------------- |
-| `action_all_<n>.yml`       | `.github/workflows/<n>`    | always           |
-| `action_collection_<n>.yml`| `.github/workflows/<n>`    | `galaxy.yml`     |
-| `action_role_<n>.yml`      | `.github/workflows/<n>`    | `meta/main.yml`  |
-| `config_all_<n>.yml`       | `.github/<n>`              | always           |
-| `skill_<n>.md`             | `.claude/skills/<n>/SKILL.md` | always        |
+| Rendered name               | Installed to                  | Gated on        |
+| --------------------------- | ----------------------------- | --------------- |
+| `action_all_<n>.yml`        | `.github/workflows/<n>`       | always          |
+| `action_collection_<n>.yml` | `.github/workflows/<n>`       | `galaxy.yml`    |
+| `action_role_<n>.yml`       | `.github/workflows/<n>`       | `meta/main.yml` |
+| `config_all_<n>.yml`        | `.github/<n>`                 | always          |
+| `skill_<n>.md`              | `.claude/skills/<n>/SKILL.md` | always          |
 
 `config_all_*` exists because dependabot config must sit at `.github/dependabot.yml`,
 one level above `workflows/`. Only skills are force-refreshed; actions and configs are
@@ -214,7 +214,7 @@ edit without this step exercises the previous version and reports it as the new 
 and for a destructive recipe that means running the old command believing it is the
 fixed one.
 
-Re-rendering only *writes* files; it never prunes. Deleting a `create_files` entry
+Re-rendering only _writes_ files; it never prunes. Deleting a `create_files` entry
 leaves its rendered copy in `.devbox/virtenv/molecule/` even after
 `rm .devbox/state.json && devbox install`, and because `_install-actions` /
 `_install-configs` glob by prefix, that orphan keeps installing downstream as though
