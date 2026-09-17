@@ -149,6 +149,7 @@ pyproject:
 
 lint: sync
     #!/usr/bin/env bash
+    set -eo pipefail
     ${UV_RUN} yamllint . -c $([ -f ${YAMLLINT_FILE} ] && echo ${YAMLLINT_FILE} || echo '{{.Virtenv}}/.yamllint')
     if [ -f "${GALAXY_FILE}" ]; then
         if [ ! -f "${RUNTIME_FILE}" ]; then
