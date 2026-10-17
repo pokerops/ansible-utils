@@ -149,6 +149,7 @@ pyproject:
 
 lint: sync
     #!/usr/bin/env bash
+    set -eo pipefail
     ${UV_RUN} yamllint . -c $([ -f ${YAMLLINT_FILE} ] && echo ${YAMLLINT_FILE} || echo '{{.Virtenv}}/.yamllint')
     if [ -f "${GALAXY_FILE}" ]; then
         if [ ! -f "${RUNTIME_FILE}" ]; then
@@ -157,6 +158,17 @@ lint: sync
             echo "No 'requires_ansible' field found in ${RUNTIME_FILE}"
             exit 1
         fi
+    fi
+    if [ -f "${GALAXY_FILE}" ] && [ -f "${ROLE_FILE}" ]; then
+        # Collections reference the roles from roles.yml as <namespace>.<name>.<role>,
+        # so the ansible-lint syntax check needs them present under roles/.
+        # ansible-lint mock_roles cannot stand in for them: the collection install
+        # that ansible-lint performs replaces the mocked directories.
+        mkdir -p ${ROLE_DIR}
+        ${UV_RUN} ansible-galaxy role install \
+            --force --no-deps \
+            --roles-path ${ROLE_DIR} \
+            --role-file ${ROLE_FILE}
     fi
     if [ -f "${GALAXY_FILE}" ] || [ -f "${META_FILE}" ]; then
         # Only supply the plugin config when the repository defines none of its
