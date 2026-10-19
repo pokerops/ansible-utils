@@ -159,7 +159,7 @@ lint: sync
             exit 1
         fi
     fi
-    if [ (-f "${GALAXY_FILE}" ] && [ -f "${ROLE_FILE}") || (-f "${META_FILE}" ] && [ -f "${ROLE_FILE}") ]; then
+    if ( [ -f "${GALAXY_FILE}" ] && [ -f "${ROLE_FILE}" ] ) || ( [ -f "${META_FILE}" ] && [ -f "${ROLE_FILE}" ] ); then
         # Collections reference the roles from roles.yml as <namespace>.<name>.<role>,
         # so the ansible-lint syntax check needs them present under roles/.
         # ansible-lint mock_roles cannot stand in for them: the collection install
