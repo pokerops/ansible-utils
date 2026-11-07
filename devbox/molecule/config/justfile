@@ -183,7 +183,7 @@ lint: sync
                 break
             fi
         done
-        ${UV_RUN} ansible-lint ${ANSIBLELINT_CONFIG} --format=pep8 . --exclude ".ansible/*"
+        ${UV_RUN} ansible-lint ${ANSIBLELINT_CONFIG} --format=pep8 --exclude ".ansible/*"
     fi
     actionlint
 
