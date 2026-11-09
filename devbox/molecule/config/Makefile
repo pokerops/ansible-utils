@@ -119,7 +119,7 @@ lint: install
 		fi; \
 	done; \
 	if [ -f "${GALAXY_FILE}" ] || [ -f "${META_FILE}" ]; then \
-		$(UV_RUN) ansible-lint $${ANSIBLELINT_CONFIG} -p . --exclude ".ansible/*"; \
+		$(UV_RUN) ansible-lint $${ANSIBLELINT_CONFIG} --format=pep8 . --exclude ".ansible/*"; \
 	fi
 
 requirements: clean install
